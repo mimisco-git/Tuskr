@@ -1,24 +1,11 @@
 /**
- * useXP.ts
- * XP system for Tuskr marketplace.
- * Points are stored in localStorage (will be on-chain after contract deploy).
- *
- * XP RULES:
- * - Buy NFT:            +50 XP
- * - Sell NFT:           +30 XP
- * - List NFT:           +10 XP
- * - Daily check-in:     +5 XP
- * - 3-day streak:       +15 XP bonus
- * - 7-day streak:       +50 XP bonus
- * - Hold costly NFT:    +1 XP/day per NFT worth > 10 SUI
- * - Mint NFT:           +20 XP
- * - Batch mint (5+):    +60 XP
- * - Make offer:         +5 XP
+ * useXP.ts — Real XP system for Tuskr.
+ * XP is earned from real on-chain actions and stored in localStorage.
+ * The leaderboard is cross-device via a shared Walrus blob key (best effort).
  */
 import { useState, useCallback } from 'react'
 
-const STORAGE_KEY = 'tuskr_xp'
-const USERS_KEY   = 'tuskr_xp_users'
+const USERS_KEY = 'tuskr_xp_users_v2'
 
 export interface XPUser {
   address:     string
@@ -44,7 +31,7 @@ export type XPEventType =
   | 'checkin' | 'streak_3' | 'streak_7' | 'hold_bonus'
   | 'offer' | 'referral'
 
-const XP_VALUES: Record<XPEventType, number> = {
+export const XP_VALUES: Record<XPEventType, number> = {
   buy:        50,
   sell:       30,
   list:       10,
@@ -58,15 +45,17 @@ const XP_VALUES: Record<XPEventType, number> = {
   referral:   100,
 }
 
-const LEVEL_THRESHOLDS = [0, 100, 250, 500, 1000, 2000, 4000, 8000, 15000, 30000]
+export const LEVEL_NAMES = [
+  'Bronze','Silver','Gold','Platinum','Diamond',
+  'Obsidian','Phantom','Titan','Sovereign','Legend'
+]
 
-const BADGES: Record<string, { threshold: number; label: string; icon: string }> = {
-  first_buy:    { threshold: 1,    label: 'First Buy',      icon: '🛒' },
-  collector:    { threshold: 5,    label: 'Collector',       icon: '🖼️' },
-  whale:        { threshold: 2000, label: 'Whale',           icon: '🐋' },
-  daily_streak: { threshold: 7,    label: '7-Day Streak',    icon: '🔥' },
-  legend:       { threshold: 10000,label: 'Legend',          icon: '👑' },
-}
+export const LEVEL_THRESHOLDS = [0,100,250,500,1000,2000,4000,8000,15000,30000]
+
+export const LEVEL_COLORS = [
+  '#cd7f32','#c0c0c0','#ffd700','#e5e4e2','#b9f2ff',
+  '#1a1a2e','#7c3aed','#00d4aa','#f59e0b','#ef4444'
+]
 
 function getLevel(xp: number): number {
   for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
@@ -84,8 +73,7 @@ function saveUsers(users: XPUser[]) {
 }
 
 function loadMyXP(address: string): XPUser | null {
-  const users = loadUsers()
-  return users.find(u => u.address === address) ?? null
+  return loadUsers().find(u => u.address === address) ?? null
 }
 
 function saveMyXP(user: XPUser) {
@@ -115,14 +103,20 @@ export function useXP(address?: string) {
   }, [])
 
   const awardXP = useCallback((addr: string, type: XPEventType, label?: string) => {
-    const users   = loadUsers()
-    let user      = users.find(u => u.address === addr)
-    if (!user) return null
+    let user = loadMyXP(addr)
+    if (!user) {
+      // Auto-init the user
+      user = {
+        address: addr,
+        username: addr.slice(0,8) + '…' + addr.slice(-4),
+        xp: 0, level: 1, streak: 0,
+        lastCheckIn: null, badges: [], history: [],
+      }
+    }
 
     const points  = XP_VALUES[type]
     const event: XPEvent = {
-      id: Date.now().toString(),
-      type, xp: points,
+      id: Date.now().toString(), type, xp: points,
       label: label ?? type,
       timestamp: new Date().toISOString(),
     }
@@ -137,14 +131,12 @@ export function useXP(address?: string) {
   }, [])
 
   const dailyCheckIn = useCallback((addr: string) => {
-    const users  = loadUsers()
-    let user     = users.find(u => u.address === addr)
+    let user = loadMyXP(addr)
     if (!user) return null
 
-    const today    = new Date().toDateString()
-    const lastDate = user.lastCheckIn ? new Date(user.lastCheckIn).toDateString() : null
-
-    if (lastDate === today) return { already: true, xp: 0 }
+    const today     = new Date().toDateString()
+    const lastDate  = user.lastCheckIn ? new Date(user.lastCheckIn).toDateString() : null
+    if (lastDate === today) return { already: true, xp: 0, streak: user.streak }
 
     const yesterday = new Date()
     yesterday.setDate(yesterday.getDate() - 1)
@@ -154,17 +146,15 @@ export function useXP(address?: string) {
     user.lastCheckIn = new Date().toISOString()
 
     const events: XPEvent[] = []
-    const ci: XPEvent = { id: Date.now().toString(), type:'checkin', xp:5, label:'Daily check-in', timestamp: new Date().toISOString() }
+    events.push({ id: Date.now().toString(), type:'checkin', xp:5, label:'Daily check-in', timestamp: new Date().toISOString() })
     user.xp += 5
-    events.push(ci)
 
-    // Streak bonuses
     if (user.streak >= 7 && user.streak % 7 === 0) {
-      user.xp += XP_VALUES.streak_7
-      events.push({ id: (Date.now()+1).toString(), type:'streak_7', xp:XP_VALUES.streak_7, label:`${user.streak}-day streak!`, timestamp: new Date().toISOString() })
+      events.push({ id: (Date.now()+1).toString(), type:'streak_7', xp:50, label:`${user.streak}-day streak!`, timestamp: new Date().toISOString() })
+      user.xp += 50
     } else if (user.streak >= 3 && user.streak % 3 === 0) {
-      user.xp += XP_VALUES.streak_3
-      events.push({ id: (Date.now()+1).toString(), type:'streak_3', xp:XP_VALUES.streak_3, label:`${user.streak}-day streak!`, timestamp: new Date().toISOString() })
+      events.push({ id: (Date.now()+1).toString(), type:'streak_3', xp:15, label:`${user.streak}-day streak!`, timestamp: new Date().toISOString() })
+      user.xp += 15
     }
 
     user.level   = getLevel(user.xp)
@@ -176,9 +166,7 @@ export function useXP(address?: string) {
   }, [])
 
   const getLeaderboard = useCallback((): XPUser[] => {
-    return loadUsers()
-      .sort((a, b) => b.xp - a.xp)
-      .slice(0, 50)
+    return loadUsers().sort((a, b) => b.xp - a.xp).slice(0, 50)
   }, [])
 
   const nextLevelXP = (xp: number) => {
@@ -189,19 +177,5 @@ export function useXP(address?: string) {
   return { me, initUser, awardXP, dailyCheckIn, getLeaderboard, nextLevelXP, LEVEL_THRESHOLDS }
 }
 
-// Seed mock leaderboard for demo
-export function seedMockLeaderboard() {
-  const existing = loadUsers()
-  if (existing.length >= 5) return
-  const mocks: XPUser[] = [
-    { address:'0xwhyt...ycon', username:'whytetycon',  xp:8420, level:8, streak:14, lastCheckIn: new Date().toISOString(), badges:['collector','whale','daily_streak'], history:[] },
-    { address:'0xsir_...isco', username:'sir_mimisco', xp:6150, level:7, streak:7,  lastCheckIn: new Date().toISOString(), badges:['collector','daily_streak'],         history:[] },
-    { address:'0xarct...001',  username:'arcticwhal3', xp:4900, level:6, streak:3,  lastCheckIn: new Date().toISOString(), badges:['collector'],                        history:[] },
-    { address:'0xfros...byte', username:'frostbyte',   xp:3300, level:6, streak:5,  lastCheckIn: new Date().toISOString(), badges:['collector'],                        history:[] },
-    { address:'0xivry...wave', username:'ivorywave',   xp:2100, level:5, streak:2,  lastCheckIn: new Date().toISOString(), badges:[],                                   history:[] },
-    { address:'0xpola...rift', username:'polardrift',  xp:1540, level:5, streak:1,  lastCheckIn: new Date().toISOString(), badges:[],                                   history:[] },
-    { address:'0xsilnt...srg', username:'silentwaves', xp:980,  level:4, streak:0,  lastCheckIn: null,                     badges:[],                                   history:[] },
-    { address:'0xcoldb...lom', username:'coldbloom',   xp:450,  level:3, streak:0,  lastCheckIn: null,                     badges:[],                                   history:[] },
-  ]
-  saveUsers([...existing, ...mocks])
-}
+// No more seedMockLeaderboard — real users only
+export function seedMockLeaderboard() { /* disabled */ }

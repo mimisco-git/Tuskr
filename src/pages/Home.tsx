@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSuiClient } from '@mysten/dapp-kit'
 import NFTCard, { NFT } from '../components/NFTCard'
 import usePageTitle from '../hooks/usePageTitle'
 import s from './Home.module.css'
 
-const FEATURED: NFT[] = [
-  { id:'1', name:'Arctic Phantom #001', image:'https://picsum.photos/seed/tk1/500/500', price:'12.5', currency:'SUI', creator:'whytetycon',  listed:true, blobId:'b1' },
-  { id:'2', name:'Deep Current #007',   image:'https://picsum.photos/seed/tk2/500/500', price:'8.0',  currency:'SUI', creator:'sir_mimisco', listed:true, blobId:'b2' },
-  { id:'3', name:'Tusk Genesis',        image:'https://picsum.photos/seed/tk3/500/500', price:'22.0', currency:'SUI', creator:'whytetycon',  listed:true, blobId:'b3' },
-  { id:'4', name:'Polar Drift #012',    image:'https://picsum.photos/seed/tk4/500/500', price:'6.5',  currency:'SUI', creator:'sir_mimisco', listed:true, blobId:'b4' },
-]
+// Featured NFTs loaded from real chain listings below
 
 const FEATURES = [
   { tab:'Permanent', icon:'💾', tag:'WALRUS BLOB', title:'Always\npermanent.',
@@ -60,9 +56,44 @@ function Arrow() {
 export default function Home() {
   usePageTitle()
   const [activeFeat, setActiveFeat] = useState(0)
+  const [featured, setFeatured] = useState<NFT[]>([])
+  const client = useSuiClient()
+  const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
   const [counter, setCounter] = useState({ nfts:0, vol:0, creators:0 })
   const feat = FEATURES[activeFeat]
   const allPartners = [...PARTNERS, ...PARTNERS]
+
+  useEffect(() => {
+    // Fetch real recent listings for featured section
+    client.queryEvents({
+      query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` },
+      limit: 4,
+    }).then(async (events) => {
+      const items: NFT[] = []
+      for (const e of events.data.slice(0,4)) {
+        try {
+          const p = (e as any).parsedJson ?? {}
+          const nftObj = await client.getObject({
+            id: p.nft_id,
+            options: { showContent:true, showDisplay:true },
+          })
+          const f = (nftObj.data?.content as any)?.fields ?? {}
+          const d = (nftObj.data?.display as any)?.data   ?? {}
+          items.push({
+            id:       p.listing_id || p.nft_id,
+            name:     f.name || d.name || `NFT #${(p.nft_id||'').slice(2,8)}`,
+            image:    f.media_url || d.image_url || '',
+            price:    p.price ? (Number(p.price)/1e9).toFixed(2) : '0',
+            currency: 'SUI',
+            creator:  (f.creator||p.seller||'').slice(0,10)+'…',
+            listed:   true,
+            blobId:   f.blob_id || '',
+          })
+        } catch {}
+      }
+      if (items.length > 0) setFeatured(items)
+    }).catch(() => {})
+  }, [client])
 
   useEffect(() => {
     const targets = { nfts:2841, vol:14200, creators:390 }
@@ -238,7 +269,12 @@ export default function Home() {
             <Link to="/marketplace" className="btn btn-ghost">View all →</Link>
           </div>
           <div className={s.nftGrid}>
-            {FEATURED.map((nft,i) => <NFTCard key={nft.id} nft={nft} delay={i*0.07}/>)}
+            {featured.length > 0
+              ? featured.map((nft,i) => <NFTCard key={nft.id} nft={nft} delay={i*0.07}/>)
+              : Array.from({length:4}).map((_,i) => (
+                  <div key={i} className="skeleton" style={{aspectRatio:'1',borderRadius:20}}/>
+                ))
+            }
           </div>
         </div>
       </section>

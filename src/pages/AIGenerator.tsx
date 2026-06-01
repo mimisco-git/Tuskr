@@ -4,40 +4,55 @@ import { useAIGenerator } from '../hooks/useAIGenerator'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useCurrentAccount } from '@mysten/dapp-kit'
 import { useToast } from '../components/Toast'
+import { Link } from 'react-router-dom'
 import s from './AIGenerator.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
 const STYLE_PRESETS = [
-  { label:'Pixel Art',        prompt:'pixel art style, 16-bit, vibrant colors' },
-  { label:'Dark Fantasy',     prompt:'dark fantasy digital art, dramatic lighting, cinematic' },
-  { label:'Watercolor',       prompt:'delicate watercolor illustration, soft edges, flowing' },
-  { label:'Cyberpunk',        prompt:'cyberpunk neon, futuristic, glowing, urban decay' },
-  { label:'Minimalist',       prompt:'minimalist geometric art, clean lines, limited palette' },
-  { label:'Afrofuturism',     prompt:'afrofuturism, vibrant, cosmic, cultural richness' },
+  { label:'Pixel Art',     icon:'◈', prompt:'pixel art style, 16-bit, vibrant colors' },
+  { label:'Dark Fantasy',  icon:'◉', prompt:'dark fantasy digital art, dramatic lighting, cinematic' },
+  { label:'Watercolor',    icon:'◎', prompt:'delicate watercolor illustration, soft edges, flowing' },
+  { label:'Cyberpunk',     icon:'◆', prompt:'cyberpunk neon, futuristic, glowing, urban decay' },
+  { label:'Minimalist',    icon:'○', prompt:'minimalist geometric art, clean lines, limited palette' },
+  { label:'Afrofuturism',  icon:'✦', prompt:'afrofuturism, vibrant, cosmic, cultural richness' },
+]
+
+const AI_TOOLS = [
+  { name:'Midjourney',   url:'https://midjourney.com',       desc:'Best quality' },
+  { name:'DALL-E',       url:'https://chatgpt.com',          desc:'Fast, free tier' },
+  { name:'Leonardo AI',  url:'https://leonardo.ai',          desc:'Free credits' },
+  { name:'Adobe Firefly',url:'https://firefly.adobe.com',    desc:'Free trial' },
 ]
 
 export default function AIGenerator() {
   usePageTitle('AI Generator')
-  const account  = useCurrentAccount()
+  const account = useCurrentAccount()
   const { toast, success, error: toastError } = useToast()
   const { uploadBlob, uploading } = useWalrus()
   const { mintNFT } = useNFTMarketplace()
   const { generateNFTConcept, generating } = useAIGenerator()
 
-  const [userPrompt, setUserPrompt] = useState('')
-  const [style, setStyle]           = useState(STYLE_PRESETS[0])
-  const [concept, setConcept]       = useState<any>(null)
-  const [step, setStep]             = useState<'prompt'|'review'|'mint'|'done'>('prompt')
-  const [imageFile, setImageFile]   = useState<File|null>(null)
-  const [imagePreview, setImagePreview] = useState<string|null>(null)
-  const [txDigest, setTxDigest]     = useState<string|null>(null)
+  const [userPrompt,    setUserPrompt]    = useState('')
+  const [style,         setStyle]         = useState(STYLE_PRESETS[0])
+  const [concept,       setConcept]       = useState<any>(null)
+  const [step,          setStep]          = useState<'prompt'|'review'|'mint'|'done'>('prompt')
+  const [imageFile,     setImageFile]     = useState<File|null>(null)
+  const [imagePreview,  setImagePreview]  = useState<string|null>(null)
+  const [txDigest,      setTxDigest]      = useState<string|null>(null)
+  const [promptCopied,  setPromptCopied]  = useState(false)
 
   const generate = async () => {
     if (!userPrompt.trim()) return
     toast('Generating concept with Groq AI...', 'loading')
     const result = await generateNFTConcept(`${userPrompt} in ${style.label} style`)
     if (result) { setConcept(result); setStep('review') }
-    else toastError('Generation failed. Try again.')
+    else toastError('Generation failed. Check your Groq API key in Vercel.')
+  }
+
+  const copyPrompt = () => {
+    navigator.clipboard.writeText(concept?.prompt ?? '')
+    setPromptCopied(true)
+    setTimeout(() => setPromptCopied(false), 2000)
   }
 
   const handleImageUpload = (file: File) => {
@@ -45,14 +60,18 @@ export default function AIGenerator() {
     setImagePreview(URL.createObjectURL(file))
   }
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    const file = e.dataTransfer.files?.[0]
+    if (file && file.type.startsWith('image/')) handleImageUpload(file)
+  }
+
   const mintGenerated = async () => {
     if (!imageFile || !concept || !account) return
     setStep('mint')
     toast('Uploading to Walrus...', 'loading')
-
     const uploaded = await uploadBlob(imageFile)
     if (!uploaded) { toastError('Walrus upload failed'); setStep('review'); return }
-
     toast('Minting on Sui...', 'loading')
     try {
       const result = await mintNFT({
@@ -65,112 +84,177 @@ export default function AIGenerator() {
       setTxDigest(result.digest)
       success('NFT minted!', result.digest)
       setStep('done')
-    } catch (e) {
+    } catch {
       toastError('Mint failed')
       setStep('review')
     }
   }
 
+  const reset = () => {
+    setStep('prompt'); setConcept(null)
+    setImageFile(null); setImagePreview(null)
+    setUserPrompt(''); setTxDigest(null)
+  }
+
   return (
     <main className={s.page}>
       <div className={s.inner}>
+
+        {/* Header */}
         <div className={s.header}>
           <div className={s.eyebrow}>
-            <div className={s.eyebrowLine} />
-            <span className={s.eyebrowText}>AI-Powered</span>
+            <span className={s.eyebrowDot}/>
+            <span>AI-Powered Creation</span>
           </div>
           <h1 className={s.title}>NFT Generator</h1>
-          <p className={s.sub}>Describe your idea. Groq AI generates the concept. You upload the art. It mints on Sui.</p>
+          <p className={s.sub}>Describe your idea. Groq AI builds the concept and traits. You generate the art. Tuskr mints it on Sui with media on Walrus.</p>
         </div>
 
+        {/* Step indicators */}
+        <div className={s.steps}>
+          {['Describe','Generate','Upload art','Mint'].map((label, i) => {
+            const stepMap = ['prompt','review','review','done']
+            const active  = i === ['prompt','review','mint','done'].indexOf(step)
+            const done    = ['prompt','review','review','done'].indexOf(step) > i ||
+                            (step === 'done' && i < 3)
+            return (
+              <div key={label} className={`${s.step} ${active ? s.stepActive : ''} ${done ? s.stepDone : ''}`}>
+                <div className={s.stepNum}>{done ? '✓' : i + 1}</div>
+                <span className={s.stepLabel}>{label}</span>
+                {i < 3 && <div className={s.stepLine}/>}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* STEP 1 — Prompt */}
         {step === 'prompt' && (
           <div className={s.card}>
-            <div className={s.section}>
-              <p className={s.sectionLabel}>Describe your NFT</p>
+            <div className={s.fieldGroup}>
+              <label className={s.label}>Describe your NFT concept</label>
               <textarea
                 className={`input ${s.textarea}`}
-                placeholder="e.g. A cosmic walrus floating through a nebula, wearing ancient tribal jewellery..."
+                placeholder="e.g. A cosmic walrus warrior floating through a nebula, wearing ancient tribal armour and holding a glowing spear..."
                 value={userPrompt}
                 onChange={e => setUserPrompt(e.target.value)}
-                rows={4}
+                rows={5}
               />
+              <p className={s.hint}>Be specific. Include mood, setting, character, and any unique details.</p>
             </div>
 
-            <div className={s.section}>
-              <p className={s.sectionLabel}>Art style</p>
+            <div className={s.fieldGroup}>
+              <label className={s.label}>Art style</label>
               <div className={s.styleGrid}>
                 {STYLE_PRESETS.map(st => (
                   <button
                     key={st.label}
-                    className={`${s.stylePill} ${style.label === st.label ? s.styleActive : ''}`}
+                    className={`${s.styleCard} ${style.label === st.label ? s.styleActive : ''}`}
                     onClick={() => setStyle(st)}
                   >
-                    {st.label}
+                    <span className={s.styleIcon}>{st.icon}</span>
+                    <span className={s.styleName}>{st.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             <button
-              className="btn btn-primary btn-lg"
+              className={`btn btn-primary btn-lg ${s.generateBtn}`}
               onClick={generate}
               disabled={!userPrompt.trim() || generating}
-              style={{ width:'100%', justifyContent:'center' }}
             >
-              {generating ? 'Groq is generating...' : '✦ Generate concept'}
+              {generating
+                ? <><span className={s.spinner}/> Groq is generating…</>
+                : '✦ Generate concept'
+              }
             </button>
           </div>
         )}
 
+        {/* STEP 2 — Review + Upload */}
         {step === 'review' && concept && (
-          <div className={s.reviewGrid}>
-            <div className={s.card}>
-              <p className={s.sectionLabel}>Generated concept</p>
-              <h2 className={s.conceptName}>{concept.name}</h2>
-              <p className={s.conceptDesc}>{concept.description}</p>
-              <div className={s.conceptStyle}>
-                <span className="tag tag-a">{concept.style}</span>
+          <div className={s.reviewLayout}>
+
+            {/* Left: Generated concept */}
+            <div className={s.conceptCard}>
+              <div className={s.conceptHeader}>
+                <div className={s.conceptMeta}>
+                  <span className={s.conceptStyle}>{concept.style || style.label}</span>
+                  <span className={s.conceptBadge}>AI Generated</span>
+                </div>
+                <h2 className={s.conceptName}>{concept.name}</h2>
+                <p className={s.conceptDesc}>{concept.description}</p>
               </div>
 
-              <div className={s.traits}>
-                <p className={s.traitsLabel}>Traits</p>
-                <div className={s.traitsGrid}>
-                  {concept.traits?.map((t: any) => (
-                    <div key={t.trait_type} className={s.trait}>
-                      <p className={s.traitKey}>{t.trait_type}</p>
-                      <p className={s.traitVal}>{t.value}</p>
-                    </div>
-                  ))}
+              {/* Traits */}
+              {concept.traits?.length > 0 && (
+                <div className={s.traitsSection}>
+                  <p className={s.traitsTitle}>Traits</p>
+                  <div className={s.traitsGrid}>
+                    {concept.traits.map((t: any) => (
+                      <div key={t.trait_type} className={s.traitCard}>
+                        <p className={s.traitType}>{t.trait_type}</p>
+                        <p className={s.traitValue}>{t.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Prompt box */}
+              <div className={s.promptSection}>
+                <div className={s.promptHeader}>
+                  <p className={s.promptTitle}>Image generation prompt</p>
+                  <button className={s.copyBtn} onClick={copyPrompt}>
+                    {promptCopied ? '✓ Copied' : 'Copy prompt'}
+                  </button>
+                </div>
+                <p className={s.promptText}>{concept.prompt}</p>
+                <div className={s.toolsRow}>
+                  <p className={s.toolsLabel}>Use this prompt in:</p>
+                  <div className={s.tools}>
+                    {AI_TOOLS.map(t => (
+                      <a key={t.name} href={t.url} target="_blank" rel="noopener noreferrer" className={s.toolPill}>
+                        <span>{t.name}</span>
+                        <span className={s.toolDesc}>{t.desc}</span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div className={s.aiPromptBox}>
-                <p className={s.aiPromptLabel}>Art generation prompt</p>
-                <p className={s.aiPrompt}>{concept.prompt}</p>
-              </div>
-
-              <button className="btn btn-ghost btn-sm" onClick={() => setStep('prompt')} style={{marginTop:12}}>
-                ← Regenerate
+              <button className={s.regenBtn} onClick={() => setStep('prompt')}>
+                ← Change concept
               </button>
             </div>
 
-            <div className={s.card}>
-              <p className={s.sectionLabel}>Upload your artwork</p>
-              <p className={s.uploadHint}>
-                Use the prompt above in Midjourney, DALL-E, or any AI art tool, then upload the result here.
-              </p>
+            {/* Right: Upload */}
+            <div className={s.uploadCard}>
+              <div className={s.uploadHeader}>
+                <h3 className={s.uploadTitle}>Upload your artwork</h3>
+                <p className={s.uploadSub}>Generate an image using the prompt above, then upload it here to mint.</p>
+              </div>
 
               <div
-                className={s.dropzone}
+                className={`${s.dropzone} ${imagePreview ? s.dropzoneFilled : ''}`}
                 onClick={() => document.getElementById('ai-file')?.click()}
+                onDrop={handleDrop}
+                onDragOver={e => e.preventDefault()}
               >
-                {imagePreview
-                  ? <img src={imagePreview} alt="" className={s.previewImg} />
-                  : <div className={s.dropInner}>
-                      <p className={s.dropIcon}>↑</p>
-                      <p className={s.dropText}>Click to upload artwork</p>
+                {imagePreview ? (
+                  <>
+                    <img src={imagePreview} alt="Preview" className={s.previewImg}/>
+                    <div className={s.previewOverlay}>
+                      <span>Click to change</span>
                     </div>
-                }
+                  </>
+                ) : (
+                  <div className={s.dropInner}>
+                    <div className={s.dropIcon}>↑</div>
+                    <p className={s.dropTitle}>Drop your image here</p>
+                    <p className={s.dropSub}>PNG, JPG, GIF, MP4 · up to 10MB</p>
+                  </div>
+                )}
                 <input
                   id="ai-file" type="file" accept="image/*"
                   style={{ display:'none' }}
@@ -178,45 +262,78 @@ export default function AIGenerator() {
                 />
               </div>
 
+              {imageFile && (
+                <div className={s.fileInfo}>
+                  <span className={s.fileName}>{imageFile.name}</span>
+                  <span className={s.fileSize}>{(imageFile.size / 1024).toFixed(0)} KB</span>
+                </div>
+              )}
+
               {!account && (
-                <p className={s.connectWarning}>Connect wallet to mint</p>
+                <div className={s.walletWarning}>Connect your wallet to mint</div>
               )}
 
               <button
-                className="btn btn-primary btn-lg"
+                className={`btn btn-primary btn-lg ${s.mintBtn}`}
                 onClick={mintGenerated}
                 disabled={!imageFile || !account || uploading}
-                style={{ width:'100%', justifyContent:'center', marginTop:16 }}
               >
-                {uploading ? 'Uploading...' : 'Mint on Sui'}
+                {uploading ? 'Uploading to Walrus…' : 'Mint on Sui →'}
               </button>
+
+              <div className={s.mintInfo}>
+                <div className={s.mintInfoItem}><span className={s.mintDot}/> Media stored on Walrus</div>
+                <div className={s.mintInfoItem}><span className={s.mintDot}/> Ownership on Sui</div>
+                <div className={s.mintInfoItem}><span className={s.mintDot}/> 5% royalty set</div>
+              </div>
             </div>
           </div>
         )}
 
+        {/* STEP 3 — Minting */}
         {step === 'mint' && (
-          <div className={s.card} style={{ textAlign:'center', padding:'60px 32px' }}>
-            <div className={s.mintingIcon}>⟳</div>
-            <h2 className={s.mintingTitle}>Minting your NFT...</h2>
-            <p className={s.mintingSub}>Uploading to Walrus and minting on Sui. Confirm in your wallet.</p>
+          <div className={s.statusCard}>
+            <div className={s.spinner} style={{ width:48, height:48, borderWidth:3 }}/>
+            <h2 className={s.statusTitle}>Minting your NFT</h2>
+            <p className={s.statusSub}>Uploading to Walrus decentralized storage, then minting on Sui. Confirm the transaction in your wallet.</p>
+            <div className={s.statusSteps}>
+              <div className={s.statusStep}><span className={s.mintDot}/>Upload to Walrus</div>
+              <div className={s.statusStep}><span className={s.mintDot}/>Mint on Sui</div>
+              <div className={s.statusStep}><span className={s.mintDot}/>Confirm in wallet</div>
+            </div>
           </div>
         )}
 
+        {/* STEP 4 — Done */}
         {step === 'done' && (
-          <div className={s.card} style={{ textAlign:'center', padding:'60px 32px' }}>
-            <div className={s.doneIcon}>✓</div>
-            <h2 className={s.doneTitle}>{concept?.name}</h2>
-            <p className={s.doneSub}>Your AI-generated NFT is live on Sui with media on Walrus.</p>
-            <div className="flex gap-12" style={{ justifyContent:'center', marginTop:20 }}>
+          <div className={s.statusCard}>
+            <div className={s.doneCheck}>✓</div>
+            <h2 className={s.statusTitle}>{concept?.name} is live</h2>
+            <p className={s.statusSub}>Your AI-generated NFT is now permanently stored on Walrus and owned on Sui.</p>
+
+            {imagePreview && (
+              <div className={s.donePreview}>
+                <img src={imagePreview} alt={concept?.name} className={s.doneImg}/>
+              </div>
+            )}
+
+            <div className={s.doneActions}>
               {txDigest && (
-                <a href={`https://suiexplorer.com/txblock/${txDigest}?network=testnet`} target="_blank" rel="noreferrer" className="btn btn-ghost">
-                  Sui Explorer ↗
+                <a
+                  href={`https://suiexplorer.com/txblock/${txDigest}?network=testnet`}
+                  target="_blank" rel="noreferrer"
+                  className="btn btn-ghost"
+                >
+                  View on Explorer ↗
                 </a>
               )}
-              <button className="btn btn-primary" onClick={() => { setStep('prompt'); setConcept(null); setImageFile(null); setImagePreview(null); setUserPrompt('') }}>
-                Generate another
-              </button>
+              <Link to="/profile" className="btn btn-ghost">My NFTs</Link>
+              <Link to="/list" className="btn btn-primary">List for sale</Link>
             </div>
+
+            <button className={s.regenBtn} style={{ marginTop:24 }} onClick={reset}>
+              Generate another NFT
+            </button>
           </div>
         )}
       </div>
