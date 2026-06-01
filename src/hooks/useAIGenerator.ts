@@ -1,9 +1,7 @@
 /**
- * useAIGenerator.ts
- * Generate NFT artwork descriptions and metadata using Claude,
- * then the user can use the generated concept to create/upload their art.
- *
- * For actual image generation we call a compatible image gen endpoint.
+ * useAIGenerator.ts — uses Groq (llama3-70b) for fast, free NFT concept generation.
+ * Add VITE_GROQ_API_KEY to Vercel environment variables.
+ * Get a free key at: https://console.groq.com
  */
 import { useState } from 'react'
 
@@ -15,6 +13,8 @@ export interface GeneratedNFT {
   style:       string
 }
 
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY ?? ''
+
 export function useAIGenerator() {
   const [generating, setGenerating] = useState(false)
   const [error, setError]           = useState<string | null>(null)
@@ -23,33 +23,50 @@ export function useAIGenerator() {
     setGenerating(true)
     setError(null)
 
+    if (!GROQ_API_KEY) {
+      setError('No Groq API key. Add VITE_GROQ_API_KEY to Vercel environment variables.')
+      setGenerating(false)
+      return null
+    }
+
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          model:      'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: `You are an NFT creative director for Tuskr, a premium NFT marketplace on Sui blockchain.
-Generate compelling NFT concepts based on user prompts.
-Always respond with valid JSON only, no markdown, no explanation outside the JSON.
-The JSON must have: name (string), description (string, 1-2 sentences), traits (array of {trait_type, value}), prompt (detailed art generation prompt), style (art style name).`,
-          messages: [{
-            role:    'user',
-            content: `Generate an NFT concept for: "${userPrompt}". Return JSON with name, description, traits (4-6 items), prompt (for image generation), and style.`
-          }]
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama3-70b-8192',
+          max_tokens: 800,
+          temperature: 0.9,
+          messages: [
+            {
+              role: 'system',
+              content: `You are an NFT creative director for Tuskr, a premium NFT marketplace on Sui blockchain with media stored on Walrus.
+Generate compelling, unique NFT concepts. Respond ONLY with valid JSON — no markdown, no explanation, just raw JSON.
+Required fields: name (creative title), description (1-2 evocative sentences), traits (array of 4-6 {trait_type, value} objects), prompt (detailed image generation prompt), style (art style name).`
+            },
+            {
+              role: 'user',
+              content: `Generate a unique NFT concept for: "${userPrompt}"`
+            }
+          ]
         })
       })
 
-      if (!response.ok) throw new Error(`API error: ${response.status}`)
-      const data = await response.json()
-      const text = data.content?.[0]?.text ?? ''
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}))
+        throw new Error((err as any)?.error?.message ?? `Groq error: ${response.status}`)
+      }
 
-      // Parse JSON, strip any markdown fences
+      const data = await response.json()
+      const text = data.choices?.[0]?.message?.content ?? ''
       const clean = text.replace(/```json|```/g, '').trim()
       return JSON.parse(clean) as GeneratedNFT
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Generation failed')
+      const msg = e instanceof Error ? e.message : 'Generation failed. Try again.'
+      setError(msg)
       return null
     } finally {
       setGenerating(false)
@@ -57,26 +74,25 @@ The JSON must have: name (string), description (string, 1-2 sentences), traits (
   }
 
   const generateCollectionIdeas = async (theme: string): Promise<string[]> => {
-    setGenerating(true)
-    setError(null)
+    if (!GROQ_API_KEY) return []
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          model:      'claude-sonnet-4-20250514',
-          max_tokens: 500,
-          system: 'You are an NFT creative director. Return only a JSON array of 5 creative NFT collection name suggestions. No explanation.',
-          messages: [{ role: 'user', content: `Theme: ${theme}` }]
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama3-70b-8192',
+          max_tokens: 200,
+          messages: [
+            { role: 'system', content: 'Return ONLY a JSON array of 5 creative NFT collection names. No explanation.' },
+            { role: 'user', content: `Theme: ${theme}` }
+          ]
         })
       })
       const data = await response.json()
-      const text = data.content?.[0]?.text ?? '[]'
+      const text = data.choices?.[0]?.message?.content ?? '[]'
       return JSON.parse(text.replace(/```json|```/g, '').trim())
     } catch {
       return []
-    } finally {
-      setGenerating(false)
     }
   }
 
