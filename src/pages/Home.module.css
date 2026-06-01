@@ -169,28 +169,133 @@
 }
 
 /* ── Tab strip ── */
+/* ════════════════════════════════════════════════════
+   FEATURE TAB STRIP — premium pill capsule
+   
+   Architecture:
+   - Outer pill: frosted glass container
+   - Each tab: icon + label, no border of its own
+   - Active tab: filled with feat.color via CSS var
+   - Inactive: dim text, no background, icon in feat.color
+   - Hover: slight background reveal
+   - Transition: all properties 0.22s for snappy feel
+   - Double ring: outer border + inner inset highlight
+════════════════════════════════════════════════════ */
 .featureTabs {
-  display:flex; gap:4px; justify-content:center;
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:99px; padding:4px;
-  width:fit-content; margin:0 auto 52px;
-  backdrop-filter:blur(12px);
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset;
+  display: inline-flex;
+  gap: 3px;
+  justify-content: center;
+  align-items: center;
+  width: fit-content;
+  margin: 0 auto 52px;
+  padding: 5px;
+  border-radius: 99px;
+
+  /* Layered glass pill */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.06) 0%,
+      rgba(255,255,255,0.02) 100%
+    );
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+
+  /* Outer glow + inner highlight */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 1px 0 rgba(255,255,255,0.1) inset,
+    0 8px 32px rgba(0,0,0,0.35),
+    0 2px 8px rgba(0,0,0,0.2);
 }
+
+/* Individual tab button */
 .featureTab {
-  padding:9px 22px; border-radius:99px;
-  font-size:14px; font-weight:600;
-  color:rgba(250,248,245,0.35);
-  cursor:pointer; border:none; background:transparent;
-  font-family:'Space Grotesk',sans-serif;
-  transition:color 0.2s, background 0.2s;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 99px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(250,248,245,0.38);
+  white-space: nowrap;
+
+  /* Smooth all transitions */
+  transition:
+    color      0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    transform  0.15s ease;
+
+  /* Prevent touch flash on mobile */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
-.featureTab:hover { color:rgba(250,248,245,0.75); }
+
+/* Hover — reveal a ghost fill */
+.featureTab:not(.featureTabActive):hover {
+  color: rgba(250,248,245,0.72);
+  background: rgba(255,255,255,0.06);
+}
+
+/* Hover micro-lift */
+.featureTab:not(.featureTabActive):hover { transform: translateY(-1px); }
+.featureTab:active { transform: scale(0.97) !important; }
+
+/* ── ACTIVE STATE ── */
 .featureTabActive {
-  /* color and background now set inline via feat.color */
-  color:#000 !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  /* Background = feat.color via --tab-color CSS var */
+  background: var(--tab-color, #00d4aa) !important;
+  color: #000 !important;
+
+  /* Layered shadow for depth:
+     1. Outer shadow in feat.color = colored glow
+     2. Inner top highlight = catch light
+     3. Drop shadow = lift above strip */
+  box-shadow:
+    0 0 20px -4px var(--tab-color, #00d4aa),
+    0 0 0 1px rgba(255,255,255,0.25) inset,
+    0 1px 0 rgba(255,255,255,0.35) inset,
+    0 4px 16px rgba(0,0,0,0.3);
+}
+
+/* Icon wrapper inside tab */
+.featureTabIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  transition: transform 0.22s ease;
+}
+
+/* Active icon: slightly larger */
+.featureTabIconActive { transform: scale(1.1); }
+
+/* Label text */
+.featureTabLabel {
+  position: relative;
+  z-index: 1;
+}
+
+/* Active dot — small indicator below label */
+.featureTabDot {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
 }
 
 /* ── Carousel ── */

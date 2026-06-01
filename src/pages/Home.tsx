@@ -252,12 +252,28 @@ export default function Home() {
         <div className="container">
           <h2 className={s.powerTitle}>Power to the<br/>collector.</h2>
           <div className={s.featureTabs}>
-            {FEATURES.map((f,i) => (
-              <button key={f.tab}
-                className={`${s.featureTab} ${i===activeFeat?s.featureTabActive:''}`}
-                style={i===activeFeat ? { background:f.color, color:'#000' } : {}}
-                onClick={() => setActiveFeat(i)}>{f.tab}</button>
-            ))}
+            {FEATURES.map((f,i) => {
+              const isActive = i === activeFeat
+              return (
+                <button
+                  key={f.tab}
+                  className={`${s.featureTab} ${isActive ? s.featureTabActive : ''}`}
+                  onClick={() => setActiveFeat(i)}
+                  style={{
+                    '--tab-color': f.color,
+                  } as React.CSSProperties}
+                >
+                  {/* Icon */}
+                  <span className={`${s.featureTabIcon} ${isActive ? s.featureTabIconActive : ''}`}>
+                    <FeatureIconSmall type={f.icon} color={isActive ? '#000' : f.color}/>
+                  </span>
+                  {/* Label */}
+                  <span className={s.featureTabLabel}>{f.tab}</span>
+                  {/* Active dot indicator */}
+                  {isActive && <span className={s.featureTabDot} style={{ background: '#000', opacity: 0.4 }}/>}
+                </button>
+              )
+            })}
           </div>
         </div>
         <div className={s.featureCarousel}>
