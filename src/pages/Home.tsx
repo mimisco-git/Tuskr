@@ -9,16 +9,20 @@ import s from './Home.module.css'
 // Featured NFTs loaded from real chain listings below
 
 const FEATURES = [
-  { tab:'Permanent', icon:'💾', tag:'WALRUS BLOB', title:'Always\npermanent.',
+  { tab:'Permanent', icon:'permanent', tag:'WALRUS BLOB', title:'Always\npermanent.',
+    color:'#00d4aa',
     desc:'Your NFT media is stored as a certified, erasure-coded blob on Walrus. Not IPFS, not a server. A blob that outlasts any single node.',
     points:['On-chain blob certification for every file','Erasure-coded across hundreds of nodes','Media survives as long as Walrus runs'] },
-  { tab:'Provable', icon:'🔗', tag:'SUI MOVE', title:'Always\nprovable.',
+  { tab:'Provable', icon:'provable', tag:'SUI MOVE', title:'Always\nprovable.',
+    color:'#60a5fa',
     desc:'Every NFT is a Move object on Sui. Ownership enforced at the protocol level, not in a database. The chain is the only truth.',
     points:['Move objects with formal ownership semantics','Royalties enforced on-chain at every sale','Full provenance from mint to current holder'] },
-  { tab:'Programmable', icon:'⚡', tag:'SUI PTB', title:'Always\nprogrammable.',
+  { tab:'Programmable', icon:'programmable', tag:'SUI PTB', title:'Always\nprogrammable.',
+    color:'#a78bfa',
     desc:'Sui Programmable Transaction Blocks let you buy dozens of NFTs atomically. All succeed or all revert. One signature, one fee.',
     points:['Bulk-buy up to 20 NFTs in one transaction','Atomic: never a partial purchase','Gas-efficient batch operations'] },
-  { tab:'Private', icon:'🛡️', tag:'WALRUS SEAL', title:'Private\nby design.',
+  { tab:'Private', icon:'private', tag:'WALRUS SEAL', title:'Private\nby design.',
+    color:'#f59e0b',
     desc:'Walrus Seal threshold encryption ensures only the verified NFT holder can decrypt the full file. Preview is public; the original is yours.',
     points:['AES-256-GCM keyed to NFT ownership','Threshold decryption via Seal nodes','First marketplace with native content gating'] },
 ]
@@ -51,6 +55,45 @@ function Arrow() {
       <path d="M9 0H8V9H9V0Z" fill="currentColor"/>
     </svg>
   )
+}
+
+/* Premium SVG icons for each feature */
+function FeatureIcon({ type, size=52, color='#00d4aa' }: { type:string; size?:number; color?:string }) {
+  const s = { width:size, height:size, strokeWidth:1.5, fill:'none', stroke:color, strokeLinecap:'round' as const, strokeLinejoin:'round' as const }
+  if (type === 'permanent') return (
+    <svg viewBox="0 0 24 24" {...s}>
+      <ellipse cx="12" cy="5" rx="9" ry="3"/>
+      <path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12"/>
+      <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+      <path d="M12 8v6M9 11l3 3 3-3" strokeWidth={1.4}/>
+    </svg>
+  )
+  if (type === 'provable') return (
+    <svg viewBox="0 0 24 24" {...s}>
+      <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+      <polyline points="9,12 11,14 15,10" strokeWidth={1.8}/>
+    </svg>
+  )
+  if (type === 'programmable') return (
+    <svg viewBox="0 0 24 24" {...s}>
+      <rect x="2" y="3" width="20" height="14" rx="2"/>
+      <path d="M8 21h8M12 17v4"/>
+      <path d="M8 9l4-4 4 4M8 15l4 4 4-4" strokeWidth={1.4}/>
+    </svg>
+  )
+  if (type === 'private') return (
+    <svg viewBox="0 0 24 24" {...s}>
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      <circle cx="12" cy="16" r="1.5" fill={color} stroke="none"/>
+    </svg>
+  )
+  return null
+}
+
+/* Small icon for side cards */
+function FeatureIconSmall({ type, color }: { type:string; color:string }) {
+  return <FeatureIcon type={type} size={28} color={color}/>
 }
 
 export default function Home() {
@@ -185,13 +228,14 @@ export default function Home() {
             {FEATURES.map((f,i) => (
               <button key={f.tab}
                 className={`${s.featureTab} ${i===activeFeat?s.featureTabActive:''}`}
+                style={i===activeFeat ? { background:f.color, color:'#000' } : {}}
                 onClick={() => setActiveFeat(i)}>{f.tab}</button>
             ))}
           </div>
         </div>
         <div className={s.featureCarousel}>
           <div className={s.featureCardSide} onClick={() => setActiveFeat((activeFeat+3)%4)}>
-            <div className={s.featureSideIcon}>{FEATURES[(activeFeat+3)%4].icon}</div>
+            <div className={s.featureSideIcon}><FeatureIconSmall type={FEATURES[(activeFeat+3)%4].icon} color={FEATURES[(activeFeat+3)%4].color}/></div>
             <div className={s.featureSideTitle}>{FEATURES[(activeFeat+3)%4].tab}</div>
             <div className={s.featureSideDesc}>Click to view</div>
           </div>
@@ -199,9 +243,9 @@ export default function Home() {
             <motion.div key={activeFeat} className={s.featureCardMain}
               initial={{opacity:0,y:10}} animate={{opacity:1,y:0}}
               exit={{opacity:0,y:-8}} transition={{duration:0.22}}>
-              <div className={s.featureGlow}/>
-              <div className={s.featureIcon}>{feat.icon}</div>
-              <div className={s.featureTag}><div className={s.featureTagDot}/>{feat.tag}</div>
+              <div className={s.featureGlow} style={{ background: `radial-gradient(circle, ${feat.color}22 0%, transparent 65%)` }}/>
+              <div className={s.featureIcon}><FeatureIcon type={feat.icon} size={52} color={feat.color}/></div>
+              <div className={s.featureTag}><div className={s.featureTagDot} style={{ background:feat.color, boxShadow:`0 0 8px ${feat.color}` }}/>{feat.tag}</div>
               <h3 className={s.featureTitle} style={{whiteSpace:'pre-line'}}>{feat.title}</h3>
               <p className={s.featureDesc}>{feat.desc}</p>
               <div className={s.featurePoints}>
@@ -213,7 +257,7 @@ export default function Home() {
             </motion.div>
           </AnimatePresence>
           <div className={s.featureCardSide} onClick={() => setActiveFeat((activeFeat+1)%4)}>
-            <div className={s.featureSideIcon}>{FEATURES[(activeFeat+1)%4].icon}</div>
+            <div className={s.featureSideIcon}><FeatureIconSmall type={FEATURES[(activeFeat+1)%4].icon} color={FEATURES[(activeFeat+1)%4].color}/></div>
             <div className={s.featureSideTitle}>{FEATURES[(activeFeat+1)%4].tab}</div>
             <div className={s.featureSideDesc}>Click to view</div>
           </div>
