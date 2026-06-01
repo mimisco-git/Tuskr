@@ -57,6 +57,33 @@ function Arrow() {
   )
 }
 
+/* Use case SVG icons */
+function UCIcon({ type, color }: { type: string; color: string }) {
+  const p = { width:48, height:48, viewBox:"0 0 24 24", fill:"none", stroke:color, strokeWidth:1.5, strokeLinecap:"round" as const, strokeLinejoin:"round" as const }
+  if (type === 'trade') return (
+    <svg {...p}>
+      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/>
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M9 10V6.5a2.5 2.5 0 0 1 5 0V10" strokeWidth={1.3}/>
+    </svg>
+  )
+  if (type === 'create') return (
+    <svg {...p}>
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      <circle cx="7" cy="7" r="3" strokeWidth={1.3}/>
+    </svg>
+  )
+  if (type === 'encrypt') return (
+    <svg {...p}>
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      <path d="M12 15v2" strokeWidth={2}/>
+    </svg>
+  )
+  return null
+}
+
 /* Premium SVG icons for each feature */
 function FeatureIcon({ type, size=52, color='#00d4aa' }: { type:string; size?:number; color?:string }) {
   const s = { width:size, height:size, strokeWidth:1.5, fill:'none', stroke:color, strokeLinecap:'round' as const, strokeLinejoin:'round' as const }
@@ -289,12 +316,12 @@ export default function Home() {
         </div>
         <div className={s.usecaseCarousel}>
           {[
-            { icon:'🌊', pre:'Trade', title:'NFTs at scale.', desc:'Bulk-buy dozens of NFTs in one PTB. Move-enforced royalties on every transfer. Earn XP for every trade.', tags:['SUI PTB','WALRUS BLOB','MOVE'], to:'/marketplace' },
-            { icon:'✦',  pre:'Create', title:'AI-powered minting.', desc:'Claude generates the concept. You upload the art. Minted on Sui, stored permanently on Walrus. Earn XP for every mint.', tags:['CLAUDE AI','WALRUS BLOB','SUI MINT'], to:'/mint/ai' },
-            { icon:'🔐', pre:'Gate', title:'Encrypted content.', desc:'Lock full-resolution files behind Walrus Seal. Only verified NFT holders can decrypt. Preview is public; the original is yours.', tags:['SEAL','AES-256','THRESHOLD'], to:'/mint' },
+            { icon:'trade',   color:'#00d4aa', pre:'Trade',  title:'NFTs at scale.',        desc:'Bulk-buy dozens of NFTs in one PTB. Move-enforced royalties on every transfer. Earn XP for every trade.', tags:['SUI PTB','WALRUS BLOB','MOVE'],        to:'/marketplace' },
+            { icon:'create',  color:'#a78bfa', pre:'Create', title:'AI-powered minting.',    desc:'Groq AI generates the concept. You upload the art. Minted on Sui, stored permanently on Walrus. Earn XP for every mint.', tags:['GROQ AI','WALRUS BLOB','SUI MINT'], to:'/mint/ai' },
+            { icon:'encrypt', color:'#f59e0b', pre:'Gate',   title:'Encrypted content.',     desc:'Lock full-resolution files behind Walrus Seal. Only verified NFT holders can decrypt. Preview is public; the original is yours.', tags:['SEAL','AES-256','THRESHOLD'], to:'/mint' },
           ].map((u,i) => (
-            <div key={i} className={s.ucCard}>
-              <div className={s.ucIcon}>{u.icon}</div>
+            <div key={i} className={s.ucCard} style={{ '--uc-color': u.color } as React.CSSProperties}>
+              <div className={s.ucIcon}><UCIcon type={u.icon} color={u.color}/></div>
               <div className={s.ucPre}>{u.pre}</div>
               <div className={s.ucTitle}>{u.title}</div>
               <p className={s.ucDesc}>{u.desc}</p>

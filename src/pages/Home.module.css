@@ -405,20 +405,149 @@
 
 /* ── USE CASES ── */
 .usecaseSection { background:#000; padding:80px 0 100px; }
-.usecaseHead { text-align:center; padding:0 28px; margin-bottom:56px; }
-.usecasePre { display:inline-flex; padding:7px 14px; border-radius:4px; font-family:'Space Mono',monospace; font-size:11px; color:rgba(250,248,245,0.45); letter-spacing:0.14em; text-transform:uppercase; background:rgba(255,255,255,0.05); margin-bottom:20px; }
-.usecaseTitle { font-family:'Space Grotesk',sans-serif; font-size:clamp(44px,6vw,80px); font-weight:700; color:#fff; letter-spacing:-0.035em; line-height:1.0; }
-.usecaseCarousel { display:flex; align-items:stretch; gap:10px; padding:0 28px; max-width:1200px; margin:0 auto; -webkit-mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent); mask-image:linear-gradient(to right,transparent,black 8%,black 92%,transparent); }
-.ucCard { flex:1; background:rgba(161,200,255,0.07); border:1px solid rgba(255,255,255,0.08); border-radius:48px; padding:48px 40px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:14px; transition:all 0.25s; backdrop-filter:blur(12px); }
-.ucCard:hover { background:rgba(161,200,255,0.13); border-color:rgba(255,255,255,0.14); }
-.ucIcon { font-size:40px; }
-.ucPre { font-family:'Space Mono',monospace; font-size:11px; color:rgba(100,180,255,0.8); letter-spacing:0.14em; text-transform:uppercase; }
-.ucTitle { font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; color:#fff; letter-spacing:-0.025em; line-height:1.15; }
-.ucDesc { font-size:15px; color:rgba(250,248,245,0.42); line-height:1.75; }
-.ucTags { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:4px; }
-.ucTag { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; color:rgba(250,248,245,0.22); letter-spacing:0.06em; padding:3px 8px; border-radius:3px; background:rgba(255,255,255,0.04); }
-.ucLink { font-size:14px; color:rgba(250,248,245,0.35); text-decoration:underline; text-underline-offset:3px; margin-top:auto; transition:color 0.2s; }
-.ucCard:hover .ucLink { color:var(--a); }
+
+.usecaseHead { text-align:center; padding:0 28px; margin-bottom:64px; }
+
+.usecasePre {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:7px 16px; border-radius:99px;
+  font-family:'Space Mono',monospace; font-size:10px;
+  color:var(--a); letter-spacing:0.18em; text-transform:uppercase;
+  background:rgba(0,212,170,0.06); border:1px solid rgba(0,212,170,0.2);
+  margin-bottom:20px;
+}
+
+.usecaseTitle {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(44px,6vw,80px); font-weight:700;
+  color:#fff; letter-spacing:-0.04em; line-height:0.95;
+}
+
+/* Cards grid — no mask, equal columns */
+.usecaseCarousel {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:16px; padding:0 28px; max-width:1200px; margin:0 auto;
+}
+
+/* ── Premium glass card ── */
+.ucCard {
+  flex:1; position:relative; overflow:hidden;
+  display:flex; flex-direction:column; align-items:flex-start;
+  text-align:left; gap:0;
+  padding:40px 36px 36px;
+  border-radius:36px;
+
+  /* Glassmorphism base */
+  background:
+    linear-gradient(
+      150deg,
+      rgba(255,255,255,0.07) 0%,
+      rgba(255,255,255,0.025) 50%,
+      rgba(0,0,0,0.08) 100%
+    );
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter:blur(24px) saturate(150%);
+  -webkit-backdrop-filter:blur(24px) saturate(150%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 1px 0 rgba(255,255,255,0.1) inset,
+    0 24px 60px rgba(0,0,0,0.32);
+
+  transition:transform 0.28s cubic-bezier(0.22,1,0.36,1),
+             border-color 0.28s,
+             box-shadow 0.28s;
+}
+
+/* Hover: lift + brighten border */
+.ucCard:hover {
+  transform:translateY(-6px);
+  border-color:rgba(255,255,255,0.18);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 1px 0 rgba(255,255,255,0.14) inset,
+    0 40px 80px rgba(0,0,0,0.4);
+}
+
+/* Ambient glow blob using card's own color */
+.ucCard::before {
+  content:'';
+  position:absolute; top:-60px; right:-60px;
+  width:200px; height:200px; border-radius:50%;
+  background:radial-gradient(circle,
+    color-mix(in srgb, var(--uc-color, #00d4aa) 20%, transparent) 0%,
+    transparent 70%);
+  pointer-events:none;
+  transition:opacity 0.28s;
+  opacity:0.8;
+}
+.ucCard:hover::before { opacity:1.0; }
+
+/* Bottom accent line — uses card color */
+.ucCard::after {
+  content:'';
+  position:absolute; bottom:0; left:10%; right:10%; height:1px;
+  background:linear-gradient(
+    to right,
+    transparent,
+    var(--uc-color, #00d4aa),
+    transparent
+  );
+  opacity:0.25; transition:opacity 0.28s;
+}
+.ucCard:hover::after { opacity:0.5; }
+
+/* Icon wrapper — glassy badge */
+.ucIcon {
+  display:flex; align-items:center; justify-content:center;
+  width:64px; height:64px; border-radius:20px; flex-shrink:0;
+  margin-bottom:24px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 4px 16px rgba(0,0,0,0.2);
+  position:relative; z-index:1;
+}
+
+.ucPre {
+  font-family:'Space Mono',monospace; font-size:10px;
+  font-weight:700; letter-spacing:0.18em; text-transform:uppercase;
+  margin-bottom:10px; color:var(--uc-color, #00d4aa);
+  position:relative; z-index:1;
+}
+
+.ucTitle {
+  font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:700;
+  color:#fff; letter-spacing:-0.03em; line-height:1.1;
+  margin-bottom:14px; position:relative; z-index:1;
+}
+
+.ucDesc {
+  font-size:15px; color:rgba(250,248,245,0.48); line-height:1.8;
+  margin-bottom:20px; position:relative; z-index:1; flex:1;
+}
+
+.ucTags {
+  display:flex; gap:6px; flex-wrap:wrap;
+  margin-bottom:20px; position:relative; z-index:1;
+}
+.ucTag {
+  font-family:'Space Mono',monospace; font-size:9px; font-weight:700;
+  letter-spacing:0.08em; text-transform:uppercase;
+  color:rgba(250,248,245,0.35);
+  padding:4px 9px; border-radius:6px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.ucLink {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600;
+  color:rgba(250,248,245,0.4); text-decoration:none;
+  margin-top:auto; position:relative; z-index:1;
+  transition:color 0.2s;
+}
+.ucLink::after { content:'→'; transition:transform 0.2s; }
+.ucCard:hover .ucLink { color:var(--uc-color, #00d4aa); }
+.ucCard:hover .ucLink::after { transform:translateX(4px); }
 
 /* ── FEATURED NFTS ── */
 .nftSection { background:#000; padding:80px 0 100px; border-top:1px solid rgba(255,255,255,0.06); }
@@ -441,7 +570,7 @@
 @media(max-width:1060px) {
   .featureCarousel{flex-direction:column;} .featureCardSide{display:none;}
   .nftGrid{grid-template-columns:repeat(2,1fr);} .statsGrid{grid-template-columns:1fr 1fr;}
-  .usecaseCarousel{flex-direction:column;-webkit-mask-image:none;mask-image:none;}
+  .usecaseCarousel{grid-template-columns:1fr;}
 }
 @media(max-width:768px) {
   .heroText{padding-top:90px;} .heroTitle{font-size:clamp(44px,12vw,72px);}
