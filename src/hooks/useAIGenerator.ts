@@ -37,7 +37,7 @@ export function useAIGenerator() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'llama3-70b-8192',
+          model: 'llama-3.3-70b-versatile',
           max_tokens: 800,
           temperature: 0.9,
           messages: [
@@ -80,7 +80,7 @@ Required fields: name (creative title), description (1-2 evocative sentences), t
         method: 'POST',
         headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama3-70b-8192',
+          model: 'llama-3.3-70b-versatile',
           max_tokens: 200,
           messages: [
             { role: 'system', content: 'Return ONLY a JSON array of 5 creative NFT collection names. No explanation.' },

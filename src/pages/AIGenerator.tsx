@@ -34,7 +34,7 @@ export default function AIGenerator() {
 
   const generate = async () => {
     if (!userPrompt.trim()) return
-    toast('Generating concept with Claude...', 'loading')
+    toast('Generating concept with Groq AI...', 'loading')
     const result = await generateNFTConcept(`${userPrompt} in ${style.label} style`)
     if (result) { setConcept(result); setStep('review') }
     else toastError('Generation failed. Try again.')
@@ -80,7 +80,7 @@ export default function AIGenerator() {
             <span className={s.eyebrowText}>AI-Powered</span>
           </div>
           <h1 className={s.title}>NFT Generator</h1>
-          <p className={s.sub}>Describe your idea. Claude generates the concept. You upload the art. It mints on Sui.</p>
+          <p className={s.sub}>Describe your idea. Groq AI generates the concept. You upload the art. It mints on Sui.</p>
         </div>
 
         {step === 'prompt' && (
@@ -117,7 +117,7 @@ export default function AIGenerator() {
               disabled={!userPrompt.trim() || generating}
               style={{ width:'100%', justifyContent:'center' }}
             >
-              {generating ? 'Claude is thinking...' : '✦ Generate concept'}
+              {generating ? 'Groq is generating...' : '✦ Generate concept'}
             </button>
           </div>
         )}
