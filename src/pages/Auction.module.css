@@ -5,6 +5,8 @@
 .title { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,5vw,52px); font-weight:800; letter-spacing:-0.03em; color:#fff; margin-bottom:8px; }
 .sub { font-size:15px; color:rgba(255,255,255,0.4); margin-bottom:40px; }
 .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+@media(max-width:768px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:480px){.grid{grid-template-columns:1fr;}}
 .card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:var(--r-2xl); overflow:hidden; transition:border-color 0.2s; }
 .card:hover { border-color:rgba(255,255,255,0.14); }
 .imgWrap { position:relative; aspect-ratio:1; overflow:hidden; background:rgba(255,255,255,0.03); }

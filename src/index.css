@@ -1,277 +1,196 @@
-/* ════════════════════════════════════════════
-   TUSKR — Global Design System
-   Font: Space Grotesk (Monument Grotesk match)
-════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   TUSKR — Global styles
+   Device-agnostic: works on 320px phone to 2560px desktop
+════════════════════════════════════════════════════════ */
 
-*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
-:root {
-  /* Colours */
-  --black:   #000000;
-  --bg:      #050505;
-  --bg-1:    #0d0d0d;
-  --bg-2:    #141414;
-  --bg-3:    #1c1c1c;
-  --border:  rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.14);
-  --border3: rgba(255,255,255,0.22);
-  --text:    #faf8f5;
-  --text-2:  rgba(250,248,245,0.52);
-  --text-3:  rgba(250,248,245,0.26);
-  --a:       #00d4aa;
-  --a-2:     #00b896;
-  --a-bg:    rgba(0,212,170,0.07);
-  --a-bdr:   rgba(0,212,170,0.22);
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* Typography — matches walrus.xyz */
-  --f-disp:  'Space Grotesk', system-ui, sans-serif;
-  --f-sans:  'Space Grotesk', system-ui, sans-serif;
-  --f-mono:  'Space Mono', monospace, monospace;
-
-  /* Spacing & radius */
-  --r-sm:    8px;
-  --r-md:    14px;
-  --r-lg:    20px;
-  --r-xl:    28px;
-  --r-2xl:   40px;
-  --r-nav:   26px;   /* walrus.xyz nav button radius */
-
-  /* Motion */
-  --ease:    cubic-bezier(0.22,1,0.36,1);
-  --dur:     200ms;
+html {
+  font-size: 16px; /* Prevents iOS zoom on input focus */
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
-
-html { scroll-behavior: smooth; }
 
 body {
-  font-family: var(--f-sans);
-  background: var(--black);
-  color: var(--text);
-  font-size: 16px;
-  font-weight: 430;
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  background: #000;
+  color: #faf8f5;
   line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* Prevent horizontal scroll on all devices */
+  max-width: 100vw;
 }
 
-/* All headings use Space Grotesk heavy */
-h1,h2,h3,h4 {
-  font-family: var(--f-disp);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1;
+/* ── CSS variables ── */
+:root {
+  --a:    #00d4aa;
+  --p:    #7c3aed;
+  --font-sans: 'Space Grotesk', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  /* Spacing scale */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  40px;
+  --space-2xl: 64px;
+  /* Safe area for notched phones */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
 }
 
-a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
-button { font-family: var(--f-sans); cursor: pointer; border: none; background: none; }
-input,select,textarea { font-family: var(--f-sans); }
-
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
-
-/* ── Container ── */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 28px; }
-
-/* ══════════════════════════════
-   BUTTONS — walrus.xyz exact style
-══════════════════════════════ */
-
-/* Base */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-family: var(--f-sans);
-  font-size: 17px;
-  font-weight: 430;
-  letter-spacing: 0.04em;
-  border-radius: var(--r-nav);
-  padding: 12px 28px;
-  transition: all var(--dur) var(--ease);
-  white-space: nowrap;
-  cursor: pointer;
-  border: none;
-  text-decoration: none;
-}
-
-/* Walrus-style outlined pill — white border, transparent bg */
-.btn-outline {
-  background: transparent;
-  color: var(--text);
-  border: 1.5px solid rgba(250,248,245,0.55);
-}
-.btn-outline:hover {
-  border-color: var(--text);
-  background: rgba(255,255,255,0.04);
-}
-
-/* Solid white — filled primary */
-.btn-primary {
-  background: var(--text);
-  color: #000;
-  font-weight: 600;
-}
-.btn-primary:hover {
-  background: rgba(250,248,245,0.88);
-  transform: translateY(-1px);
-}
-
-/* Ghost — subtle */
-.btn-ghost {
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-.btn-ghost:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: var(--border2);
-}
-
-/* Teal accent */
-.btn-teal {
-  background: var(--a);
-  color: #000;
-  font-weight: 700;
-}
-.btn-teal:hover {
-  background: var(--a-2);
-  box-shadow: 0 6px 28px rgba(0,212,170,0.28);
-  transform: translateY(-1px);
-}
-
-/* Purple — matches walrus.xyz CTA sections */
-.btn-purple {
-  background: #a855f7;
-  color: #fff;
-  font-weight: 600;
-  border: 2.5px solid #a855f7;
-}
-.btn-purple:hover {
-  background: #9333ea;
-  border-color: #9333ea;
-}
-
-/* Sizes */
-.btn-sm  { padding:8px 18px; font-size:14px; letter-spacing:0.03em; }
-.btn-lg  { padding:14px 32px; font-size:18px; }
-
-/* ── Arrow icon shared ── */
-.btn-arrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* ── Inputs ── */
-.input,.select,.textarea {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-md);
-  color: var(--text);
-  font-family: var(--f-sans);
-  font-size: 15px;
-  font-weight: 400;
-  padding: 11px 16px;
-  outline: none;
+/* ── Container — fluid with max-width ── */
+.container {
   width: 100%;
-  transition: border-color var(--dur);
-}
-.input:focus,.select:focus,.textarea:focus {
-  border-color: var(--a-bdr);
-  box-shadow: 0 0 0 3px rgba(0,212,170,0.06);
-}
-.input::placeholder { color: var(--text-3); }
-.textarea { resize: vertical; min-height: 88px; }
-.select option { background: var(--bg-1); }
-
-/* ── Tag ── */
-.tag {
-  display: inline-flex; align-items: center;
-  font-family: var(--f-mono); font-size: 10px; font-weight: 400;
-  letter-spacing: 0.1em; padding: 5px 12px;
-  border-radius: 4px; border: 1px solid;
-  text-transform: uppercase;
-}
-.tag-teal  { color: var(--a); border-color: var(--a-bdr); background: var(--a-bg); }
-.tag-white { color: var(--text-2); border-color: var(--border); background: rgba(255,255,255,0.04); }
-
-/* ── Card ── */
-.card-dark {
-  background: rgba(255,255,255,0.02);
-  border-radius: var(--r-xl);
-  border: 1px solid var(--border);
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 48px);
 }
 
-/* ── Skeleton ── */
-@keyframes sk { from{background-position:-200% 0;} to{background-position:200% 0;} }
+/* ── Images — never overflow ── */
+img, video, svg { max-width: 100%; display: block; }
+
+/* ── Typography — fluid scale ── */
+h1 { font-size: clamp(32px, 8vw, 80px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.0; }
+h2 { font-size: clamp(26px, 5vw, 56px); font-weight: 700; letter-spacing: -0.025em; line-height: 1.05; }
+h3 { font-size: clamp(20px, 3.5vw, 36px); font-weight: 700; letter-spacing: -0.02em; }
+p  { font-size: clamp(14px, 2vw, 17px); }
+
+/* ── Buttons — min 44px touch target ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 44px; /* iOS minimum touch target */
+  padding: 10px 22px;
+  border-radius: 99px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(14px, 1.8vw, 16px);
+  font-weight: 600; letter-spacing: 0.02em;
+  cursor: pointer; white-space: nowrap;
+  border: none; text-decoration: none;
+  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent; /* Remove iOS tap flash */
+  touch-action: manipulation; /* Faster tap response */
+}
+.btn-primary {
+  background: var(--a); color: #000;
+  box-shadow: 0 0 0 0 rgba(0,212,170,0.4);
+}
+.btn-primary:hover   { filter: brightness(1.1); }
+.btn-primary:active  { transform: scale(0.97); }
+.btn-outline {
+  background: transparent; color: #faf8f5;
+  border: 1.5px solid rgba(250,248,245,0.5);
+}
+.btn-outline:hover { border-color: #faf8f5; background: rgba(255,255,255,0.06); }
+.btn-ghost {
+  background: rgba(255,255,255,0.06); color: rgba(250,248,245,0.75);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.1); color: #faf8f5; }
+.btn-lg { padding: 12px 28px; min-height: 50px; font-size: clamp(15px,2vw,17px); }
+.btn-sm { padding: 7px 16px; min-height: 36px; font-size: 13px; }
+
+/* ── Inputs — 16px prevents iOS zoom ── */
+.input, .textarea {
+  width: 100%;
+  font-size: 16px !important; /* MUST be 16px+ to prevent iOS zoom */
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 12px 16px;
+  min-height: 44px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  color: #faf8f5;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none; /* Remove iOS styling */
+  appearance: none;
+}
+.input:focus, .textarea:focus { border-color: var(--a); }
+.textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field-label {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  color: rgba(250,248,245,0.4); letter-spacing: 0.14em; text-transform: uppercase;
+}
+
+/* ── Tags ── */
+.tag { display:inline-flex; padding: 4px 10px; border-radius: 6px; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.tag-a { background: rgba(0,212,170,0.1); color: var(--a); border: 1px solid rgba(0,212,170,0.25); }
+
+/* ── Skeleton loader ── */
 .skeleton {
-  background: linear-gradient(90deg,var(--bg-1) 25%,var(--bg-2) 50%,var(--bg-1) 75%);
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%);
   background-size: 200% 100%;
-  animation: sk 1.6s infinite;
-  border-radius: var(--r-md);
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+@keyframes shimmer { from{background-position:200% 0;} to{background-position:-200% 0;} }
+
+/* ── Page wrapper — accounts for fixed navbar ── */
+main { padding-top: 66px; }
+
+/* ── Scrollbar (desktop only) ── */
+@media(hover:hover) {
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #000; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 }
 
-/* ── Animations ── */
-@keyframes up { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
-@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-.up { animation: up 0.5s var(--ease) both; }
+/* ── Focus visible — accessibility ── */
+:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
+button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 
-/* ── Section eyebrow ── */
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 7px 14px;
-  border-radius: 4px;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  font-weight: 400;
-  color: rgba(250,248,245,0.5);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  /* walrus.xyz frosted pill */
-  background: linear-gradient(87deg, rgba(25,31,40,0.1) 0%, rgba(25,31,40,0.35) 100%);
+/* ── Utility ── */
+.sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0; }
+
+/* ════════════════════
+   GLOBAL RESPONSIVE
+════════════════════ */
+
+/* Tablet */
+@media(max-width: 768px) {
+  main { padding-top: 62px; }
+  .btn-lg { padding: 12px 22px; }
 }
 
-/* ── Utils ── */
-.glass {
-  background: rgba(255,255,255,0.03);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1px solid var(--border);
+/* Mobile */
+@media(max-width: 480px) {
+  .container { padding: 0 16px; }
+  .btn { font-size: 14px; }
+  /* Stack any flex row */
+  .flex-mobile-col { flex-direction: column !important; }
+  /* Full width buttons on smallest screens */
+  .btn-mobile-full { width: 100% !important; justify-content: center !important; }
 }
-.flex{display:flex;} .col{display:flex;flex-direction:column;}
-.center{align-items:center;} .between{justify-content:space-between;}
-.gap-8{gap:8px;} .gap-12{gap:12px;} .gap-16{gap:16px;} .gap-24{gap:24px;}
-.ml-auto{margin-left:auto;}
-.text-2{color:var(--text-2);} .text-3{color:var(--text-3);}
-.text-teal{color:var(--a);}
-.text-sm{font-size:13px;} .text-xs{font-size:11px;}
-.mono{font-family:var(--f-mono);}
-.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.field{display:flex;flex-direction:column;gap:6px;}
-.field-label{font-size:12px;font-weight:500;color:var(--text-2);}
 
-/* ════════════════════════
-   MOBILE — comprehensive
-════════════════════════ */
-@media(max-width:768px) {
-  .container { padding: 0 18px; }
-  button, .btn { min-height: 44px; }
-  .btn-lg { padding: 12px 24px; font-size: 16px; }
-}
-@media(max-width:480px) {
-  .container { padding: 0 14px; }
-  input, select, textarea, .input, .select, .textarea {
-    font-size: 16px !important;
+/* ════════════════════
+   ALL GRIDS — collapse to 1 or 2 cols on mobile
+════════════════════ */
+
+/* 4-col grids → 2 on tablet, 1 on mobile */
+@media(max-width: 960px) {
+  [class*="nftGrid"],
+  [class*="statsGrid"] {
+    grid-template-columns: repeat(2,1fr) !important;
   }
 }
-@supports (padding-top: env(safe-area-inset-top)) {
-  body { padding-top: env(safe-area-inset-top, 0); }
+@media(max-width: 480px) {
+  [class*="nftGrid"]    { grid-template-columns: repeat(2,1fr) !important; }
+  [class*="statsGrid"]  { grid-template-columns: 1fr 1fr !important; }
 }
-* { -webkit-tap-highlight-color: transparent; }
-html, body { overflow-x: hidden; max-width: 100vw; }
+
+/* 3-col grids → 1 on mobile */
+@media(max-width: 680px) {
+  [class*="usecaseCarousel"] { grid-template-columns: 1fr !important; }
+  [class*="traitsGrid"]      { grid-template-columns: 1fr 1fr !important; }
+}
