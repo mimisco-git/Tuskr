@@ -1,181 +1,309 @@
-import { useState, useMemo } from 'react'
-import { useCurrentAccount } from '@mysten/dapp-kit'
-import NFTCard, { NFT } from '../components/NFTCard'
+import { useState, useEffect, useCallback } from 'react'
+import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useXP } from '../hooks/useXP'
 import { useToast } from '../components/Toast'
+import { Transaction } from '@mysten/sui/transactions'
+import { useSignAndExecuteTransaction } from '@mysten/dapp-kit'
+import NFTCard, { NFT } from '../components/NFTCard'
 import s from './Marketplace.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
-const CREATORS = ['whytetycon', 'sir_mimisco']
-const NAMES    = ['Arctic Phantom','Deep Current','Tusk Genesis','Frozen Echo','Ocean Pulse','Ivory Wave','Polar Drift','Silent Surge','Tusk Reborn','Cold Bloom','Sea Shadow','Ice Relic']
+const PACKAGE_ID     = import.meta.env.VITE_PACKAGE_ID     ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID ?? '0xd1a40986e214e59d9882b3e47c861eea3b732367958d27c03e9fc3b1f747a3b2'
 
-const ALL_NFTS: NFT[] = Array.from({ length:12 }, (_,i) => ({
-  id:       String(i+1),
-  name:     `${NAMES[i]} #${String(i+1).padStart(3,'0')}`,
-  image:    `https://picsum.photos/seed/tk${i+1}/400/400`,
-  price:    ((i+1)*3.2+2).toFixed(1),
-  currency: 'SUI',
-  creator:  CREATORS[i % 2],
-  listed:   true,
-  blobId:   `blob-${i+1}`,
-}))
-
-type Sort = 'recent' | 'price-asc' | 'price-desc'
+interface Listing {
+  listingId: string
+  nftId:     string
+  price:     string
+  seller:    string
+  name:      string
+  image:     string
+  blobId:    string
+}
 
 export default function Marketplace() {
   usePageTitle('Marketplace')
-  const account = useCurrentAccount()
-  const { bulkBuyNFTs, buyNFT } = useNFTMarketplace()
+  const account  = useCurrentAccount()
+  const client   = useSuiClient()
+  const { buyNFT } = useNFTMarketplace()
   const { awardXP } = useXP(account?.address)
   const { success, error: toastErr, info } = useToast()
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction()
 
-  const [sort,      setSort]      = useState<Sort>('recent')
-  const [search,    setSearch]    = useState('')
-  const [minPrice,  setMinPrice]  = useState('')
-  const [maxPrice,  setMaxPrice]  = useState('')
-  const [creator,   setCreator]   = useState('all')
-  const [selected,  setSelected]  = useState<Set<string>>(new Set())
+  const [listings,  setListings]  = useState<Listing[]>([])
   const [loading,   setLoading]   = useState(true)
-  const [buying,    setBuying]    = useState(false)
-  const [showFilter, setShowFilter] = useState(false)
+  const [search,    setSearch]    = useState('')
+  const [sort,      setSort]      = useState('recent')
+  const [selected,  setSelected]  = useState<Set<string>>(new Set())
+  const [buying,    setBuying]    = useState<string | null>(null)
 
-  const filtered = useMemo(() => {
-    return ALL_NFTS
-      .filter(n => {
-        const q  = search.toLowerCase()
-        const p  = +n.price
-        const okSearch  = !q || n.name.toLowerCase().includes(q) || n.creator.includes(q)
-        const okMin     = !minPrice || p >= +minPrice
-        const okMax     = !maxPrice || p <= +maxPrice
-        const okCreator = creator === 'all' || n.creator === creator
-        return okSearch && okMin && okMax && okCreator
-      })
-      .sort((a,b) =>
-        sort === 'price-asc'  ? +a.price - +b.price :
-        sort === 'price-desc' ? +b.price - +a.price : 0
-      )
-  }, [search, minPrice, maxPrice, creator, sort])
-
-  const total   = Array.from(selected).reduce((acc,id) => acc + +(ALL_NFTS.find(n=>n.id===id)?.price||0), 0)
-  const toggle  = (id: string) => setSelected(p => { const n=new Set(p); n.has(id)?n.delete(id):n.add(id); return n })
-
-  const bulkBuy = async () => {
-    if (!account) return
-    setBuying(true)
+  const loadListings = useCallback(async () => {
+    setLoading(true)
     try {
-      await bulkBuyNFTs(Array.from(selected).map(id => ({
-        id,
-        price: BigInt(Math.floor(+(ALL_NFTS.find(n=>n.id===id)!.price) * 1e9))
-      })))
-      success(`Purchased ${selected.size} NFTs in one transaction!`)
-      if (account) awardXP(account.address, 'buy', `Bulk buy: ${selected.size} NFTs`)
-      setSelected(new Set())
-    } catch { toastErr('Bulk buy failed') } finally { setBuying(false) }
+      // Query ListedEvents to get all listing IDs
+      const events = await client.queryEvents({
+        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` },
+        limit: 50,
+      }).catch(() => ({ data: [] }))
+
+      // Also query DelistedEvents and SoldEvents to exclude them
+      const delistedEvents = await client.queryEvents({
+        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::DelistedEvent` },
+        limit: 50,
+      }).catch(() => ({ data: [] }))
+
+      const soldEvents = await client.queryEvents({
+        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::SoldEvent` },
+        limit: 50,
+      }).catch(() => ({ data: [] }))
+
+      // Build sets of inactive listing IDs
+      const delistedIds = new Set(
+        delistedEvents.data.map((e: any) => e.parsedJson?.listing_id).filter(Boolean)
+      )
+      const soldIds = new Set(
+        soldEvents.data.map((e: any) => e.parsedJson?.listing_id).filter(Boolean)
+      )
+
+      // Active listings = listed but not delisted or sold
+      const activeEvents = events.data.filter((e: any) => {
+        const lid = e.parsedJson?.listing_id
+        return lid && !delistedIds.has(lid) && !soldIds.has(lid)
+      })
+
+      if (activeEvents.length === 0) {
+        setListings([])
+        return
+      }
+
+      // Fetch each listing object to get full details
+      const listingObjects = await Promise.allSettled(
+        activeEvents.map((e: any) =>
+          client.getObject({
+            id: e.parsedJson.listing_id,
+            options: { showContent: true },
+          })
+        )
+      )
+
+      const parsed: Listing[] = []
+      for (let i = 0; i < listingObjects.length; i++) {
+        const res = listingObjects[i]
+        if (res.status !== 'fulfilled') continue
+        const obj = res.value?.data
+        if (!obj) continue
+        const f = (obj.content as any)?.fields ?? {}
+        const ev = (activeEvents[i] as any).parsedJson ?? {}
+
+        // Fetch the NFT's display data for image
+        let image = ''
+        let blobId = ''
+        try {
+          const nftObj = await client.getObject({
+            id: f.nft_id || ev.nft_id,
+            options: { showContent: true, showDisplay: true },
+          })
+          const nftFields  = (nftObj.data?.content as any)?.fields ?? {}
+          const nftDisplay = (nftObj.data?.display as any)?.data  ?? {}
+          image  = nftFields.media_url  || nftDisplay.image_url || ''
+          blobId = nftFields.blob_id    || ''
+        } catch {}
+
+        parsed.push({
+          listingId: obj.objectId,
+          nftId:     f.nft_id     || ev.nft_id     || '',
+          price:     f.price      ? (Number(f.price) / 1e9).toFixed(2) : (ev.price ? (Number(ev.price) / 1e9).toFixed(2) : '0'),
+          seller:    f.seller     || ev.seller     || '',
+          name:      f.name       || `NFT #${(f.nft_id || '').slice(2,8)}`,
+          image,
+          blobId,
+        })
+      }
+
+      setListings(parsed)
+    } catch (e) {
+      console.error('Marketplace load error:', e)
+      setListings([])
+    } finally {
+      setLoading(false)
+    }
+  }, [client])
+
+  useEffect(() => { loadListings() }, [loadListings])
+
+  // Filter + sort
+  const filtered = listings
+    .filter(l =>
+      !search ||
+      l.name.toLowerCase().includes(search.toLowerCase()) ||
+      l.seller.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sort === 'price_asc')  return parseFloat(a.price) - parseFloat(b.price)
+      if (sort === 'price_desc') return parseFloat(b.price) - parseFloat(a.price)
+      return 0
+    })
+
+  const asNFT = (l: Listing): NFT => ({
+    id:       l.listingId,
+    name:     l.name,
+    image:    l.image,
+    price:    l.price,
+    currency: 'SUI',
+    creator:  l.seller.slice(0,8) + '…',
+    listed:   true,
+    blobId:   l.blobId,
+  })
+
+  const handleBuy = async (listing: Listing) => {
+    if (!account) return toastErr('Connect your wallet first')
+    setBuying(listing.listingId)
+    try {
+      await buyNFT(listing.listingId, BigInt(Math.floor(parseFloat(listing.price) * 1e9)))
+      success(`Bought ${listing.name}!`)
+      if (account) awardXP(account.address, 'buy', `Bought: ${listing.name}`)
+      loadListings()
+    } catch (e: any) {
+      toastErr(e?.message || 'Purchase failed')
+    } finally {
+      setBuying(null)
+    }
   }
 
-  const activeFilters = (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (creator !== 'all' ? 1 : 0)
+  const handleBulkBuy = async () => {
+    if (!account || selected.size === 0) return
+    info(`Buying ${selected.size} NFTs in one transaction…`)
+    const toBuy = listings.filter(l => selected.has(l.listingId))
+    try {
+      const tx = new Transaction()
+      for (const l of toBuy) {
+        const priceInMist = BigInt(Math.floor(parseFloat(l.price) * 1e9))
+        const [coin] = tx.splitCoins(tx.gas, [priceInMist])
+        tx.moveCall({
+          target: `${PACKAGE_ID}::tuskr_marketplace::buy`,
+          arguments: [
+            tx.object(MARKETPLACE_ID),
+            tx.object(l.listingId),
+            coin,
+          ],
+        })
+      }
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => {
+            success(`Bought ${selected.size} NFTs!`)
+            setSelected(new Set())
+            loadListings()
+            if (account) awardXP(account.address, 'buy', `Bulk buy: ${selected.size} NFTs`)
+          },
+          onError: (e) => toastErr(e?.message || 'Bulk buy failed'),
+        }
+      )
+    } catch (e: any) {
+      toastErr(e?.message || 'Bulk buy failed')
+    }
+  }
+
+  const toggleSelect = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  const selectedTotal = listings
+    .filter(l => selected.has(l.listingId))
+    .reduce((acc, l) => acc + parseFloat(l.price), 0)
 
   return (
     <main className={s.page}>
       <div className="container">
         <div className={s.header}>
           <div className={s.eyebrow}><div className={s.eyebrowDot}/>NFT Marketplace</div>
-          <div>
-            <h1 className={s.title}>Marketplace</h1>
-            <p className={s.sub}>{filtered.length} NFTs · Media stored on Walrus</p>
-          </div>
+          <h1 className={s.title}>Marketplace</h1>
+          <p className={s.sub}>{filtered.length} NFT{filtered.length !== 1 ? 's' : ''} · Media stored on Walrus</p>
         </div>
 
-        <div className={s.toolbar}>
-          <div className={s.searchWrap}>
-            <svg className={s.searchIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input
-              className={`input ${s.search}`}
-              placeholder="Search by name or creator..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-          <select className={`select ${s.sort}`} value={sort} onChange={e => setSort(e.target.value as Sort)}>
+        {/* Controls */}
+        <div className={s.controls}>
+          <input
+            className={`input ${s.search}`}
+            placeholder="Search by name or seller address..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          <select className="input" value={sort} onChange={e => setSort(e.target.value)} style={{ width:'auto' }}>
             <option value="recent">Recently listed</option>
-            <option value="price-asc">Price: low → high</option>
-            <option value="price-desc">Price: high → low</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
           </select>
-          <button
-            className={`btn btn-ghost ${activeFilters > 0 ? s.filterActive : ''}`}
-            onClick={() => setShowFilter(v => !v)}
-          >
-            Filters {activeFilters > 0 && <span className={s.filterCount}>{activeFilters}</span>}
-          </button>
+          <button className="btn btn-ghost btn-sm" onClick={loadListings}>↻ Refresh</button>
         </div>
 
-        {/* Filter panel */}
-        {showFilter && (
-          <div className={s.filterPanel}>
-            <div className={s.filterRow}>
-              <div className={s.filterGroup}>
-                <p className={s.filterLabel}>Creator</p>
-                <select className="select" value={creator} onChange={e => setCreator(e.target.value)}>
-                  <option value="all">All creators</option>
-                  {CREATORS.map(c => <option key={c} value={c}>@{c}</option>)}
-                </select>
-              </div>
-              <div className={s.filterGroup}>
-                <p className={s.filterLabel}>Min price (SUI)</p>
-                <input className="input" type="number" placeholder="0" value={minPrice} onChange={e => setMinPrice(e.target.value)} min="0" />
-              </div>
-              <div className={s.filterGroup}>
-                <p className={s.filterLabel}>Max price (SUI)</p>
-                <input className="input" type="number" placeholder="∞" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} min="0" />
-              </div>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => { setMinPrice(''); setMaxPrice(''); setCreator('all') }}
-                style={{ alignSelf:'flex-end' }}
-              >
-                Clear filters
+        {/* Bulk buy banner */}
+        {selected.size > 0 && (
+          <div className={s.bulkBanner}>
+            <span>{selected.size} NFT{selected.size > 1 ? 's' : ''} selected · {selectedTotal.toFixed(2)} SUI total</span>
+            <div style={{ display:'flex', gap:8 }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => setSelected(new Set())}>Clear</button>
+              <button className="btn btn-primary" onClick={handleBulkBuy}>
+                Buy all in one transaction
               </button>
             </div>
           </div>
         )}
 
-        {/* Bulk buy bar */}
-        {account && (
-          <div className={s.bulkBar}>
-            <p className={s.bulkInfo}>
-              {selected.size === 0
-                ? 'Select multiple NFTs to bulk-buy in one Sui PTB transaction'
-                : `${selected.size} selected · ${total.toFixed(1)} SUI total`}
-            </p>
-            {selected.size > 0 && (
-              <div className={s.bulkActions}>
-                <button className="btn btn-ghost btn-sm" onClick={() => setSelected(new Set())}>Clear</button>
-                <button className="btn btn-primary btn-sm" onClick={bulkBuy} disabled={buying}>
-                  {buying ? 'Processing...' : `Buy ${selected.size} NFTs (PTB)`}
-                </button>
-              </div>
-            )}
+        {/* Bulk buy tip */}
+        {selected.size === 0 && listings.length > 1 && (
+          <div className={s.bulkTip}>
+            Tip: click multiple NFTs to bulk-buy in one Sui PTB transaction
           </div>
         )}
 
-        <div className={s.grid}>
-          {filtered.map((nft, i) => (
-            <div key={nft.id} className={`${s.cardWrap} ${selected.has(nft.id) ? s.cardSelected : ''}`}>
-              {account && (
-                <button className={s.selectBtn} onClick={() => toggle(nft.id)}>
-                  {selected.has(nft.id) ? '✓' : '+'}
-                </button>
-              )}
-              <NFTCard nft={nft} delay={i * 0.04} onBuy={(nft) => { if(account) { buyNFT(nft.id, BigInt(Math.floor(+nft.price * 1e9))).then(() => { success(`Bought ${nft.name}!`); if(account) awardXP(account.address, "buy", `Bought: ${nft.name}`) }).catch(() => toastErr("Buy failed")) } }} />
-            </div>
-          ))}
-        </div>
-
-        {filtered.length === 0 && (
-          <p className={s.empty}>No NFTs match your filters.</p>
+        {/* Grid */}
+        {loading ? (
+          <div className={s.grid}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ aspectRatio:'1', borderRadius:20 }}/>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className={s.empty}>
+            <p className={s.emptyIcon}>🏪</p>
+            <p className={s.emptyTitle}>
+              {listings.length === 0 ? 'No listings yet' : 'No results found'}
+            </p>
+            <p className={s.emptySub}>
+              {listings.length === 0
+                ? 'Mint an NFT and list it for sale to be the first.'
+                : 'Try a different search term.'}
+            </p>
+            {listings.length === 0 && (
+              <a href="/mint" className="btn btn-primary">Mint an NFT</a>
+            )}
+          </div>
+        ) : (
+          <div className={s.grid}>
+            {filtered.map((listing, i) => (
+              <div
+                key={listing.listingId}
+                className={`${s.cardWrap} ${selected.has(listing.listingId) ? s.cardSelected : ''}`}
+                onClick={() => toggleSelect(listing.listingId)}
+              >
+                <NFTCard
+                  nft={asNFT(listing)}
+                  delay={i * 0.05}
+                  onBuy={() => handleBuy(listing)}
+                />
+                {buying === listing.listingId && (
+                  <div className={s.buyingOverlay}>Buying…</div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </main>
