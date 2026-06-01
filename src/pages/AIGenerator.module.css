@@ -1,0 +1,20 @@
+.page { padding:56px 0 80px; }
+.inner { max-width:700px; margin:0 auto; padding:0 28px; }
+.eyebrow { display:flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:10px; color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px; }
+.eyebrowDot { width:6px; height:6px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 2s infinite; }
+@keyframes pulse{50%{opacity:0.3;}}
+.title { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,44px); font-weight:800; letter-spacing:-0.03em; color:#fff; margin-bottom:8px; }
+.sub { font-size:15px; color:rgba(255,255,255,0.4); margin-bottom:36px; }
+.card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:var(--r-2xl); padding:28px; margin-bottom:16px; }
+.presets { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.preset { padding:6px 16px; border-radius:99px; font-size:12px; font-weight:600; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); cursor:pointer; transition:all 0.2s; }
+.preset:hover { border-color:rgba(255,255,255,0.2); color:rgba(255,255,255,0.8); }
+.presetActive { background:rgba(0,212,170,0.1); border-color:rgba(0,212,170,0.3); color:var(--a); }
+.resultCard { background:rgba(0,212,170,0.04); border:1px solid rgba(0,212,170,0.15); border-radius:var(--r-xl); padding:24px; }
+.resultName { font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:800; color:#fff; margin-bottom:8px; }
+.resultDesc { font-size:14px; color:rgba(255,255,255,0.5); line-height:1.75; margin-bottom:16px; }
+.resultTraits { display:flex; flex-wrap:wrap; gap:8px; }
+.resultTrait { font-family:var(--f-mono); font-size:11px; color:var(--a); background:rgba(0,212,170,0.1); border:1px solid rgba(0,212,170,0.2); padding:4px 10px; border-radius:99px; }
+.actions { display:flex; gap:10px; margin-top:20px; }
+.actions .btn { flex:1; justify-content:center; }
+@media(max-width:768px){.page{padding:32px 0 60px;}.inner{padding:0 16px;}.card{padding:20px 16px;}.actions{flex-direction:column;}}

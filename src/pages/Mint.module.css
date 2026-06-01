@@ -1,0 +1,53 @@
+.page { padding: 56px 0 80px; }
+.inner { max-width: 640px; margin: 0 auto; padding: 0 28px; }
+.eyebrow { display:flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:10px; color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px; }
+.eyebrowDot { width:6px; height:6px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 2s infinite; }
+@keyframes pulse{50%{opacity:0.3;}}
+.title { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,4vw,48px); font-weight:800; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:8px; }
+.sub { font-size:15px; color:rgba(255,255,255,0.4); margin-bottom:40px; }
+
+.steps { display:flex; gap:4px; margin-bottom:36px; }
+.step { display:flex; align-items:center; gap:8px; padding:8px 16px; border-radius:99px; font-size:12px; font-weight:600; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:rgba(255,255,255,0.3); transition:all 0.2s; }
+.stepActive { background:rgba(0,212,170,0.1); border-color:rgba(0,212,170,0.3); color:var(--a); }
+.stepDone { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5); }
+.stepNum { width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; background:rgba(255,255,255,0.1); }
+
+.card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:var(--r-2xl); padding:32px; margin-bottom:16px; }
+
+.drop { border:2px dashed rgba(255,255,255,0.15); border-radius:var(--r-xl); padding:48px 28px; text-align:center; cursor:pointer; transition:all 0.2s; min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
+.drop:hover,.dropActive { border-color:rgba(0,212,170,0.4); background:rgba(0,212,170,0.04); }
+.dropIcon { font-size:40px; }
+.dropTitle { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; color:rgba(255,255,255,0.7); }
+.dropSub { font-size:13px; color:rgba(255,255,255,0.3); }
+
+.preview { width:100%; aspect-ratio:1; border-radius:var(--r-lg); overflow:hidden; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); }
+.preview img { width:100%; height:100%; object-fit:cover; }
+
+.uploadProgress { display:flex; align-items:center; gap:12px; padding:14px; background:rgba(0,212,170,0.06); border:1px solid rgba(0,212,170,0.15); border-radius:var(--r-md); }
+.uploadBar { flex:1; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; overflow:hidden; }
+.uploadFill { height:100%; background:var(--a); border-radius:2px; transition:width 0.3s; }
+
+.detailGrid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.royaltyWrap { display:flex; align-items:center; gap:12px; }
+.royaltyVal { font-family:var(--f-mono); font-size:18px; font-weight:600; color:var(--a); min-width:40px; }
+
+.actions { display:flex; gap:10px; margin-top:8px; }
+.actions .btn { flex:1; justify-content:center; }
+
+.doneBox { text-align:center; padding:40px 20px; }
+.doneIcon { font-size:48px; margin:0 auto 16px; width:72px; height:72px; border-radius:50%; border:2px solid rgba(0,212,170,0.3); display:flex; align-items:center; justify-content:center; background:rgba(0,212,170,0.08); }
+.doneTitle { font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:800; color:#fff; margin-bottom:8px; }
+.doneSub { font-size:14px; color:rgba(255,255,255,0.4); margin-bottom:24px; }
+.doneTx { font-family:var(--f-mono); font-size:11px; color:rgba(255,255,255,0.3); word-break:break-all; background:rgba(255,255,255,0.04); padding:8px 12px; border-radius:var(--r-sm); margin-bottom:20px; }
+.doneActions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+@media(max-width:768px){
+  .page{padding:32px 0 60px;}
+  .inner{padding:0 16px;}
+  .title{font-size:28px;}
+  .card{padding:24px 18px;}
+  .drop{min-height:180px;padding:28px 16px;}
+  .detailGrid{grid-template-columns:1fr;}
+  .actions{flex-direction:column;}
+  .steps{overflow-x:auto;padding-bottom:4px;}
+}

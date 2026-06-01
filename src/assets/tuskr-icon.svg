@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <rect width="160" height="160" rx="28" fill="#070707"/>
+  <rect width="160" height="160" rx="28" stroke="#00c9a7" stroke-width="1.5" stroke-opacity="0.25"/>
+  <!-- T crossbar -->
+  <rect x="28" y="38" width="104" height="14" rx="7" fill="#00c9a7"/>
+  <!-- T stem with tusk point -->
+  <path d="
+    M 68 38
+    L 92 38
+    L 92 116
+    C 92 128, 86 136, 80 136
+    C 74 136, 68 128, 68 116
+    Z
+  " fill="#00c9a7"/>
+  <!-- Subtle highlight on stem -->
+  <path d="M 80 52 L 80 114" stroke="rgba(255,255,255,0.12)" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

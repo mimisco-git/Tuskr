@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 160" fill="none">
+  <!-- Wordmark: icon mark + TUSKR text -->
+
+  <!-- Icon container: rounded square -->
+  <rect x="0" y="12" width="136" height="136" rx="22" fill="#070707"/>
+  <rect x="0" y="12" width="136" height="136" rx="22" stroke="#00c9a7" stroke-width="1.5" stroke-opacity="0.3"/>
+
+  <!-- T crossbar -->
+  <rect x="26" y="42" width="84" height="12" rx="6" fill="#00c9a7"/>
+
+  <!-- T stem + tusk tip -->
+  <path d="
+    M 58 42
+    L 78 42
+    L 78 108
+    C 78 118, 73 126, 68 126
+    C 63 126, 58 118, 58 108
+    Z
+  " fill="#00c9a7"/>
+
+  <!-- Subtle inner glow line on stem -->
+  <path d="M 68 54 L 68 108" stroke="rgba(255,255,255,0.15)" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- TUSKR wordmark text -->
+  <!-- T -->
+  <path d="M 172 36 L 172 44 L 185 44 L 185 108 L 195 108 L 195 44 L 208 44 L 208 36 Z" fill="#f5f5f3"/>
+
+  <!-- U -->
+  <path d="M 222 36 L 222 84 C 222 98 228 110 242 110 C 256 110 262 98 262 84 L 262 36 L 252 36 L 252 84 C 252 93 248 101 242 101 C 236 101 232 93 232 84 L 232 36 Z" fill="#f5f5f3"/>
+
+  <!-- S -->
+  <path d="M 276 98 C 281 105 289 110 300 110 C 316 110 327 101 327 88 C 327 76 319 70 307 66 C 297 62 293 59 293 53 C 293 47 298 44 305 44 C 311 44 317 47 321 52 L 329 46 C 323 38 314 34 304 34 C 290 34 281 43 281 54 C 281 66 289 72 301 76 C 311 80 315 83 315 89 C 315 96 310 100 301 100 C 293 100 286 96 282 90 Z" fill="#f5f5f3"/>
+
+  <!-- K -->
+  <path d="M 341 36 L 341 108 L 351 108 L 351 78 L 377 108 L 390 108 L 362 75 L 388 36 L 375 36 L 351 71 L 351 36 Z" fill="#f5f5f3"/>
+
+  <!-- R -->
+  <path d="
+    M 404 36 L 404 108 L 414 108 L 414 78 L 427 78
+    C 430 78 433 80 435 84 L 445 108 L 456 108
+    L 445 82 C 443 78 440 75 437 74
+    C 445 71 450 64 450 55
+    C 450 44 442 36 429 36 Z
+    M 414 44 L 428 44 C 436 44 440 49 440 56
+    C 440 63 436 68 428 68 L 414 68 Z
+  " fill="#f5f5f3"/>
+</svg>

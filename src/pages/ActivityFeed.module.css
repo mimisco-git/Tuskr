@@ -1,0 +1,24 @@
+.page { padding:56px 0 80px; }
+.header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:36px; gap:16px; flex-wrap:wrap; }
+.eyebrow { display:flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:10px; color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px; }
+.eyebrowDot { width:6px; height:6px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 2s infinite; }
+@keyframes pulse{50%{opacity:0.3;}}
+.title { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,44px); font-weight:800; letter-spacing:-0.03em; color:#fff; line-height:1; }
+.liveBadge { display:inline-flex; align-items:center; gap:7px; padding:7px 14px; border-radius:99px; background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.2); font-family:var(--f-mono); font-size:10px; color:var(--a); letter-spacing:0.1em; }
+.liveDot { width:7px; height:7px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 1.5s infinite; }
+.feed { display:flex; flex-direction:column; gap:8px; }
+.event { display:flex; align-items:center; gap:14px; padding:14px 20px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:var(--r-lg); transition:background 0.2s; animation:up 0.3s ease both; }
+.event:hover { background:rgba(255,255,255,0.04); }
+@keyframes up{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.eventIcon { font-size:20px; width:28px; flex-shrink:0; text-align:center; }
+.eventType { font-family:var(--f-mono); font-size:10px; color:var(--a); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:3px; }
+.eventName { font-size:14px; font-weight:600; color:#fff; }
+.eventMeta { display:flex; align-items:center; gap:12px; margin-left:auto; flex-shrink:0; }
+.eventAmount { font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:#fff; }
+.eventTime { font-family:var(--f-mono); font-size:11px; color:rgba(255,255,255,0.3); }
+.eventHash { font-family:var(--f-mono); font-size:10px; color:rgba(0,212,170,0.6); }
+@media(max-width:768px){
+  .page{padding:32px 0 60px;}.header{flex-direction:column;gap:12px;}.title{font-size:28px;}
+  .event{flex-wrap:wrap;gap:8px;}.eventMeta{flex-direction:column;align-items:flex-start;}
+}
+@media(max-width:480px){.eventAmount,.eventHash{display:none;}}

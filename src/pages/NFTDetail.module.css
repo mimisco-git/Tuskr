@@ -1,0 +1,40 @@
+.page { padding: 56px 0 80px; }
+.layout { display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:start; }
+.imgWrap { position:sticky; top:80px; border-radius:var(--r-2xl); overflow:hidden; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); }
+.imgWrap img { width:100%; height:auto; display:block; }
+.badge { position:absolute; top:14px; right:14px; font-family:var(--f-mono); font-size:9px; color:var(--a); padding:4px 10px; background:rgba(0,0,0,0.7); border:1px solid rgba(0,212,170,0.25); border-radius:99px; backdrop-filter:blur(8px); }
+
+.creator { font-family:var(--f-mono); font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:0.08em; margin-bottom:8px; }
+.name { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,44px); font-weight:800; letter-spacing:-0.03em; color:#fff; line-height:1.1; margin-bottom:20px; }
+.priceCard { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:var(--r-xl); padding:20px; margin-bottom:20px; }
+.priceLabel { font-family:var(--f-mono); font-size:9px; color:rgba(255,255,255,0.3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:6px; }
+.price { font-family:'Space Grotesk',sans-serif; font-size:40px; font-weight:800; color:#fff; letter-spacing:-0.04em; line-height:1; }
+.priceSuf { font-size:16px; color:rgba(255,255,255,0.4); font-weight:400; margin-left:6px; }
+.buyRow { display:flex; gap:10px; margin-top:16px; }
+.buyRow .btn { flex:1; justify-content:center; }
+
+.section { margin-top:28px; }
+.sectionTitle { font-family:var(--f-mono); font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:14px; }
+.traitsGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.trait { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:var(--r-md); padding:10px 12px; }
+.traitType { font-family:var(--f-mono); font-size:9px; color:var(--a); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:4px; }
+.traitVal { font-size:13px; font-weight:600; color:#fff; }
+
+.historyChart { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:var(--r-lg); padding:16px; }
+
+.offerModal { position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; z-index:200; padding:20px; }
+.offerBox { background:var(--bg-1); border:1px solid rgba(255,255,255,0.1); border-radius:var(--r-2xl); padding:32px; width:100%; max-width:440px; }
+.offerTitle { font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:800; color:#fff; margin-bottom:20px; }
+.offerRow { display:flex; gap:10px; margin-top:20px; }
+.offerRow .btn { flex:1; justify-content:center; }
+
+@media(max-width:768px) {
+  .page{padding:28px 0 60px;}
+  .layout{grid-template-columns:1fr;gap:24px;}
+  .imgWrap{position:static;}
+  .name{font-size:28px;}
+  .price{font-size:36px;}
+  .traitsGrid{grid-template-columns:1fr 1fr;}
+  .buyRow{flex-direction:column;}
+  .buyRow .btn{width:100%;justify-content:center;}
+}
