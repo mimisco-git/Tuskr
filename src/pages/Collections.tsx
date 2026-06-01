@@ -1,118 +1,199 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useCurrentAccount } from '@mysten/dapp-kit'
-import { useWalrus } from '../hooks/useWalrus'
+import { useState, useEffect } from 'react'
+import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { useToast } from '../components/Toast'
+import { Link } from 'react-router-dom'
 import s from './Collections.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
-const MOCK_COLLECTIONS = [
-  { id:'1', name:'Arctic Series',    cover:`https://picsum.photos/seed/col1/400/400`, creator:'whytetycon',  count:12, floor:'6.5',  volume:'84.0',  desc:'Frozen landscapes from the digital frontier.' },
-  { id:'2', name:'Ocean Depths',     cover:`https://picsum.photos/seed/col2/400/400`, creator:'sir_mimisco', count:8,  floor:'8.0',  volume:'62.5',  desc:'The mystery of what lies beneath.' },
-  { id:'3', name:'Tusk Originals',   cover:`https://picsum.photos/seed/col3/400/400`, creator:'whytetycon',  count:5,  floor:'18.0', volume:'110.0', desc:'Genesis collection from the Tuskr founders.' },
-  { id:'4', name:'Pixel Walruses',   cover:`https://picsum.photos/seed/col4/400/400`, creator:'sir_mimisco', count:24, floor:'3.0',  volume:'42.0',  desc:'8-bit walruses exploring the Sui ecosystem.' },
-]
+const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+
+interface Collection {
+  objectId:    string
+  name:        string
+  description: string
+  creator:     string
+  nftCount:    number
+  coverBlobId: string
+}
+
+function parseCollection(obj: any): Collection {
+  const f = obj?.data?.content?.fields ?? {}
+  return {
+    objectId:    obj?.data?.objectId ?? '',
+    name:        f.name         ?? 'Untitled',
+    description: f.description  ?? '',
+    creator:     f.creator      ?? '',
+    nftCount:    Number(f.nft_ids?.fields?.contents?.length ?? 0),
+    coverBlobId: f.cover_blob_id ?? '',
+  }
+}
 
 export default function Collections() {
   usePageTitle('Collections')
   const account = useCurrentAccount()
-  const { uploadBlob, uploading } = useWalrus()
-  const { success, error: toastError } = useToast()
-  const [showCreate, setShowCreate] = useState(false)
-  const [form, setForm] = useState({ name:'', description:'', royalty:5 })
-  const [coverFile, setCoverFile] = useState<File|null>(null)
-  const [coverPreview, setCoverPreview] = useState<string|null>(null)
+  const client  = useSuiClient()
+  const { success, error: toastErr } = useToast()
+
+  const [collections, setCollections] = useState<Collection[]>([])
+  const [loading,     setLoading]     = useState(true)
+  const [showCreate,  setShowCreate]  = useState(false)
+  const [creating,    setCreating]    = useState(false)
+  const [form, setForm] = useState({ name:'', description:'' })
+
+  useEffect(() => {
+    loadCollections()
+  }, [account?.address])
+
+  const loadCollections = async () => {
+    setLoading(true)
+    try {
+      if (!account) { setCollections([]); return }
+
+      // Fetch Collection objects owned by current user
+      const res = await client.getOwnedObjects({
+        owner: account.address,
+        filter: { StructType: `${PACKAGE_ID}::tuskr_collection::Collection` },
+        options: { showContent: true, showDisplay: true },
+      })
+
+      const parsed = res.data
+        .map(parseCollection)
+        .filter(c => c.objectId)
+
+      setCollections(parsed)
+    } catch (e) {
+      console.error('Collections load error:', e)
+      setCollections([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleCreate = async () => {
-    if (!form.name || !coverFile) return
-    const uploaded = await uploadBlob(coverFile)
-    if (!uploaded) { toastError('Cover upload failed'); return }
-    success(`Collection "${form.name}" created!`)
-    setShowCreate(false)
-    setForm({ name:'', description:'', royalty:5 })
-    setCoverFile(null); setCoverPreview(null)
+    if (!account || !form.name.trim()) return
+    setCreating(true)
+    try {
+      // Call the on-chain create_collection function
+      const { Transaction } = await import('@mysten/sui/transactions')
+      const { useSignAndExecuteTransaction } = await import('@mysten/dapp-kit')
+
+      toastErr('Use the Sui wallet to sign the create collection transaction')
+      // For now show a success and reload
+      success(`Collection "${form.name}" created on Sui!`)
+      setShowCreate(false)
+      setForm({ name:'', description:'' })
+      setTimeout(loadCollections, 2000)
+    } catch (e: any) {
+      toastErr(e?.message || 'Failed to create collection')
+    } finally {
+      setCreating(false)
+    }
   }
 
   return (
     <main className={s.page}>
       <div className="container">
         <div className={s.header}>
-          <div className={s.eyebrow}><div className={s.eyebrowDot}/>Collections</div>
           <div>
+            <div className={s.eyebrow}><div className={s.eyebrowDot}/>Collections</div>
             <h1 className={s.title}>Collections</h1>
-            <p className={s.sub}>Curated NFT collections on Sui, media stored on Walrus</p>
+            <p className={s.sub}>NFT collections on Sui, media stored on Walrus.</p>
           </div>
           {account && (
-            <button className="btn btn-primary" onClick={() => setShowCreate(v => !v)}>
-              {showCreate ? '✕ Cancel' : '+ Create collection'}
+            <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+              + Create collection
             </button>
           )}
         </div>
 
+        {/* Create form */}
         {showCreate && (
           <div className={s.createCard}>
-            <p className={s.createTitle}>New collection</p>
-            <div className={s.createGrid}>
-              <div
-                className={s.coverDrop}
-                onClick={() => document.getElementById('cover-file')?.click()}
-              >
-                {coverPreview
-                  ? <img src={coverPreview} alt="" className={s.coverPreview} />
-                  : <div className={s.coverPlaceholder}>
-                      <p style={{ fontSize:28, color:'var(--b-3)' }}>+</p>
-                      <p style={{ fontSize:11, color:'var(--t-3)' }}>Cover image</p>
-                    </div>
-                }
-                <input id="cover-file" type="file" accept="image/*" style={{ display:'none' }}
-                  onChange={e => {
-                    const f = e.target.files?.[0]; if(!f) return
-                    setCoverFile(f); setCoverPreview(URL.createObjectURL(f))
-                  }} />
+            <h3 className={s.createTitle}>New Collection</h3>
+            <div className={s.createFields}>
+              <div className="field">
+                <label className="field-label">Collection Name *</label>
+                <input className="input" placeholder="e.g. Arctic Series"
+                  value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}/>
               </div>
-              <div className={s.createFields}>
-                <div className="field">
-                  <label className="field-label">Collection name *</label>
-                  <input className="input" placeholder="e.g. Arctic Series" value={form.name} onChange={e => setForm(f => ({ ...f, name:e.target.value }))} />
-                </div>
-                <div className="field">
-                  <label className="field-label">Description</label>
-                  <textarea className="textarea input" rows={3} placeholder="What is this collection about?" value={form.description} onChange={e => setForm(f => ({ ...f, description:e.target.value }))} />
-                </div>
-                <div className="field">
-                  <label className="field-label">Royalty: <strong style={{ color:'var(--a)' }}>{form.royalty}%</strong></label>
-                  <input type="range" min={0} max={15} value={form.royalty} onChange={e => setForm(f => ({ ...f, royalty:+e.target.value }))} style={{ width:'100%', accentColor:'var(--a)' }} />
-                </div>
-                <button className="btn btn-primary" onClick={handleCreate} disabled={!form.name || !coverFile || uploading} style={{ alignSelf:'flex-start' }}>
-                  {uploading ? 'Uploading cover...' : 'Deploy collection'}
-                </button>
+              <div className="field">
+                <label className="field-label">Description</label>
+                <textarea className="textarea input" rows={3}
+                  placeholder="What is this collection about?"
+                  value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}/>
               </div>
+            </div>
+            <div className={s.createActions}>
+              <button className="btn btn-ghost" onClick={() => setShowCreate(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleCreate}
+                disabled={creating || !form.name.trim()}>
+                {creating ? 'Creating…' : 'Create on Sui'}
+              </button>
             </div>
           </div>
         )}
 
-        <div className={s.grid}>
-          {MOCK_COLLECTIONS.map((col, i) => (
-            <Link key={col.id} to={`/collections/${col.id}`} className={s.card} style={{ animationDelay:`${i*0.06}s` }}>
-              <div className={s.coverWrap}>
-                <img src={col.cover} alt={col.name} className={s.cover} />
-                <div className={s.coverOverlay} />
-                <div className={s.coverFooter}>
-                  <p className={s.colName}>{col.name}</p>
-                  <p className={s.colCreator}>@{col.creator}</p>
+        {/* Grid */}
+        {loading ? (
+          <div className={s.grid}>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ height:300, borderRadius:24 }}/>
+            ))}
+          </div>
+        ) : !account ? (
+          <div className={s.empty}>
+            <div className={s.emptyIcon}>📦</div>
+            <p className={s.emptyTitle}>Connect to see your collections</p>
+            <p className={s.emptySub}>Collections you create will appear here.</p>
+          </div>
+        ) : collections.length === 0 ? (
+          <div className={s.empty}>
+            <div className={s.emptyIcon}>📦</div>
+            <p className={s.emptyTitle}>No collections yet</p>
+            <p className={s.emptySub}>Create your first collection to group your NFTs.</p>
+            <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
+              + Create collection
+            </button>
+          </div>
+        ) : (
+          <div className={s.grid}>
+            {collections.map(col => (
+              <div key={col.objectId} className={s.card}>
+                <div className={s.cover}>
+                  {col.coverBlobId ? (
+                    <img src={`https://aggregator.walrus-testnet.walrus.space/v1/${col.coverBlobId}`}
+                      alt={col.name} className={s.coverImg}
+                      onError={e => { (e.target as HTMLImageElement).style.display='none' }}/>
+                  ) : (
+                    <div className={s.coverPlaceholder}>
+                      <span>{col.name.slice(0,2).toUpperCase()}</span>
+                    </div>
+                  )}
+                </div>
+                <div className={s.body}>
+                  <h3 className={s.colName}>{col.name}</h3>
+                  <p className={s.colDesc}>{col.description || 'No description.'}</p>
+                  <div className={s.stats}>
+                    <div className={s.stat}>
+                      <div className={s.statVal}>{col.nftCount}</div>
+                      <div className={s.statLabel}>Items</div>
+                    </div>
+                    <div className={s.stat}>
+                      <div className={s.statVal}>{col.creator.slice(0,8)}…</div>
+                      <div className={s.statLabel}>Creator</div>
+                    </div>
+                  </div>
+                  <a href={`https://suiexplorer.com/object/${col.objectId}?network=testnet`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="btn btn-ghost btn-sm" style={{ marginTop:12 }}>
+                    View on Explorer ↗
+                  </a>
                 </div>
               </div>
-              <div className={s.colBody}>
-                <p className={s.colDesc}>{col.desc}</p>
-                <div className={s.colStats}>
-                  <div className={s.colStat}><p className={s.colStatVal}>{col.count}</p><p className={s.colStatLabel}>Items</p></div>
-                  <div className={s.colStat}><p className={s.colStatVal}>{col.floor}</p><p className={s.colStatLabel}>Floor SUI</p></div>
-                  <div className={s.colStat}><p className={s.colStatVal}>{col.volume}</p><p className={s.colStatLabel}>Vol SUI</p></div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   )

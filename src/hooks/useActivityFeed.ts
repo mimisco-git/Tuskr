@@ -1,101 +1,127 @@
 /**
  * useActivityFeed.ts
- * Subscribe to Sui on-chain events from the Tuskr package.
- * Falls back to polling when WebSocket is unavailable.
+ * Queries real Sui events from the Tuskr contracts.
+ * Falls back to empty list if no events yet.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSuiClient } from '@mysten/dapp-kit'
 
-const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x0'
-
-export type ActivityType = 'mint' | 'sale' | 'listing' | 'offer' | 'auction_bid' | 'auction_settled'
+const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
 
 export interface ActivityEvent {
-  id:        string
-  type:      ActivityType
-  nftName:   string
-  amount?:   string
-  currency?: string
-  actor:     string
-  timestamp: Date
-  txDigest?: string
+  id:       string
+  type:     'sold' | 'listed' | 'minted' | 'delisted' | 'bid'
+  nftName:  string
+  amount:   string
+  actor:    string
+  txDigest: string
+  time:     string
 }
 
-// Mock data for when the contract isn't deployed yet
-const MOCK_EVENTS: ActivityEvent[] = [
-  { id:'1', type:'sale',         nftName:'Arctic Phantom #001', amount:'12.5', currency:'SUI', actor:'0xwhyt...ycon', timestamp: new Date(Date.now()-60000),   txDigest:'0xabc' },
-  { id:'2', type:'mint',         nftName:'Deep Current #007',                                  actor:'0xsir_...isco', timestamp: new Date(Date.now()-180000),  txDigest:'0xdef' },
-  { id:'3', type:'listing',      nftName:'Tusk Genesis',        amount:'22.0', currency:'SUI', actor:'0xwhyt...ycon', timestamp: new Date(Date.now()-300000),  txDigest:'0xghi' },
-  { id:'4', type:'auction_bid',  nftName:'Polar Drift #012',    amount:'8.0',  currency:'SUI', actor:'0xanon...user', timestamp: new Date(Date.now()-600000),  txDigest:'0xjkl' },
-  { id:'5', type:'offer',        nftName:'Frozen Echo #003',    amount:'5.5',  currency:'SUI', actor:'0xanon...user', timestamp: new Date(Date.now()-900000),  txDigest:'0xmno' },
-]
+function parseEventType(raw: string): ActivityEvent['type'] {
+  if (raw.includes('SoldEvent'))     return 'sold'
+  if (raw.includes('ListedEvent'))   return 'listed'
+  if (raw.includes('MintedEvent'))   return 'minted'
+  if (raw.includes('DelistedEvent')) return 'delisted'
+  if (raw.includes('BidEvent'))      return 'bid'
+  return 'minted'
+}
 
-export function useActivityFeed(limit = 20) {
+function timeAgo(ms: number): string {
+  const diff = Date.now() - ms
+  if (diff < 60000)   return `${Math.floor(diff/1000)}s ago`
+  if (diff < 3600000) return `${Math.floor(diff/60000)}m ago`
+  if (diff < 86400000)return `${Math.floor(diff/3600000)}h ago`
+  return `${Math.floor(diff/86400000)}d ago`
+}
+
+export function useActivityFeed() {
   const client = useSuiClient()
-  const [events, setEvents] = useState<ActivityEvent[]>(MOCK_EVENTS)
+  const [events, setEvents]   = useState<ActivityEvent[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    let cancelled = false
+  const fetchEvents = useCallback(async () => {
+    try {
+      // Query all event types from our package
+      const eventTypes = [
+        `${PACKAGE_ID}::tuskr_marketplace::SoldEvent`,
+        `${PACKAGE_ID}::tuskr_marketplace::ListedEvent`,
+        `${PACKAGE_ID}::tuskr_nft::MintedEvent`,
+        `${PACKAGE_ID}::tuskr_marketplace::DelistedEvent`,
+        `${PACKAGE_ID}::tuskr_auction::BidEvent`,
+      ]
 
-    const fetchEvents = async () => {
-      if (PACKAGE_ID === '0x0') {
-        // Simulate live feed with mock data
-        setLoading(false)
-        const timer = setInterval(() => {
-          if (cancelled) return
-          const types: ActivityType[] = ['mint', 'sale', 'listing', 'offer', 'auction_bid']
-          const names = ['Ivory Wave', 'Silent Surge', 'Cold Bloom', 'Sea Shadow', 'Ice Relic', 'Arctic Phantom']
-          setEvents(prev => [{
-            id:        Date.now().toString(),
-            type:      types[Math.floor(Math.random() * types.length)],
-            nftName:   names[Math.floor(Math.random() * names.length)] + ' #' + String(Math.floor(Math.random()*100)).padStart(3,'0'),
-            amount:    (Math.random() * 20 + 2).toFixed(1),
-            currency:  'SUI',
-            actor:     '0x' + Math.random().toString(16).slice(2, 8) + '...',
-            timestamp: new Date(),
-          }, ...prev.slice(0, limit - 1)])
-        }, 8000)
-        return () => clearInterval(timer)
-      }
+      const results = await Promise.allSettled(
+        eventTypes.map(t =>
+          client.queryEvents({ query: { MoveEventType: t }, limit: 20 })
+        )
+      )
 
-      try {
-        // Real on-chain event query
-        const [mintEvts, saleEvts] = await Promise.all([
-          client.queryEvents({ query: { MoveEventType: `${PACKAGE_ID}::tuskr_nft::MintedEvent`   }, limit }),
-          client.queryEvents({ query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::SoldEvent` }, limit }),
-        ])
+      const all: ActivityEvent[] = []
+      results.forEach((r, i) => {
+        if (r.status !== 'fulfilled') return
+        r.value.data.forEach((e: any) => {
+          const p = e.parsedJson ?? {}
+          const type = parseEventType(eventTypes[i])
 
-        const parsed: ActivityEvent[] = [
-          ...mintEvts.data.map((e, i) => ({
-            id:        e.id.txDigest + i,
-            type:      'mint' as ActivityType,
-            nftName:   (e.parsedJson as any)?.name ?? 'Tuskr NFT',
-            actor:     (e.parsedJson as any)?.creator ?? 'N/A',
-            timestamp: new Date(parseInt(e.timestampMs ?? '0')),
-            txDigest:  e.id.txDigest,
-          })),
-          ...saleEvts.data.map((e, i) => ({
-            id:        e.id.txDigest + i,
-            type:      'sale' as ActivityType,
-            nftName:   (e.parsedJson as any)?.nft_id ?? 'NFT',
-            amount:    String((parseInt((e.parsedJson as any)?.price ?? '0') / 1e9).toFixed(2)),
-            currency:  'SUI',
-            actor:     (e.parsedJson as any)?.buyer ?? 'N/A',
-            timestamp: new Date(parseInt(e.timestampMs ?? '0')),
-            txDigest:  e.id.txDigest,
-          })),
-        ].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+          let amount = '0'
+          let actor  = ''
+          let name   = ''
 
-        if (!cancelled) { setEvents(parsed); setLoading(false) }
-      } catch {
-        if (!cancelled) setLoading(false)
-      }
+          if (type === 'sold') {
+            amount = p.price   ? (Number(p.price) / 1e9).toFixed(2)   : '0'
+            actor  = p.buyer   ? `${p.buyer.slice(0,8)}…`             : ''
+            name   = p.nft_id  ? `NFT #${p.nft_id.slice(2,8)}`        : 'NFT'
+          } else if (type === 'listed') {
+            amount = p.price   ? (Number(p.price) / 1e9).toFixed(2)   : '0'
+            actor  = p.seller  ? `${p.seller.slice(0,8)}…`            : ''
+            name   = p.nft_id  ? `NFT #${p.nft_id.slice(2,8)}`        : 'NFT'
+          } else if (type === 'minted') {
+            amount = '0'
+            actor  = p.creator ? `${p.creator.slice(0,8)}…`           : ''
+            name   = p.name    || (p.nft_id ? `NFT #${p.nft_id.slice(2,8)}` : 'NFT')
+          } else if (type === 'bid') {
+            amount = p.amount  ? (Number(p.amount) / 1e9).toFixed(2)  : '0'
+            actor  = p.bidder  ? `${p.bidder.slice(0,8)}…`            : ''
+            name   = `Auction #${(p.auction_id || '').slice(2,8)}`
+          } else {
+            actor  = p.seller  ? `${p.seller.slice(0,8)}…`            : ''
+            name   = `NFT #${(p.listing_id || '').slice(2,8)}`
+          }
+
+          all.push({
+            id:       `${e.id.txDigest}-${e.id.eventSeq}`,
+            type,
+            nftName:  name,
+            amount,
+            actor,
+            txDigest: e.id.txDigest,
+            time:     e.timestampMs ? timeAgo(Number(e.timestampMs)) : 'Recent',
+          })
+        })
+      })
+
+      // Sort by most recent first
+      all.sort((a, b) => {
+        // We don't have raw ms here so just keep order
+        return 0
+      })
+
+      setEvents(all.slice(0, 40))
+    } catch (e) {
+      console.error('Activity feed error:', e)
+      setEvents([])
+    } finally {
+      setLoading(false)
     }
+  }, [client])
 
+  useEffect(() => {
     fetchEvents()
-    return () => { cancelled = true }
-  }, [])
+    // Refresh every 15 seconds
+    const interval = setInterval(fetchEvents, 15000)
+    return () => clearInterval(interval)
+  }, [fetchEvents])
 
-  return { events, loading }
+  return { events, loading, refresh: fetchEvents }
 }

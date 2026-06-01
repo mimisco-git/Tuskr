@@ -1,57 +1,78 @@
-import { useState } from 'react'
-import { useCurrentAccount, ConnectButton } from '@mysten/dapp-kit'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useCurrentAccount } from '@mysten/dapp-kit'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
-import { useToast } from '../components/Toast'
-import s from './ListNFT.module.css'
 import { useXP } from '../hooks/useXP'
+import { useToast } from '../components/Toast'
+import { Link } from 'react-router-dom'
+import { SuiObjectData } from '@mysten/sui/client'
+import s from './ListNFT.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
-// Mock owned NFTs — will be replaced with real on-chain data after deployment
-const MOCK_OWNED = [
-  { id:'1', name:'Arctic Phantom #001', image:'https://picsum.photos/seed/tk1/300/300', listed:false,  price:'' },
-  { id:'3', name:'Tusk Genesis',        image:'https://picsum.photos/seed/tk3/300/300', listed:true,   price:'22.0' },
-  { id:'4', name:'Polar Drift #012',    image:'https://picsum.photos/seed/tk4/300/300', listed:false,  price:'' },
-]
+interface OwnedNFT {
+  objectId: string
+  name:     string
+  image:    string
+  blobId:   string
+}
+
+function parseOwned(obj: SuiObjectData): OwnedNFT {
+  const fields  = (obj.content as any)?.fields ?? {}
+  const display = (obj.display as any)?.data   ?? {}
+  return {
+    objectId: obj.objectId,
+    name:     fields.name      || display.name      || 'Tuskr NFT',
+    image:    fields.media_url || display.image_url || '',
+    blobId:   fields.blob_id   || '',
+  }
+}
 
 export default function ListNFT() {
   usePageTitle('List NFT')
-  const account = useCurrentAccount()
+  const account    = useCurrentAccount()
+  const { fetchOwnedNFTs, listNFT, delistNFT } = useNFTMarketplace()
   const { awardXP } = useXP(account?.address)
-  const { listNFT, delistNFT } = useNFTMarketplace()
-  const { success, error: toastErr, toast } = useToast()
-  const [nfts, setNfts]   = useState(MOCK_OWNED)
-  const [prices, setPrices] = useState<Record<string, string>>({})
-  const [loading, setLoading] = useState<string | null>(null)
+  const { success, error: toastErr } = useToast()
 
-  const handleList = async (nft: typeof MOCK_OWNED[0]) => {
-    const price = prices[nft.id]
-    if (!price || isNaN(+price) || +price <= 0) {
-      toastErr('Enter a valid price in SUI')
-      return
+  const [nfts,     setNfts]     = useState<OwnedNFT[]>([])
+  const [selected, setSelected] = useState<OwnedNFT | null>(null)
+  const [price,    setPrice]    = useState('')
+  const [loading,  setLoading]  = useState(true)
+  const [listing,  setListing]  = useState(false)
+
+  useEffect(() => {
+    if (!account) { setLoading(false); return }
+    fetchOwnedNFTs(account.address)
+      .then(raw => setNfts(raw.map(parseOwned)))
+      .catch(() => setNfts([]))
+      .finally(() => setLoading(false))
+  }, [account?.address])
+
+  const handleList = async () => {
+    if (!selected || !price || !account) return
+    setListing(true)
+    try {
+      const priceInMist = BigInt(Math.floor(parseFloat(price) * 1e9))
+      await listNFT({ nftId: selected.objectId, priceInMist })
+      success(`${selected.name} listed for ${price} SUI`)
+      awardXP(account.address, 'list', `Listed: ${selected.name}`)
+      // Refresh owned NFTs
+      const raw = await fetchOwnedNFTs(account.address)
+      setNfts(raw.map(parseOwned))
+      setSelected(null)
+      setPrice('')
+    } catch (e: any) {
+      toastErr(e?.message || 'Listing failed')
+    } finally {
+      setListing(false)
     }
-    setLoading(nft.id)
-    try {
-      await listNFT({ nftId: nft.id, priceInMist: BigInt(Math.floor(+price * 1e9)) })
-      success(`${nft.name} listed for ${price} SUI`)
-      setNfts(p => p.map(n => n.id === nft.id ? { ...n, listed: true, price } : n))
-    } catch { toastErr('Listing failed') } finally { setLoading(null) }
-  }
-
-  const handleDelist = async (nft: typeof MOCK_OWNED[0]) => {
-    setLoading(nft.id)
-    try {
-      await delistNFT(nft.id)
-      success(`${nft.name} delisted`)
-      setNfts(p => p.map(n => n.id === nft.id ? { ...n, listed: false, price: '' } : n))
-    } catch { toastErr('Delist failed') } finally { setLoading(null) }
   }
 
   if (!account) return (
     <main className={s.page}><div className="container">
-      <div className={s.connectBox}>
-        <p className={s.connectTitle}>Connect to list NFTs</p>
-        <ConnectButton />
+      <div className={s.empty}>
+        <div className={s.emptyIcon}>🏷️</div>
+        <p className={s.emptyTitle}>Connect your wallet</p>
+        <p className={s.emptySub}>Connect to list your NFTs for sale.</p>
       </div>
     </div></main>
   )
@@ -59,69 +80,100 @@ export default function ListNFT() {
   return (
     <main className={s.page}>
       <div className="container">
-        <div className={s.header}>
-          <div className={s.eyebrow}><div className={s.eyebrowDot}/>List your NFT</div>
-          <div>
-            <h1 className={s.title}>List for sale</h1>
-            <p className={s.sub}>Set a price and list your NFTs on the Tuskr marketplace</p>
+        <div className={s.eyebrow}><div className={s.eyebrowDot}/>List for Sale</div>
+        <h1 className={s.title}>List an NFT</h1>
+        <p className={s.sub}>Select an NFT from your wallet and set your price.</p>
+
+        {loading ? (
+          <div className={s.grid}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ aspectRatio:'1', borderRadius:16 }}/>
+            ))}
           </div>
-          <Link to="/profile" className="btn btn-ghost">← My NFTs</Link>
-        </div>
-
-        <div className={s.grid}>
-          {nfts.map(nft => (
-            <div key={nft.id} className={`${s.card} ${nft.listed ? s.cardListed : ''}`}>
-              <div className={s.imgWrap}>
-                <img src={nft.image} alt={nft.name} className={s.img} />
-                {nft.listed && (
-                  <div className={s.listedBadge}>Listed</div>
-                )}
-              </div>
-              <div className={s.body}>
-                <p className={s.name}>{nft.name}</p>
-
-                {nft.listed ? (
-                  <div className={s.listedState}>
-                    <div className={s.listedPrice}>
-                      <p className={s.priceLabel}>Listed at</p>
-                      <p className={s.price}>{nft.price} <span>SUI</span></p>
-                    </div>
-                    <button
-                      className={`btn ${s.delistBtn}`}
-                      onClick={() => handleDelist(nft)}
-                      disabled={loading === nft.id}
-                    >
-                      {loading === nft.id ? '...' : 'Delist'}
-                    </button>
+        ) : nfts.length === 0 ? (
+          <div className={s.empty}>
+            <div className={s.emptyIcon}>🎨</div>
+            <p className={s.emptyTitle}>No NFTs to list</p>
+            <p className={s.emptySub}>Mint an NFT first, then come back to list it.</p>
+            <Link to="/mint" className="btn btn-primary">Mint an NFT</Link>
+          </div>
+        ) : (
+          <>
+            {/* NFT picker */}
+            <div className={s.grid}>
+              {nfts.map(nft => (
+                <div
+                  key={nft.objectId}
+                  className={`${s.card} ${selected?.objectId === nft.objectId ? s.cardSelected : ''}`}
+                  onClick={() => setSelected(nft)}
+                >
+                  <div className={s.imgWrap}>
+                    {nft.image ? (
+                      <img src={nft.image} alt={nft.name} className={s.img}
+                        onError={e => { (e.target as HTMLImageElement).style.display='none' }}/>
+                    ) : (
+                      <div className={s.imgPlaceholder}>{nft.name.slice(0,2).toUpperCase()}</div>
+                    )}
+                    {selected?.objectId === nft.objectId && (
+                      <div className={s.checkmark}>✓</div>
+                    )}
                   </div>
-                ) : (
-                  <div className={s.listState}>
-                    <div className={s.priceInput}>
-                      <input
-                        className="input"
-                        type="number"
-                        placeholder="Price in SUI"
-                        value={prices[nft.id] ?? ''}
-                        onChange={e => setPrices(p => ({ ...p, [nft.id]: e.target.value }))}
-                        min="0.01"
-                        step="0.1"
-                      />
-                      <span className={s.suiLabel}>SUI</span>
-                    </div>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => handleList(nft)}
-                      disabled={loading === nft.id || !prices[nft.id]}
-                      style={{ width:'100%', justifyContent:'center' }}
-                    >
-                      {loading === nft.id ? 'Listing...' : 'List for sale'}
-                    </button>
-                  </div>
-                )}
-              </div>
+                  <div className={s.cardName}>{nft.name}</div>
+                  <div className={s.cardId}>{nft.objectId.slice(0,10)}…</div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+
+            {/* Listing form */}
+            {selected && (
+              <div className={s.formCard}>
+                <div className={s.formHeader}>
+                  <div className={s.selectedName}>Listing: <strong>{selected.name}</strong></div>
+                </div>
+                <div className={s.priceRow}>
+                  <div className="field" style={{ flex:1 }}>
+                    <label className="field-label">Sale Price (SUI)</label>
+                    <input
+                      className="input"
+                      type="number"
+                      placeholder="0.0"
+                      value={price}
+                      onChange={e => setPrice(e.target.value)}
+                      step="0.1"
+                      min="0.1"
+                    />
+                  </div>
+                  {price && (
+                    <div className={s.feeBreakdown}>
+                      <div className={s.feeRow}>
+                        <span>You receive</span>
+                        <span className={s.feeVal}>{(parseFloat(price||'0') * 0.93).toFixed(3)} SUI</span>
+                      </div>
+                      <div className={s.feeRow}>
+                        <span>Platform fee (2%)</span>
+                        <span>{(parseFloat(price||'0') * 0.02).toFixed(3)} SUI</span>
+                      </div>
+                      <div className={s.feeRow}>
+                        <span>Creator royalty (5%)</span>
+                        <span>{(parseFloat(price||'0') * 0.05).toFixed(3)} SUI</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className={s.actions}>
+                  <button className="btn btn-ghost" onClick={() => setSelected(null)}>Cancel</button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleList}
+                    disabled={listing || !price || parseFloat(price) <= 0}
+                  >
+                    {listing ? 'Listing…' : `List for ${price || '0'} SUI`}
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </main>
   )
