@@ -13,10 +13,87 @@
 
 .nav {
   position: fixed; top: 2px; left: 0; right: 0; z-index: 100;
-  background: #000;
-  transition: box-shadow 0.3s;
+
+  /* Transparent glass — shows page content behind */
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.3s;
 }
-.scrolled { box-shadow: 0 1px 0 rgba(255,255,255,0.07); }
+
+/* When scrolled — becomes frosted glass */
+.scrolled {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06),
+    0 4px 32px rgba(0,0,0,0.4);
+}
+
+/* ══════════════════════════════════════════
+   RING LIGHT — ambient corner glow
+   Positioned just below the rainbow line.
+   Creates a soft halo effect around the
+   full width of the navbar.
+══════════════════════════════════════════ */
+.nav::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+
+  /* Corner ring lights — teal left, purple right */
+  background:
+    radial-gradient(ellipse 280px 80px at 0% 0%,
+      rgba(0, 200, 185, 0.22) 0%,
+      rgba(0, 200, 185, 0.08) 45%,
+      transparent 70%),
+    radial-gradient(ellipse 280px 80px at 100% 0%,
+      rgba(110, 40, 220, 0.22) 0%,
+      rgba(110, 40, 220, 0.08) 45%,
+      transparent 70%);
+
+  animation: ringPulse 6s ease-in-out infinite alternate;
+}
+
+/* Bottom edge glow line — subtle separator */
+.nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 5%; right: 5%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 200, 185, 0.25) 20%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(110, 40, 220, 0.25) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+@keyframes ringPulse {
+  from {
+    opacity: 0.7;
+    background:
+      radial-gradient(ellipse 260px 70px at 0% 0%,
+        rgba(0, 200, 185, 0.18) 0%, rgba(0, 200, 185, 0.06) 45%, transparent 70%),
+      radial-gradient(ellipse 260px 70px at 100% 0%,
+        rgba(110, 40, 220, 0.18) 0%, rgba(110, 40, 220, 0.06) 45%, transparent 70%);
+  }
+  to {
+    opacity: 1;
+    background:
+      radial-gradient(ellipse 320px 90px at 0% 0%,
+        rgba(0, 212, 170, 0.28) 0%, rgba(0, 212, 170, 0.1) 45%, transparent 70%),
+      radial-gradient(ellipse 320px 90px at 100% 0%,
+        rgba(130, 40, 255, 0.28) 0%, rgba(130, 40, 255, 0.1) 45%, transparent 70%);
+  }
+}
 
 .inner {
   padding: 0 32px; height: 64px;
