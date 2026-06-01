@@ -1,0 +1,4 @@
+# Sui CLI binaries — never commit these
+src/contracts/sui*
+src/contracts/*.tar.gz
+*.tar.gz
