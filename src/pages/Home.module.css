@@ -18,97 +18,79 @@
 }
 
 /* Neural network canvas — fills hero */
-.neuralCanvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  opacity: 0.5;
-}
-
-/* Emerald radial glow — left */
-/* ════════════════════════════════════════════════════════════
-   HERO LIGHTING SYSTEM — Three blurred light sources
+/* Neural canvas removed — clean void */
+/* ═══════════════════════════════════════════════════════════════
+   HERO LIGHTING — Three blurred point-light sources
+   Technique: solid div + filter:blur() = real volumetric glow
    
-   Key technique: solid colored div + filter:blur()
-   This simulates real light. radial-gradient cannot match this.
+   POSITION logic:
+   - bottom: 8% puts them at the mascot's lower body/ground
+   - The blur radius is >= half the div size, so light bleeds
+     upward into the mascot silhouette naturally
+   - z-index:1 = behind mascot (z-index:2), in front of page bg
+   - Hero overflow:hidden clips outermost spill to stay localized
    
-   All three sit at z-index:1 (BEHIND mascot at z-index:2).
-   Centered at the mascot's body center (bottom 30% of hero).
-   Overflow:hidden on .hero clips the spill naturally.
-   The blur extends beyond each div's bounds — this is intentional.
-   That spill is what illuminates surrounding text and glass.
-════════════════════════════════════════════════════════════ */
+   OPACITY is intentionally moderate — too high = neon website.
+   The trick is large size + large blur, not high opacity.
+═══════════════════════════════════════════════════════════════ */
 
-/* Light 1 — Cyan #00E5FF
-   Largest source. Fills ~40% of hero.
-   Positioned at mascot's torso center. */
+/* Light 1 — Cyan #00E5FF — primary bloom */
 .lightCyan {
   position: absolute;
-  bottom: 2%;
+  bottom: 8%;
   left: 50%;
   transform: translateX(-50%);
   width: 1100px;
-  height: 1100px;
+  height: 900px;
   border-radius: 50%;
   background: #00E5FF;
-  opacity: 0.35;
-  filter: blur(300px);
+  opacity: 0.28;
+  filter: blur(320px);
   pointer-events: none;
   z-index: 1;
+  will-change: opacity;
 }
 
-/* Light 2 — Emerald #00FFB2
-   Slightly offset right, overlaps cyan to create blend. */
+/* Light 2 — Emerald #00FFB2 — secondary fill, offset for depth */
 .lightEmerald {
   position: absolute;
-  bottom: 5%;
-  left: calc(50% + 60px);
+  bottom: 12%;
+  left: calc(50% + 80px);
   transform: translateX(-50%);
-  width: 850px;
-  height: 850px;
+  width: 800px;
+  height: 700px;
   border-radius: 50%;
   background: #00FFB2;
-  opacity: 0.20;
-  filter: blur(260px);
+  opacity: 0.18;
+  filter: blur(280px);
   pointer-events: none;
   z-index: 1;
+  will-change: opacity;
 }
 
-/* Light 3 — White
-   Small tight core. Creates the sense of an intense bright center.
-   Sits slightly higher — at mascot head/chest level. */
+/* Light 3 — White — tight core directly at mascot center */
 .lightWhite {
   position: absolute;
-  bottom: 20%;
+  bottom: 22%;
   left: 50%;
   transform: translateX(-50%);
-  width: 500px;
-  height: 500px;
+  width: 420px;
+  height: 420px;
   border-radius: 50%;
   background: #ffffff;
-  opacity: 0.12;
-  filter: blur(200px);
+  opacity: 0.10;
+  filter: blur(180px);
   pointer-events: none;
   z-index: 1;
-}
-@keyframes gPulse {
-  from { opacity:0.7; transform:scale(1); }
-  to   { opacity:1.0; transform:scale(1.08); }
+  will-change: opacity;
 }
 
 /* Stars */
-.starField { position:absolute; inset:0; z-index:0; pointer-events:none; }
-.star {
-  position:absolute; background:#fff; border-radius:50%;
-  animation:starFade var(--d,5s) var(--del,0s) ease-in-out infinite; opacity:0;
-}
-@keyframes starFade { 0%,100%{opacity:0;} 50%{opacity:0.6;} }
+/* Star field removed — void is cleaner */
 
 /* Hero content */
 .heroInner {
-  position: relative; z-index: 3;
+  position: relative; z-index: 4;
   display: flex; flex-direction: column; align-items: center;
   text-align: center;
   padding: clamp(100px,14vw,140px) 24px 40px;
@@ -120,15 +102,17 @@
   display: inline-flex; align-items: center; gap: 8px;
   font-family: 'Space Mono', monospace;
   font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-  color: #00d4aa;
-  background: rgba(0,212,170,0.08);
-  border: 1px solid rgba(0,212,170,0.2);
+  color: rgba(0,229,255,0.9);
+  /* Glass pill: tinted by the cyan glow spill from below */
+  background: rgba(0,229,255,0.06);
+  border: 1px solid rgba(0,229,255,0.18);
   padding: 6px 14px; border-radius: 99px;
   margin-bottom: 28px;
+  box-shadow: 0 0 20px rgba(0,229,255,0.08);
 }
 .signalDot {
   width: 5px; height: 5px; border-radius: 50%;
-  background: #00d4aa; box-shadow: 0 0 8px #00d4aa;
+  background: #00E5FF; box-shadow: 0 0 10px #00E5FF;
   flex-shrink: 0;
   animation: sigPulse 2s ease-in-out infinite;
 }
@@ -206,34 +190,62 @@
 
 /* Mascot */
 .mascotWrap {
+  /* Sits between lights (z:1) and text (z:3) */
   position: relative; z-index: 2;
   width: 100%; display: flex; justify-content: center;
-  margin-top: 20px;
+  /* Pull up to overlap hero content — mascot bleeds through */
+  margin-top: -20px;
+  margin-bottom: -60px;
 }
 .mascot {
-  width: clamp(580px, 88vw, 1080px);
-  height: clamp(320px, 44vw, 600px);
+  width: clamp(600px, 90vw, 1100px);
+  height: clamp(340px, 48vw, 640px);
   object-fit: cover;
-  object-position: center 14%;
+  object-position: center 12%;
   display: block;
-  animation: float 7s ease-in-out infinite;
+  animation: float 8s ease-in-out infinite;
+  /* mix-blend-mode:screen removes the dark PNG background naturally */
   mix-blend-mode: screen;
+  /* Feathered radial mask — dissolves all 4 edges into black
+     No visible rectangular frame. Artwork bleeds to void. */
   -webkit-mask-image: radial-gradient(
-    ellipse 88% 80% at 50% 35%,
-    black 0%, black 20%, rgba(0,0,0,0.9) 36%,
-    rgba(0,0,0,0.62) 52%, rgba(0,0,0,0.28) 66%, transparent 80%);
+    ellipse 78% 75% at 50% 38%,
+    black 0%,
+    black 18%,
+    rgba(0,0,0,0.92) 32%,
+    rgba(0,0,0,0.70) 46%,
+    rgba(0,0,0,0.35) 60%,
+    rgba(0,0,0,0.08) 72%,
+    transparent 82%
+  );
   mask-image: radial-gradient(
-    ellipse 88% 80% at 50% 35%,
-    black 0%, black 20%, rgba(0,0,0,0.9) 36%,
-    rgba(0,0,0,0.62) 52%, rgba(0,0,0,0.28) 66%, transparent 80%);
+    ellipse 78% 75% at 50% 38%,
+    black 0%,
+    black 18%,
+    rgba(0,0,0,0.92) 32%,
+    rgba(0,0,0,0.70) 46%,
+    rgba(0,0,0,0.35) 60%,
+    rgba(0,0,0,0.08) 72%,
+    transparent 82%
+  );
 }
+/* Bottom vignette — ensures clean transition to next section */
 .hero::after {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:28%;
-  /* Fade to black at very bottom — glass card sits above this */
-  background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,0.5) 60%,rgba(0,0,0,0.85) 100%);
-  z-index:2; pointer-events:none;
+  content:''; position:absolute; bottom:0; left:0; right:0;
+  height:32%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0,0,0,0.6) 55%,
+    #000000 100%
+  );
+  z-index: 3;
+  pointer-events: none;
 }
-@keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+@keyframes float {
+  0%,100% { transform: translateY(0px); }
+  50%      { transform: translateY(-12px); }
+}
 
 /* ── INTELLIGENCE STATEMENT ── */
 .statement {
