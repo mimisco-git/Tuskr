@@ -391,22 +391,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ════ STATS BAR ════ */}
-      <div className={s.statsBar}>
-        <div className={s.statsGrid}>
-          {([
-            [counter.nfts.toLocaleString(),          'NFTs Minted'],
-            [`${(counter.vol / 1000).toFixed(1)}K`,  'SUI Volume'],
-            [`${counter.creators}+`,                  'Creators'],
-            ['100%',                                  'On Walrus'],
-          ] as [string, string][]).map(([n, l]) => (
-            <div key={l} className={s.statItem}>
-              <div className={s.statNum}>{n}</div>
-              <div className={s.statLabel}>{l}</div>
-            </div>
-          ))}
-        </div>
-      </div>
+
 
       {/* ════ POWER TO THE COLLECTOR ════ */}
       <section className={s.powerSection}>

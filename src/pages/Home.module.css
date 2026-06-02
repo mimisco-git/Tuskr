@@ -11,9 +11,37 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #000;
   overflow: hidden;
   padding-bottom: 0;
+
+  /*
+   * Walrus.xyz hero atmosphere:
+   * Deep dark navy-teal base, not black.
+   * Multiple radial gradients layer to create
+   * the signature blue-green atmospheric glow.
+   * The teal/cyan bleeds from bottom-left,
+   * purple-blue from top-left, teal from right.
+   */
+  background:
+    radial-gradient(ellipse 90% 70% at 20% 80%,
+      rgba(0,180,160,0.45) 0%,
+      rgba(0,140,130,0.20) 35%,
+      transparent 65%),
+    radial-gradient(ellipse 60% 50% at 80% 30%,
+      rgba(0,160,180,0.28) 0%,
+      rgba(0,100,140,0.12) 45%,
+      transparent 70%),
+    radial-gradient(ellipse 70% 60% at 10% 20%,
+      rgba(60,20,180,0.35) 0%,
+      rgba(40,10,120,0.18) 40%,
+      transparent 70%),
+    linear-gradient(
+      180deg,
+      #080d1a 0%,
+      #060f18 30%,
+      #04111a 60%,
+      #030e14 100%
+    );
 }
 
 /* Neural network canvas — fills hero */
@@ -23,27 +51,30 @@
   width: 100%;
   height: 100%;
   z-index: 0;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 /* Emerald radial glow — left */
 .heroGlow {
   position: absolute;
-  bottom: -120px; left: -80px;
-  width: 700px; height: 700px; border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 60%,
-    rgba(0,212,170,0.22) 0%,
-    rgba(0,212,170,0.08) 35%,
-    transparent 65%);
+  bottom: -80px; left: -60px;
+  width: 820px; height: 820px; border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 55%,
+    rgba(0,200,185,0.55) 0%,
+    rgba(0,175,165,0.28) 28%,
+    rgba(0,130,140,0.10) 52%,
+    transparent 70%);
   pointer-events: none; z-index: 0;
-  animation: gPulse 10s ease-in-out infinite alternate;
+  animation: gPulse 9s ease-in-out infinite alternate;
 }
 .heroGlowRight {
   position: absolute;
-  top: -60px; right: -80px;
-  width: 500px; height: 500px; border-radius: 50%;
-  background: radial-gradient(ellipse,
-    rgba(6,182,212,0.12) 0%, transparent 65%);
+  top: -40px; right: -60px;
+  width: 580px; height: 580px; border-radius: 50%;
+  background: radial-gradient(ellipse at 60% 40%,
+    rgba(0,180,210,0.28) 0%,
+    rgba(0,140,190,0.12) 40%,
+    transparent 68%);
   pointer-events: none; z-index: 0;
   animation: gPulse 13s ease-in-out infinite alternate-reverse;
 }
@@ -167,15 +198,15 @@
 }
 .hero::after {
   content:''; position:absolute; bottom:0; left:0; right:0; height:30%;
-  background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,0.7) 60%,#000 100%);
+  background:linear-gradient(to bottom,transparent 0%,rgba(3,14,20,0.75) 55%,#030e14 100%);
   z-index:2; pointer-events:none;
 }
 @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 
 /* ── INTELLIGENCE STATEMENT ── */
 .statement {
-  background: #000;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  background: #030e14;
+  border-top: 1px solid rgba(0,200,185,0.08);
   padding: clamp(60px,10vw,120px) 0;
 }
 .statement .container {
@@ -212,9 +243,9 @@
 
 /* ── STATS BAR ── */
 .statsBar {
-  border-top: 1px solid rgba(255,255,255,0.06);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  background: rgba(255,255,255,0.01);
+  border-top: 1px solid rgba(0,200,185,0.1);
+  border-bottom: 1px solid rgba(0,200,185,0.1);
+  background: rgba(0,180,170,0.04);
 }
 .statsGrid {
   display: grid; grid-template-columns: repeat(4,1fr);
