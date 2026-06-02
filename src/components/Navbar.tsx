@@ -22,7 +22,6 @@ function ChevronDown() {
   )
 }
 
-/* Walrus-style nav — text only, no emojis */
 const NAV = [
   {
     label: 'Explore',
@@ -62,10 +61,10 @@ const NAV = [
       {
         group: 'Technology',
         items: [
-          { label: 'Walrus Storage', href: 'https://docs.wal.app',                    ext: true },
-          { label: 'Walrus Seal',    href: 'https://docs.wal.app/walrus-seal',         ext: true },
-          { label: 'Sui Blockchain', href: 'https://docs.sui.io',                      ext: true },
-          { label: 'GitHub',         href: 'https://github.com/mimisco-git/Tuskr',     ext: true },
+          { label: 'Walrus Storage', href: 'https://docs.wal.app',               ext: true },
+          { label: 'Walrus Seal',    href: 'https://docs.wal.app/walrus-seal',    ext: true },
+          { label: 'Sui Blockchain', href: 'https://docs.sui.io',                 ext: true },
+          { label: 'GitHub',         href: 'https://github.com/mimisco-git/Tuskr',ext: true },
         ],
       },
     ],
@@ -84,10 +83,10 @@ const NAV = [
       {
         group: 'Built on',
         items: [
-          { label: 'Sui Foundation',   href: 'https://sui.io',            ext: true },
-          { label: 'Walrus Protocol',  href: 'https://walrus.xyz',        ext: true },
-          { label: 'Mysten Labs',      href: 'https://mystenlabs.com',    ext: true },
-          { label: 'DeepSurge',        href: 'https://deepsurge.xyz',     ext: true },
+          { label: 'Sui Foundation',  href: 'https://sui.io',          ext: true },
+          { label: 'Walrus Protocol', href: 'https://walrus.xyz',       ext: true },
+          { label: 'Mysten Labs',     href: 'https://mystenlabs.com',   ext: true },
+          { label: 'DeepSurge',       href: 'https://deepsurge.xyz',    ext: true },
         ],
       },
     ],
@@ -95,11 +94,10 @@ const NAV = [
 ]
 
 export default function Navbar() {
-  const location  = useLocation()
-  const [open, setOpen]     = useState<string | null>(null)
-  const [mobile, setMobile] = useState(false)
-  const [mSub, setMSub]     = useState<string | null>(null)
-  const [scrolled, setScrolled] = useState(false)
+  const location = useLocation()
+  const [open,    setOpen]    = useState<string | null>(null)
+  const [mobile,  setMobile]  = useState(false)
+  const [scrolled,setScrolled]= useState(false)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -109,8 +107,15 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => {
-    setOpen(null); setMobile(false); setMSub(null)
+    setOpen(null)
+    setMobile(false)
   }, [location.pathname])
+
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = mobile ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobile])
 
   const openMenu  = (label: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current)
@@ -130,7 +135,7 @@ export default function Navbar() {
       <header className={`${s.nav} ${scrolled ? s.scrolled : ''}`}>
         <div className={s.inner}>
 
-          {/* Logo — lowercase, bold, large */}
+          {/* Logo */}
           <Link to="/" className={s.logo} aria-label="tuskr home">
             <span className={s.logoText}>tuskr</span>
           </Link>
@@ -180,11 +185,7 @@ export default function Navbar() {
                                 <span className={s.extIcon}><Arrow size={8}/></span>
                               </a>
                             ) : (
-                              <Link
-                                key={link.label}
-                                to={link.to!}
-                                className={s.dropLink}
-                              >
+                              <Link key={link.label} to={link.to!} className={s.dropLink}>
                                 <span>{link.label}</span>
                               </Link>
                             )
@@ -198,78 +199,79 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Right: single wallet element only */}
+          {/* Right */}
           <div className={s.right}>
-            {/*
-              Single ConnectButton — dapp-kit handles both states:
-              disconnected: shows "Connect Wallet"
-              connected: shows truncated address + dropdown
-              CSS below styles both states to be clearly visible.
-            */}
             <div className={s.walletWrap}>
               <ConnectButton/>
             </div>
-
             <button
-              className={s.menuBtn}
+              className={`${s.menuBtn} ${mobile ? s.menuBtnOpen : ''}`}
               onClick={() => setMobile(v => !v)}
               aria-label={mobile ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobile}
             >
+              <span className={s.menuIcon}>
+                <span className={`${s.bar} ${mobile ? s.barTop : ''}`}/>
+                <span className={`${s.bar} ${mobile ? s.barMid : ''}`}/>
+                <span className={`${s.bar} ${mobile ? s.barBot : ''}`}/>
+              </span>
               {mobile ? 'Close' : 'Menu'}
             </button>
           </div>
         </div>
 
-        {/* Mobile fullscreen menu */}
+        {/* ═══ MOBILE MENU ═══
+          Flat layout — all links visible immediately.
+          No sub-navigation: cleaner UX on small screens.
+          Sections grouped with labels, no extra clicks needed.
+        */}
         {mobile && (
           <div className={s.mobile}>
-            {!mSub ? (
-              <>
-                <nav className={s.mobileNav}>
-                  {NAV.map(item => (
-                    <button
-                      key={item.label}
-                      className={s.mobileItem}
-                      onClick={() => setMSub(item.label)}
-                    >
-                      {item.label}
-                      <span className={s.mobileArrow}>›</span>
-                    </button>
+            <div className={s.mobileScroll}>
+
+              {/* Quick actions at top */}
+              <div className={s.mobileQuick}>
+                <Link to="/mint"        className={s.mobileQuickBtn} onClick={() => setMobile(false)}>Mint NFT</Link>
+                <Link to="/mint/ai"     className={s.mobileQuickBtn} onClick={() => setMobile(false)}>AI Generator</Link>
+                <Link to="/marketplace" className={`${s.mobileQuickBtn} ${s.mobileQuickPrimary}`} onClick={() => setMobile(false)}>Browse NFTs</Link>
+              </div>
+
+              {/* All nav sections flat */}
+              {NAV.map(section => (
+                <div key={section.label} className={s.mobileSection}>
+                  <div className={s.mobileSectionTitle}>{section.label}</div>
+                  {section.cols.map(col => (
+                    <div key={col.group} className={s.mobileGroup}>
+                      <div className={s.mobileGroupLabel}>{col.group}</div>
+                      {col.items.map(link =>
+                        'href' in link ? (
+                          <a
+                            key={link.label}
+                            href={link.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={s.mobileLink}
+                            onClick={() => setMobile(false)}
+                          >
+                            {link.label}
+                            <span className={s.mobileLinkArrow}>↗</span>
+                          </a>
+                        ) : (
+                          <Link
+                            key={link.label}
+                            to={link.to!}
+                            className={s.mobileLink}
+                            onClick={() => setMobile(false)}
+                          >
+                            {link.label}
+                          </Link>
+                        )
+                      )}
+                    </div>
                   ))}
-                  <Link to="/marketplace" className={s.mobileItem}>Browse NFTs</Link>
-                  <Link to="/leaderboard" className={s.mobileItem}>XP Leaderboard</Link>
-                </nav>
-                <div className={s.mobileCta}>
-                  <Link to="/mint" className="btn btn-outline btn-lg"
-                    style={{ width:'100%', justifyContent:'space-between' }}>
-                    Start minting <Arrow/>
-                  </Link>
                 </div>
-              </>
-            ) : (
-              <>
-                <button className={s.mobileBack} onClick={() => setMSub(null)}>← Back</button>
-                <div className={s.mobileSubTitle}>{mSub}</div>
-                {NAV.find(n => n.label === mSub)?.cols.map(col => (
-                  <div key={col.group} className={s.mobileColGroup}>
-                    <div className={s.mobileColLabel}>{col.group}</div>
-                    {col.items.map(link =>
-                      'href' in link ? (
-                        <a key={link.label} href={link.href}
-                          target="_blank" rel="noopener noreferrer"
-                          className={s.mobileLink}>
-                          {link.label} ↗
-                        </a>
-                      ) : (
-                        <Link key={link.label} to={link.to!} className={s.mobileLink}>
-                          {link.label}
-                        </Link>
-                      )
-                    )}
-                  </div>
-                ))}
-              </>
-            )}
+              ))}
+            </div>
           </div>
         )}
       </header>

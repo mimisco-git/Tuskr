@@ -1,120 +1,102 @@
-/* ══════════════════════════════════════════
-   Tuskr Navbar — walrus.xyz quality
-   Single wallet element, no emojis, lowercase logo
-══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   Tuskr Navbar — Emerald Intelligence brand
+   Ring lights: emerald #00c896 (left + center)
+   No purple — brand is now pure emerald/black
+═══════════════════════════════════════════════ */
 
+/* Rainbow line — emerald-dominant */
 .rainbow {
   position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 101;
-  background: linear-gradient(90deg, #0098f5 0%, #6800ff 45%, #00c9a7 75%, #0098f5 100%);
+  background: linear-gradient(
+    90deg,
+    #00c896 0%,
+    #06b6d4 35%,
+    #00c896 65%,
+    #06b6d4 85%,
+    #00c896 100%
+  );
   background-size: 200% 100%;
   animation: rainbowSlide 5s linear infinite;
 }
 @keyframes rainbowSlide { from{background-position:0% 0;} to{background-position:200% 0;} }
 
+/* Nav bar */
 .nav {
   position: fixed; top: 2px; left: 0; right: 0; z-index: 100;
-
-  /* Transparent glass — shows page content behind */
-  background: rgba(0, 0, 0, 0);
+  background: transparent;
   backdrop-filter: blur(0px);
   -webkit-backdrop-filter: blur(0px);
   transition: background 0.4s ease, backdrop-filter 0.4s ease, box-shadow 0.3s;
 }
-
-/* When scrolled — becomes frosted glass */
 .scrolled {
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(22px) saturate(160%);
-  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   box-shadow:
     0 1px 0 rgba(255,255,255,0.06),
-    0 4px 32px rgba(0,0,0,0.4);
+    0 4px 32px rgba(0,0,0,0.5);
 }
 
-/* ══════════════════════════════════════════
-   RING LIGHT — ambient corner glow
-   Positioned just below the rainbow line.
-   Creates a soft halo effect around the
-   full width of the navbar.
-══════════════════════════════════════════ */
+/* Emerald corner ring lights */
 .nav::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 100%;
+  top: 0; left: 0; right: 0; height: 100%;
   pointer-events: none;
   z-index: -1;
-
-  /* Corner ring lights — teal left, purple right */
   background:
-    radial-gradient(ellipse 280px 80px at 0% 0%,
-      rgba(0, 200, 185, 0.22) 0%,
-      rgba(0, 200, 185, 0.08) 45%,
+    radial-gradient(ellipse 300px 70px at 0% 0%,
+      rgba(0,200,150,0.20) 0%,
+      rgba(0,200,150,0.06) 45%,
       transparent 70%),
-    radial-gradient(ellipse 280px 80px at 100% 0%,
-      rgba(110, 40, 220, 0.22) 0%,
-      rgba(110, 40, 220, 0.08) 45%,
-      transparent 70%);
-
-  animation: ringPulse 6s ease-in-out infinite alternate;
+    radial-gradient(ellipse 300px 70px at 100% 0%,
+      rgba(0,200,150,0.16) 0%,
+      rgba(0,200,150,0.04) 45%,
+      transparent 70%),
+    radial-gradient(ellipse 200px 60px at 50% 0%,
+      rgba(6,182,212,0.10) 0%,
+      transparent 65%);
+  animation: ringPulse 7s ease-in-out infinite alternate;
 }
-
-/* Bottom edge glow line — subtle separator */
+/* Bottom separator in emerald */
 .nav::after {
   content: '';
   position: absolute;
-  bottom: 0; left: 5%; right: 5%;
+  bottom: 0; left: 3%; right: 3%;
   height: 1px;
   background: linear-gradient(
     to right,
     transparent 0%,
-    rgba(0, 200, 185, 0.25) 20%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(110, 40, 220, 0.25) 80%,
+    rgba(0,200,150,0.3) 25%,
+    rgba(6,182,212,0.15) 50%,
+    rgba(0,200,150,0.3) 75%,
     transparent 100%
   );
   pointer-events: none;
 }
-
 @keyframes ringPulse {
-  from {
-    opacity: 0.7;
-    background:
-      radial-gradient(ellipse 260px 70px at 0% 0%,
-        rgba(0, 200, 185, 0.18) 0%, rgba(0, 200, 185, 0.06) 45%, transparent 70%),
-      radial-gradient(ellipse 260px 70px at 100% 0%,
-        rgba(110, 40, 220, 0.18) 0%, rgba(110, 40, 220, 0.06) 45%, transparent 70%);
-  }
-  to {
-    opacity: 1;
-    background:
-      radial-gradient(ellipse 320px 90px at 0% 0%,
-        rgba(0, 212, 170, 0.28) 0%, rgba(0, 212, 170, 0.1) 45%, transparent 70%),
-      radial-gradient(ellipse 320px 90px at 100% 0%,
-        rgba(130, 40, 255, 0.28) 0%, rgba(130, 40, 255, 0.1) 45%, transparent 70%);
-  }
+  from { opacity: 0.65; }
+  to   { opacity: 1.0; }
 }
 
+/* Inner */
 .inner {
   padding: 0 32px; height: 64px;
   display: grid; grid-template-columns: auto 1fr auto;
   align-items: center; gap: 32px;
 }
 
-/* ── Logo — lowercase, bigger, bolder ── */
+/* Logo */
 .logo { display: inline-flex; align-items: center; text-decoration: none; }
 .logoText {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 26px;
-  font-weight: 700;
-  color: #faf8f5;
-  letter-spacing: -0.045em;
-  line-height: 1;
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 24px; font-weight: 700;
+  color: #f5f5f7; letter-spacing: -0.045em; line-height: 1;
   transition: opacity 0.2s;
 }
 .logo:hover .logoText { opacity: 0.7; }
 
-/* ── Desktop links ── */
+/* Desktop links */
 .links {
   display: flex; align-items: center; justify-content: center; gap: 2px;
 }
@@ -123,192 +105,227 @@
 .navBtn {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 10px 18px; border-radius: 26px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 17px; font-weight: 430; letter-spacing: 0.03em;
-  color: rgba(250,248,245,0.82);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px; font-weight: 500; letter-spacing: -0.01em;
+  color: rgba(245,245,247,0.75);
   background: transparent; border: 1px solid transparent;
   cursor: pointer; white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
 .navBtn:hover, .navBtnActive {
-  background: rgba(255,255,255,0.08);
-  color: #faf8f5;
+  background: rgba(255,255,255,0.07);
+  color: #f5f5f7;
 }
 .chevron {
   display: inline-flex; align-items: center;
-  color: rgba(250,248,245,0.45);
+  color: rgba(245,245,247,0.35);
   transition: transform 0.22s ease;
 }
 .chevronOpen { transform: rotate(180deg); }
 
-/* ── Dropdown — walrus.xyz cream panel ── */
+/* Dropdown */
 .dropdown {
   position: absolute; top: calc(100% + 10px); left: 50%;
   transform: translateX(-50%); z-index: 300;
-  background: #faf8f5; color: #000;
+  background: #f5f5f7; color: #000;
   border-radius: 48px; padding: 44px 48px; min-width: 440px;
   box-shadow: 0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,0,0,0.06);
   animation: dropIn 0.18s cubic-bezier(0.22,1,0.36,1) both;
 }
-.dropdown::before {
-  content: ''; position: absolute; top: -14px; left: 0; right: 0; height: 14px;
-}
+.dropdown::before { content:''; position:absolute; top:-14px; left:0; right:0; height:14px; }
 @keyframes dropIn {
-  from { opacity:0; transform:translateX(-50%) translateY(-6px); }
-  to   { opacity:1; transform:translateX(-50%) translateY(0); }
+  from{opacity:0;transform:translateX(-50%) translateY(-6px);}
+  to  {opacity:1;transform:translateX(-50%) translateY(0);}
 }
 .dropGrid { display: grid; gap: 20px 40px; }
 .dropCol  { display: flex; flex-direction: column; }
 .dropGroup {
   font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
-  color: #7c3aed; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #00a07a; letter-spacing: 0.12em; text-transform: uppercase;
   margin-bottom: 8px;
 }
 .dropLink {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.07);
-  font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 400;
+  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 400;
   color: #111; text-decoration: none; transition: color 0.15s; gap: 10px;
 }
 .dropLink:last-child { border-bottom: none; }
-.dropLink:hover { color: #7c3aed; }
+.dropLink:hover { color: #00a07a; }
 .extIcon { color: rgba(0,0,0,0.3); flex-shrink: 0; }
-.dropLink:hover .extIcon { color: #7c3aed; }
+.dropLink:hover .extIcon { color: #00a07a; }
 
-/* ── Right side ── */
+/* Right side */
 .right { display: flex; align-items: center; gap: 10px; }
 
-/* ══════════════════════════════════════════
-   WALLET BUTTON — single element
-   
-   dapp-kit renders one button that changes text
-   based on connection state:
-   - Disconnected: "Connect Wallet"
-   - Connected:    "0x4667...db61  ∨"
-   
-   We style BOTH states to be:
-   - Clearly visible (white text on black)
-   - Outlined pill (walrus.xyz CTA style)
-   - Connected state: teal glow + brighter border
-     so user can immediately see they're connected
-══════════════════════════════════════════ */
+/* Wallet */
 .walletWrap { display: flex; align-items: center; }
-
-/* Base button — disconnected state */
 .walletWrap :global(button) {
-  font-family: 'Space Grotesk', sans-serif !important;
-  font-size: 17px !important;
-  font-weight: 430 !important;
-  letter-spacing: 0.04em !important;
-  padding: 10px 24px !important;
-  border-radius: 26px !important;
-  background: transparent !important;
-  color: #faf8f5 !important;
-  border: 1.5px solid rgba(250,248,245,0.45) !important;
-  white-space: nowrap !important;
-  cursor: pointer !important;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s !important;
-  height: auto !important;
-  min-height: unset !important;
-  line-height: 1.4 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 15px !important; font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+  padding: 9px 22px !important; border-radius: 26px !important;
+  background: transparent !important; color: #f5f5f7 !important;
+  border: 1.5px solid rgba(245,245,247,0.35) !important;
+  white-space: nowrap !important; cursor: pointer !important;
+  transition: border-color 0.2s, background 0.2s !important;
+  height: auto !important; min-height: unset !important; line-height: 1.4 !important;
 }
 .walletWrap :global(button):hover {
-  border-color: #faf8f5 !important;
-  background: rgba(255,255,255,0.06) !important;
+  border-color: #00c896 !important;
+  color: #00c896 !important;
+  background: rgba(0,200,150,0.06) !important;
 }
-
-/*
- * Connected state styling.
- * dapp-kit adds data-connected or changes the button contents.
- * We target buttons that contain an address (text includes "0x")
- * via a stronger border + teal glow to signal "active wallet".
- * The dapp-kit button wrapper also gets a connected attribute.
- */
 .walletWrap :global([data-state="open"]) button,
 .walletWrap :global(button[aria-expanded="true"]) {
-  border-color: rgba(0,212,170,0.7) !important;
-  box-shadow: 0 0 0 1px rgba(0,212,170,0.25) !important;
-  background: rgba(0,212,170,0.06) !important;
+  border-color: rgba(0,200,150,0.7) !important;
+  box-shadow: 0 0 0 1px rgba(0,200,150,0.25) !important;
+  background: rgba(0,200,150,0.07) !important;
+  color: #00c896 !important;
 }
-
-/* Ensure the address text inside the button is fully white */
-.walletWrap :global(button span),
-.walletWrap :global(button div) {
-  color: #faf8f5 !important;
-}
-
-/* The dapp-kit dropdown (disconnect/copy options) */
 .walletWrap :global([role="menu"]) {
-  background: #111 !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 16px !important;
-  padding: 6px !important;
+  background: #111 !important; border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 16px !important; padding: 6px !important;
   box-shadow: 0 20px 60px rgba(0,0,0,0.6) !important;
 }
 .walletWrap :global([role="menuitem"]) {
-  font-family: 'Space Grotesk', sans-serif !important;
-  font-size: 15px !important;
-  color: rgba(250,248,245,0.75) !important;
-  padding: 10px 14px !important;
+  font-family: 'Inter', sans-serif !important; font-size: 15px !important;
+  color: rgba(245,245,247,0.75) !important; padding: 10px 14px !important;
   border-radius: 10px !important;
 }
 .walletWrap :global([role="menuitem"]:hover) {
-  background: rgba(255,255,255,0.07) !important;
-  color: #faf8f5 !important;
+  background: rgba(0,200,150,0.08) !important; color: #00c896 !important;
 }
 
-/* Mobile hamburger */
+/* Hamburger button */
 .menuBtn {
-  display: none; align-items: center; justify-content: center;
-  padding: 9px 22px; border-radius: 26px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px; font-weight: 430; letter-spacing: 0.04em;
-  color: #faf8f5; background: transparent;
-  border: 1.5px solid rgba(250,248,245,0.45);
+  display: none; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 26px;
+  font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 500;
+  color: #f5f5f7; background: transparent;
+  border: 1.5px solid rgba(245,245,247,0.35);
   cursor: pointer; transition: border-color 0.2s; white-space: nowrap;
 }
-.menuBtn:hover { border-color: #faf8f5; }
+.menuBtn:hover { border-color: #00c896; color: #00c896; }
+.menuBtnOpen   { border-color: rgba(0,200,150,0.6); color: #00c896; }
 
-/* ── Mobile fullscreen menu ── */
+/* Hamburger bars */
+.menuIcon {
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 4px; width: 16px; height: 16px;
+}
+.bar {
+  display: block; height: 1.5px; background: currentColor;
+  border-radius: 2px; transition: all 0.25s ease;
+  transform-origin: center;
+}
+.barTop { transform: translateY(5.5px) rotate(45deg); }
+.barMid { opacity: 0; transform: scaleX(0); }
+.barBot { transform: translateY(-5.5px) rotate(-45deg); }
+
+/* ═══════════════════════════════════════════════
+   MOBILE MENU — flat, all links visible at once
+   No sub-navigation, no extra clicks needed.
+═══════════════════════════════════════════════ */
 .mobile {
-  position: fixed; inset: 0; top: 64px; background: #000; z-index: 200; overflow-y: auto;
-  overflow-y: auto; padding: 32px 24px 48px; display: flex; flex-direction: column;
+  position: fixed;
+  top: 66px; left: 0; right: 0; bottom: 0;
+  background: #000;
+  z-index: 200;
+  border-top: 1px solid rgba(0,200,150,0.15);
+  /* Subtle emerald glow at top of menu */
+  box-shadow: 0 -1px 0 rgba(0,200,150,0.2);
 }
-.mobileNav { display: flex; flex-direction: column; flex: 1; }
-.mobileItem {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 0; font-family: 'Space Grotesk', sans-serif;
-  font-size: 24px; font-weight: 500; color: #faf8f5;
-  background: transparent; border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  cursor: pointer; text-align: left; text-decoration: none; transition: opacity 0.15s;
+.mobileScroll {
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  -webkit-overflow-scrolling: touch;
 }
-.mobileItem:hover { opacity: 0.65; }
-.mobileArrow { color: rgba(255,255,255,0.35); font-size: 22px; }
-.mobileBack {
-  font-family: 'Space Grotesk', sans-serif; font-size: 15px;
-  color: rgba(255,255,255,0.45); background: none; border: none;
-  cursor: pointer; margin-bottom: 20px; text-align: left;
-}
-.mobileSubTitle {
-  font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700;
-  color: #faf8f5; letter-spacing: -0.025em; margin-bottom: 28px;
-}
-.mobileColGroup { margin-bottom: 28px; }
-.mobileColLabel {
-  font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
-  color: #7c3aed; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
-}
-.mobileLink {
-  display: block; padding: 12px 0; font-size: 17px; font-weight: 400;
-  color: rgba(250,248,245,0.65);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  text-decoration: none; transition: color 0.15s;
-}
-.mobileLink:hover { color: #faf8f5; }
-.mobileCta { padding-top: 28px; }
 
-/* ── Responsive ── */
+/* Quick action buttons at top */
+.mobileQuick {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.mobileQuickBtn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px 8px; border-radius: 12px; text-decoration: none;
+  font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+  letter-spacing: -0.01em; text-align: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(245,245,247,0.75);
+  transition: all 0.18s;
+  min-height: 44px;
+}
+.mobileQuickBtn:hover { background: rgba(255,255,255,0.09); color: #f5f5f7; }
+.mobileQuickPrimary {
+  background: rgba(0,200,150,0.1) !important;
+  border-color: rgba(0,200,150,0.3) !important;
+  color: #00c896 !important;
+}
+.mobileQuickPrimary:hover {
+  background: rgba(0,200,150,0.18) !important;
+}
+
+/* Each nav section */
+.mobileSection {
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-bottom: 20px;
+  margin-top: 20px;
+}
+.mobileSection:last-child { border-bottom: none; }
+
+.mobileSectionTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px; font-weight: 700;
+  color: #00c896;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* Group within a section */
+.mobileGroup {
+  margin-bottom: 14px;
+}
+.mobileGroupLabel {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  color: rgba(245,245,247,0.25);
+  letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 6px; padding-left: 4px;
+}
+
+/* Individual links */
+.mobileLink {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 12px; border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px; font-weight: 400;
+  color: rgba(245,245,247,0.7);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  min-height: 44px;
+}
+.mobileLink:hover {
+  background: rgba(0,200,150,0.07);
+  color: #f5f5f7;
+}
+.mobileLinkArrow {
+  font-size: 12px;
+  color: rgba(245,245,247,0.3);
+}
+
+/* Responsive */
 @media(max-width:880px) {
   .links { display: none; }
   .menuBtn { display: inline-flex; }
@@ -317,4 +334,6 @@
 @media(max-width:480px) {
   .inner { padding: 0 18px; gap: 12px; }
   .logoText { font-size: 22px; }
+  .mobileQuick { grid-template-columns: 1fr 1fr; }
+  .mobileQuickPrimary { grid-column: 1 / -1; }
 }
