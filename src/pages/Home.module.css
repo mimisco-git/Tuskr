@@ -4,74 +4,75 @@
 ═══════════════════════════════════════════════════ */
 
 /* ════════════════════════════════════════════════════════════
-   HERO — Walrus.xyz visual philosophy
+   HERO — Two-column layout, mascot right side
    
-   From reading walrus.xyz source:
-   - Pure black background
-   - Mascot is STATIC (no float animation — they don't animate it)
-   - Mascot displayed full-width, overflow:hidden clips edges
-   - Three filter:blur() glow divs sit BEHIND mascot
-   - Text floats above in upper hero area
-   - No mask, no mix-blend-mode complexity
-   - The image's own black bg = seamless with page black
+   Left column  : headline, desc, CTA, stats
+   Right column : mascot absolutely positioned, overflows edge
+   
+   Mascot is a JPEG with pure-black bg and baked cyan glow.
+   Black on black page = invisible seam. No mask, no blend mode.
+   overflow:hidden on .hero clips the overflowing right edge.
+   
+   NO animation = NO shaking. Ever.
 ════════════════════════════════════════════════════════════ */
 
 .hero {
   position: relative;
-  min-height: 100vh;
   display: grid;
-  grid-template-rows: 1fr auto;
-  align-items: start;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  min-height: 100vh;
   background: #000000;
   overflow: hidden;
+  padding: 0 clamp(24px, 5vw, 80px);
 }
 
-/* ── GLOW — three filter:blur point lights behind mascot ─ */
+/* ── GLOW — filter:blur point lights sit behind mascot z:1 ── */
 .glow1 {
   position: absolute;
-  /* sits at mascot torso center */
-  bottom: 16%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  height: 800px;
+  /* Centered on right half where mascot lives */
+  top: 50%;
+  right: 0;
+  transform: translate(15%, -50%);
+  width: 700px;
+  height: 700px;
   border-radius: 50%;
   background: #00ccff;
-  opacity: 0.46;
+  opacity: 0.50;
   filter: blur(220px);
   pointer-events: none;
   z-index: 1;
 }
 .glow2 {
   position: absolute;
-  bottom: 20%;
-  left: calc(50% + 80px);
-  transform: translateX(-50%);
-  width: 560px;
-  height: 560px;
+  top: 60%;
+  right: 5%;
+  transform: translateY(-50%);
+  width: 500px;
+  height: 500px;
   border-radius: 50%;
   background: #00ffaa;
-  opacity: 0.28;
-  filter: blur(195px);
+  opacity: 0.30;
+  filter: blur(190px);
   pointer-events: none;
   z-index: 1;
 }
 .glow3 {
   position: absolute;
-  bottom: 34%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  height: 300px;
+  top: 40%;
+  right: 20%;
+  transform: translateY(-50%);
+  width: 280px;
+  height: 280px;
   border-radius: 50%;
   background: #ffffff;
   opacity: 0.16;
-  filter: blur(110px);
+  filter: blur(100px);
   pointer-events: none;
   z-index: 1;
 }
 
-/* legacy class aliases */
+/* legacy aliases */
 .lightCyan    { display: none; }
 .lightEmerald { display: none; }
 .lightWhite   { display: none; }
@@ -79,42 +80,29 @@
 .star         { display: none; }
 .neuralCanvas { display: none; }
 
-/* ── MASCOT ──────────────────────────────────────────────── */
-/*
- * Walrus.xyz approach:
- * - Wrapper has overflow:hidden on mobile (clips left/right edges)
- * - Image is max-width constrained, centered, mx-auto
- * - NO animation (walrus mascot is static)
- * - NO mix-blend-mode
- * - NO mask
- * - The image has pure black bg — black on black = invisible edges
- *
- * The only "edge" remaining is the top of the image, which has
- * empty black space above the character. We handle that with
- * a single ::after vignette on the hero.
- */
+/* ── MASCOT ─────────────────────────────────────────────── */
 .mascotWrap {
-  /* In-flow at bottom of grid, not position:absolute */
-  position: relative;
+  position: absolute;
+  /* Right column: sits on right half, bleeds off-screen edge */
+  right: -5%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52vw;
+  max-width: 680px;
+  height: auto;
   z-index: 2;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  /* Clip any horizontal overflow — this removes left/right edges */
-  overflow: hidden;
-  /* Pull image up slightly so it fills bottom of viewport */
-  margin-bottom: -2px;
+  pointer-events: none;
 }
 
 .mascot {
   display: block;
-  /* Wide enough that the black padding in the image extends offscreen */
-  width: clamp(520px, 75vw, 980px);
+  width: 100%;
   height: auto;
-  /* Static — zero animation = zero shake, ever */
+  /* Image has pure black bg — black on black page = no visible border.
+     No mask. No blend mode. overflow:hidden on .hero clips the edge. */
 }
 
-/* Thin vignette merges mascot feet into page below */
+/* Bottom vignette blends mascot feet into next section */
 .hero::after {
   content: '';
   position: absolute;
@@ -125,18 +113,60 @@
   pointer-events: none;
 }
 
-/* ── HERO CONTENT ─────────────────────────────────────────── */
+/* ── HERO TEXT — left column ─────────────────────────────── */
 .heroInner {
   position: relative;
   z-index: 4;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: clamp(90px, 12vw, 130px) 24px clamp(40px, 6vw, 80px);
-  max-width: 860px;
-  width: 100%;
-  justify-self: center;
+  align-items: flex-start;
+  text-align: left;
+  padding: clamp(90px, 12vw, 130px) 0 clamp(60px, 8vw, 100px);
+  max-width: 560px;
+}
+
+/* ── MOBILE: stack vertically ─────────────────────────────── */
+@media (max-width: 768px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 0 24px;
+    min-height: 100svh;
+  }
+  .heroInner {
+    align-items: center;
+    text-align: center;
+    padding-bottom: 380px; /* room for mascot below */
+  }
+  .mascotWrap {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: -40px;
+    transform: translateX(-50%);
+    width: 90vw;
+    max-width: 420px;
+  }
+  .glow1 {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 15%;
+    transform: translateX(-50%);
+  }
+  .glow2 {
+    right: auto;
+    left: 60%;
+    top: auto;
+    bottom: 20%;
+    transform: none;
+  }
+  .glow3 {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 32%;
+    transform: translateX(-50%);
+  }
 }
 
 /* ── INTELLIGENCE STATEMENT ── */

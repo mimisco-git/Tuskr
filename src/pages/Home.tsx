@@ -298,24 +298,12 @@ export default function Home() {
       {/* ════ HERO ════ */}
       <section className={s.hero}>
 
-        {/* ── Pure black bg, mascot is the scene ── */}
-
-        {/* CSS glow — extends artwork light beyond image bounds */}
+        {/* ── Three blurred light sources behind mascot ── */}
         <div className={s.glow1} aria-hidden/>
         <div className={s.glow2} aria-hidden/>
         <div className={s.glow3} aria-hidden/>
 
-        {/* Mascot — full bleed, no frame, no border */}
-        <div className={s.mascotWrap}>
-          <img
-            src="/mascot-stand.jpg"
-            alt="Tuskr mascot"
-            className={s.mascot}
-            draggable={false}
-          />
-        </div>
-
-        {/* Text overlay — floats above the mascot */}
+        {/* ── Left column: text content ── */}
         <div className={s.heroInner}>
           <div className={s.heroSignal}>
             <div className={s.signalDot}/>
@@ -358,6 +346,17 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {/* ── Right column: mascot absolutely positioned, bleeds right edge ── */}
+        <div className={s.mascotWrap}>
+          <img
+            src="/mascot-stand.jpg"
+            alt="Tuskr mascot"
+            className={s.mascot}
+            draggable={false}
+          />
+        </div>
+
       </section>
 
       {/* ════ INTELLIGENCE STATEMENT ════ */}
