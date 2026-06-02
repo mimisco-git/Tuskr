@@ -1,0 +1,47 @@
+.page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 80px 20px;
+  background: radial-gradient(ellipse at 50% 40%, rgba(0,212,170,0.07) 0%, transparent 65%), #000;
+}
+.card {
+  width: 100%; max-width: 420px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 28px; padding: 48px 40px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 16px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset, 0 32px 80px rgba(0,0,0,0.4);
+}
+.brandMark {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 700;
+  color: #f5f5f7; letter-spacing: -0.04em;
+}
+.brandDot { width: 8px; height: 8px; border-radius: 50%; background: #00d4aa; box-shadow: 0 0 10px #00d4aa; }
+.title { font-family: 'Inter', sans-serif; font-size: 26px; font-weight: 700; color: #f5f5f7; letter-spacing: -0.03em; }
+.sub { font-size: 15px; color: rgba(245,245,247,0.45); line-height: 1.7; max-width: 320px; }
+.features { display: flex; flex-direction: column; gap: 10px; width: 100%; margin: 4px 0; }
+.feature { display: flex; align-items: center; gap: 10px; font-size: 14px; color: rgba(245,245,247,0.55); }
+.featureDot { width: 5px; height: 5px; border-radius: 50%; background: #00d4aa; flex-shrink: 0; }
+.googleBtn {
+  display: flex; align-items: center; gap: 12px; justify-content: center;
+  width: 100%; padding: 14px 24px; border-radius: 14px; border: none;
+  background: #f5f5f7; color: #111; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 600;
+  transition: filter 0.2s, transform 0.15s;
+  min-height: 52px;
+}
+.googleBtn:hover:not(:disabled) { filter: brightness(0.94); transform: translateY(-1px); }
+.googleBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.error { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 12px 16px; font-size: 13px; color: rgba(239,68,68,0.85); width: 100%; text-align: left; }
+.footnote { font-size: 12px; color: rgba(245,245,247,0.25); line-height: 1.6; }
+.spinner { width: 40px; height: 40px; border: 2px solid rgba(255,255,255,0.1); border-top-color: #00d4aa; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.statusText { font-size: 15px; color: rgba(245,245,247,0.5); }
+.successIcon { width: 56px; height: 56px; border-radius: 50%; background: rgba(0,212,170,0.1); border: 2px solid rgba(0,212,170,0.3); display: flex; align-items: center; justify-content: center; font-size: 22px; color: #00d4aa; }
+.email { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 600; color: #f5f5f7; }
+.addrBox { background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.15); border-radius: 12px; padding: 14px 18px; width: 100%; }
+.addrLabel { font-family: 'Space Mono', monospace; font-size: 9px; color: rgba(0,212,170,0.6); letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+.addr { font-family: 'Space Mono', monospace; font-size: 13px; color: #00d4aa; }
+.actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.actions .btn { width: 100%; justify-content: center; }
+@media(max-width:480px) { .card { padding: 36px 24px; } }

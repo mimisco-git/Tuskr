@@ -6,6 +6,7 @@ import { useToast } from '../components/Toast'
 import { Link } from 'react-router-dom'
 import { SuiObjectData } from '@mysten/sui/client'
 import s from './ListNFT.module.css'
+import { getAIPriceSuggestion } from '../hooks/useAIPricing'
 import usePageTitle from '../hooks/usePageTitle'
 
 interface OwnedNFT {
@@ -38,6 +39,8 @@ export default function ListNFT() {
   const [price,    setPrice]    = useState('')
   const [loading,  setLoading]  = useState(true)
   const [listing,  setListing]  = useState(false)
+  const [aiSuggest, setAiSuggest] = useState<any>(null)
+  const [aiLoading, setAiLoading] = useState(false)
 
   useEffect(() => {
     if (!account) { setLoading(false); return }
@@ -99,13 +102,52 @@ export default function ListNFT() {
           </div>
         ) : (
           <>
-            {/* NFT picker */}
+            {/* AI price suggestion */}
+          {aiLoading && (
+            <div className={s.aiLoading}>
+              <div className={s.aiSpinner}/>
+              <span>Groq AI is analyzing market conditions...</span>
+            </div>
+          )}
+          {aiSuggest && !aiLoading && (
+            <div className={s.aiCard}>
+              <div className={s.aiHeader}>
+                <div className={s.aiIcon}>✦</div>
+                <div>
+                  <div className={s.aiTitle}>AI Price Intelligence</div>
+                  <div className={s.aiConf}>Confidence: {aiSuggest.confidence}</div>
+                </div>
+                <button className={s.usePrice} onClick={() => setPrice(String(aiSuggest.price))}>
+                  Use {aiSuggest.price} SUI
+                </button>
+              </div>
+              <div className={s.aiRange}>
+                <span className={s.aiRangeLabel}>Suggested range</span>
+                <span className={s.aiRangeVal}>{aiSuggest.low} – {aiSuggest.high} SUI</span>
+              </div>
+              <p className={s.aiReason}>{aiSuggest.reasoning}</p>
+              <div className={s.aiFactors}>
+                {aiSuggest.factors?.map((f: string) => (
+                  <span key={f} className={s.aiFactor}>{f}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* NFT picker */}
             <div className={s.grid}>
               {nfts.map(nft => (
                 <div
                   key={nft.objectId}
                   className={`${s.card} ${selected?.objectId === nft.objectId ? s.cardSelected : ''}`}
-                  onClick={() => setSelected(nft)}
+                  onClick={async () => {
+                    setSelected(nft)
+                    setAiSuggest(null)
+                    setAiLoading(true)
+                    const suggestion = await getAIPriceSuggestion(nft.name, '', [])
+                    setAiSuggest(suggestion)
+                    setAiLoading(false)
+                  }}
                 >
                   <div className={s.imgWrap}>
                     {nft.image ? (

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import LazyImage from './LazyImage'
 import s from './NFTCard.module.css'
+import { scoreFromName } from '../lib/rarity'
 
 export interface NFT {
   id: string; name: string; image: string; price: string; currency: string

@@ -35,17 +35,17 @@ body {
 /* ══════════════════════════════
    TUSKR COLOR SYSTEM
    
-   Primary:  Emerald Intelligence #00c896
+   Primary:  Emerald Intelligence #00d4aa
    It reads as intelligent, not just pretty.
    Cooler and more cerebral than warm teal.
    Green = growth, discovery, signal found.
 ══════════════════════════════ */
 :root {
   /* Core brand colors */
-  --emerald:    #00c896;     /* Emerald Intelligence — primary */
-  --emerald-dim: rgba(0,200,150,0.12);
-  --emerald-glow: rgba(0,200,150,0.35);
-  --emerald-border: rgba(0,200,150,0.22);
+  --a:    #00d4aa;     /* Emerald Intelligence — primary */
+  --a-dim: rgba(0,212,170,0.12);
+  --a-glow: rgba(0,212,170,0.35);
+  --a-border: rgba(0,212,170,0.22);
   
   --cyan:       #06b6d4;     /* Electric Cyan — accent only, limited */
   --charcoal:   #111111;     /* Soft Charcoal — card surfaces */
@@ -55,7 +55,7 @@ body {
   --white-faint:rgba(245,245,247,0.28);
   
   /* Legacy alias — keeps all existing hooks working */
-  --a: var(--emerald);
+  --a: var(--a);
   --p: #7c3aed;
 
   /* Typography */
@@ -121,14 +121,14 @@ p { font-size: clamp(14px, 1.8vw, 17px); }
   display: inline-flex; align-items: center; gap: 6px;
   font-family: 'Space Mono', monospace;
   font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--emerald);
-  background: var(--emerald-dim);
-  border: 1px solid var(--emerald-border);
+  color: var(--a);
+  background: rgba(0,212,170,0.12);
+  border: 1px solid rgba(0,212,170,0.22);
   padding: 5px 12px; border-radius: var(--radius-pill);
 }
 .signal-dot {
   width: 5px; height: 5px; border-radius: 50%;
-  background: var(--emerald); box-shadow: 0 0 8px var(--emerald);
+  background: var(--a); box-shadow: 0 0 8px var(--a);
   animation: signal-pulse 2s ease-in-out infinite;
 }
 @keyframes signal-pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
@@ -149,7 +149,7 @@ p { font-size: clamp(14px, 1.8vw, 17px); }
   touch-action: manipulation;
 }
 .btn-primary {
-  background: var(--emerald); color: #000;
+  background: var(--a); color: #000;
 }
 .btn-primary:hover   { filter: brightness(1.1); transform: translateY(-1px); }
 .btn-primary:active  { transform: scale(0.97); }
@@ -159,9 +159,9 @@ p { font-size: clamp(14px, 1.8vw, 17px); }
   border: 1.5px solid rgba(245,245,247,0.35);
 }
 .btn-outline:hover {
-  border-color: var(--emerald);
-  color: var(--emerald);
-  background: var(--emerald-dim);
+  border-color: var(--a);
+  color: var(--a);
+  background: rgba(0,212,170,0.12);
 }
 
 .btn-ghost {
@@ -189,7 +189,7 @@ p { font-size: clamp(14px, 1.8vw, 17px); }
   -webkit-appearance: none;
   appearance: none;
 }
-.input:focus, .textarea:focus { border-color: var(--emerald); }
+.input:focus, .textarea:focus { border-color: var(--a); }
 .textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
 .field { display: flex; flex-direction: column; gap: 8px; }
 .field-label {
@@ -217,12 +217,12 @@ main { padding-top: 66px; }
 @media(hover:hover) {
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: #000; }
-  ::-webkit-scrollbar-thumb { background: rgba(0,200,150,0.2); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(0,200,150,0.4); }
+  ::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,212,170,0.4); }
 }
 
 /* ── Focus ── */
-:focus-visible { outline: 2px solid var(--emerald); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--a); outline-offset: 2px; }
 button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 
 /* ── SR Only ── */
@@ -230,7 +230,7 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
 
 /* ── tag ── */
 .tag { display:inline-flex; padding: 4px 10px; border-radius: 6px; font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-.tag-a { background: var(--emerald-dim); color: var(--emerald); border: 1px solid var(--emerald-border); }
+.tag-a { background: rgba(0,212,170,0.12); color: var(--a); border: 1px solid rgba(0,212,170,0.22); }
 
 /* ════════════════
    RESPONSIVE

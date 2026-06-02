@@ -15,7 +15,7 @@ const FEATURES = [
   {
     tab: 'Intelligence',
     icon: 'intelligence',
-    color: '#00c896',
+    color: '#00d4aa',
     tag: 'WALRUS BLOB',
     title: 'Always\npermanent.',
     desc: 'Every NFT\'s media is certified on Walrus, erasure-coded across hundreds of nodes. Not IPFS. Not a server. A blob that outlasts any single point of failure.',
@@ -53,7 +53,7 @@ const FEATURES = [
 const USE_CASES = [
   {
     icon: 'trade',
-    color: '#00c896',
+    color: '#00d4aa',
     pre: 'Discover',
     title: 'Find alpha before the crowd.',
     desc: 'Scan emerging collections. Detect volume spikes. Buy in bulk atomically with PTB. Move-enforced royalties on every transfer.',
@@ -90,7 +90,7 @@ const PARTNERS = [
 ]
 
 /* ═════════════════ SVG ICONS ═════════════════ */
-function FeatureIcon({ type, size = 48, color = '#00c896' }: { type: string; size?: number; color?: string }) {
+function FeatureIcon({ type, size = 48, color = '#00d4aa' }: { type: string; size?: number; color?: string }) {
   const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color, strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
   if (type === 'intelligence' || type === 'permanent') return (
     <svg {...p}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M12 8v6M9 11l3 3 3-3" strokeWidth={1.3}/></svg>
@@ -175,9 +175,9 @@ function NeuralHero() {
           const sig = (Math.sin(frame * 0.03 + i * 0.5) + 1) / 2
 
           const grd = ctx.createLinearGradient(nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y)
-          grd.addColorStop(0, `rgba(0,200,150,${alpha * (1 - sig)})`)
+          grd.addColorStop(0, `rgba(0,212,170,${alpha * (1 - sig)})`)
           grd.addColorStop(sig, `rgba(6,182,212,${alpha * 1.4})`)
-          grd.addColorStop(1, `rgba(0,200,150,${alpha * sig})`)
+          grd.addColorStop(1, `rgba(0,212,170,${alpha * sig})`)
 
           ctx.beginPath()
           ctx.strokeStyle = grd
@@ -198,14 +198,14 @@ function NeuralHero() {
         if (isHub) {
           ctx.beginPath()
           ctx.arc(n.x, n.y, n.r * 3.5, 0, Math.PI * 2)
-          ctx.fillStyle = `rgba(0,200,150,${0.06 * bright})`
+          ctx.fillStyle = `rgba(0,212,170,${0.06 * bright})`
           ctx.fill()
         }
 
         // Glow
         const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * (isHub ? 5 : 3))
-        grad.addColorStop(0, `rgba(0,200,150,${0.7 * bright})`)
-        grad.addColorStop(1, 'rgba(0,200,150,0)')
+        grad.addColorStop(0, `rgba(0,212,170,${0.7 * bright})`)
+        grad.addColorStop(1, 'rgba(0,212,170,0)')
         ctx.beginPath()
         ctx.arc(n.x, n.y, n.r * (isHub ? 5 : 3), 0, Math.PI * 2)
         ctx.fillStyle = grad
@@ -214,7 +214,7 @@ function NeuralHero() {
         // Core dot
         ctx.beginPath()
         ctx.arc(n.x, n.y, n.r * (isHub ? 1.6 : 1), 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(0,200,150,${0.8 * bright})`
+        ctx.fillStyle = `rgba(0,212,170,${0.8 * bright})`
         ctx.fill()
       })
 

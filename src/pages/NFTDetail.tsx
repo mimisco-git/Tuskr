@@ -7,6 +7,7 @@ import { useXP } from '../hooks/useXP'
 import { useWatchlist } from '../hooks/useWatchlist'
 import { useToast } from '../components/Toast'
 import s from './NFTDetail.module.css'
+import { scoreFromName } from '../lib/rarity'
 import usePageTitle from '../hooks/usePageTitle'
 
 interface NFTData {
@@ -211,6 +212,26 @@ export default function NFTDetail() {
             </div>
 
             {/* Properties */}
+            {/* Rarity score */}
+            {(() => {
+              const r = scoreFromName(nft?.name ?? '', nft?.description ?? '')
+              return (
+                <div className={s.rarityCard} style={{ borderColor: r.color + '33', background: r.color + '08' }}>
+                  <div style={{ fontFamily:'Space Mono,monospace', fontSize:9, letterSpacing:'0.14em', textTransform:'uppercase', color: r.color, marginBottom:6 }}>Rarity Score</div>
+                  <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                    <div style={{ fontFamily:'Inter,sans-serif', fontSize:32, fontWeight:800, color: r.color, letterSpacing:'-0.03em', lineHeight:1 }}>{r.score}</div>
+                    <div>
+                      <div style={{ fontFamily:'Inter,sans-serif', fontSize:16, fontWeight:700, color:'#f5f5f7' }}>{r.tier}</div>
+                      <div style={{ fontFamily:'Space Mono,monospace', fontSize:10, color:'rgba(245,245,247,0.35)' }}>out of 100</div>
+                    </div>
+                    <div style={{ flex:1, height:6, background:'rgba(255,255,255,0.08)', borderRadius:3, overflow:'hidden', marginLeft:8 }}>
+                      <div style={{ width:`${r.score}%`, height:'100%', background: r.color, borderRadius:3, transition:'width 0.6s ease' }}/>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+
             <div className={s.section}>
               <div className={s.sectionTitle}>Properties</div>
               <div className={s.traitsGrid}>

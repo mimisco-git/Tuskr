@@ -32,8 +32,8 @@
   bottom: -120px; left: -80px;
   width: 700px; height: 700px; border-radius: 50%;
   background: radial-gradient(ellipse at 50% 60%,
-    rgba(0,200,150,0.22) 0%,
-    rgba(0,200,150,0.08) 35%,
+    rgba(0,212,170,0.22) 0%,
+    rgba(0,212,170,0.08) 35%,
     transparent 65%);
   pointer-events: none; z-index: 0;
   animation: gPulse 10s ease-in-out infinite alternate;
@@ -74,15 +74,15 @@
   display: inline-flex; align-items: center; gap: 8px;
   font-family: 'Space Mono', monospace;
   font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-  color: #00c896;
-  background: rgba(0,200,150,0.08);
-  border: 1px solid rgba(0,200,150,0.2);
+  color: #00d4aa;
+  background: rgba(0,212,170,0.08);
+  border: 1px solid rgba(0,212,170,0.2);
   padding: 6px 14px; border-radius: 99px;
   margin-bottom: 28px;
 }
 .signalDot {
   width: 5px; height: 5px; border-radius: 50%;
-  background: #00c896; box-shadow: 0 0 8px #00c896;
+  background: #00d4aa; box-shadow: 0 0 8px #00d4aa;
   flex-shrink: 0;
   animation: sigPulse 2s ease-in-out infinite;
 }
@@ -101,7 +101,7 @@
 }
 .heroTitleAccent {
   /* Emerald gradient text */
-  background: linear-gradient(135deg, #00c896 0%, #06b6d4 100%);
+  background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -122,7 +122,7 @@
   flex-wrap: wrap; justify-content: center;
   margin-bottom: 48px;
 }
-.ctaPrimary { box-shadow: 0 0 24px rgba(0,200,150,0.35); }
+.ctaPrimary { box-shadow: 0 0 24px rgba(0,212,170,0.35); }
 
 /* Stats */
 .heroStats {
@@ -194,7 +194,7 @@
 .statementLabel {
   display: flex; align-items: center; gap: 8px;
   font-family: 'Space Mono', monospace; font-size: 10px;
-  color: #00c896; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #00d4aa; letter-spacing: 0.18em; text-transform: uppercase;
   margin-bottom: 24px;
 }
 .statementTitle {
@@ -245,7 +245,7 @@
 .powerEyebrow {
   display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
   font-family: 'Space Mono', monospace; font-size: 10px;
-  color: #00c896; letter-spacing: 0.18em; text-transform: uppercase;
+  color: #00d4aa; letter-spacing: 0.18em; text-transform: uppercase;
 }
 .powerTitle {
   font-family: 'Inter', sans-serif;
@@ -442,7 +442,7 @@
   background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
   border-radius:16px; min-height:68px; white-space:nowrap; transition:all 0.2s;
 }
-.partnerPill:hover { border-color:rgba(0,200,150,0.25); background:rgba(0,200,150,0.04); transform:translateY(-2px); }
+.partnerPill:hover { border-color:rgba(0,212,170,0.25); background:rgba(0,212,170,0.04); transform:translateY(-2px); }
 .partnerName { font-family:'Inter',sans-serif; font-size:14px; font-weight:500; color:rgba(245,245,247,0.45); letter-spacing:-0.01em; }
 
 /* ── Use cases ── */
@@ -451,8 +451,8 @@
 .usecasePre {
   display:inline-flex; align-items:center; gap:8px; padding:6px 14px;
   border-radius:99px; font-family:'Space Mono',monospace; font-size:10px;
-  color:#00c896; letter-spacing:0.18em; text-transform:uppercase;
-  background:rgba(0,200,150,0.06); border:1px solid rgba(0,200,150,0.18); margin-bottom:18px;
+  color:#00d4aa; letter-spacing:0.18em; text-transform:uppercase;
+  background:rgba(0,212,170,0.06); border:1px solid rgba(0,212,170,0.18); margin-bottom:18px;
 }
 .usecaseTitle {
   font-family:'Inter',sans-serif; font-size:clamp(44px,6.5vw,80px); font-weight:800;
@@ -478,13 +478,13 @@
 .ucCard::before {
   content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px;
   border-radius:50%;
-  background:radial-gradient(circle,color-mix(in srgb,var(--uc-color,#00c896) 20%,transparent) 0%,transparent 70%);
+  background:radial-gradient(circle,color-mix(in srgb,var(--uc-color,#00d4aa) 20%,transparent) 0%,transparent 70%);
   pointer-events:none; opacity:0.8; transition:opacity .28s;
 }
 .ucCard:hover::before { opacity:1; }
 .ucCard::after {
   content:''; position:absolute; bottom:0; left:10%; right:10%; height:1px;
-  background:linear-gradient(to right,transparent,var(--uc-color,#00c896),transparent);
+  background:linear-gradient(to right,transparent,var(--uc-color,#00d4aa),transparent);
   opacity:0.22; transition:opacity .28s;
 }
 .ucCard:hover::after { opacity:0.45; }
@@ -497,7 +497,7 @@
 .ucPre {
   font-family:'Space Mono',monospace; font-size:10px; font-weight:700;
   letter-spacing:0.18em; text-transform:uppercase; margin-bottom:10px;
-  color:var(--uc-color,#00c896); position:relative; z-index:1;
+  color:var(--uc-color,#00d4aa); position:relative; z-index:1;
 }
 .ucTitle {
   font-family:'Inter',sans-serif; font-size:26px; font-weight:700;
@@ -522,7 +522,7 @@
   margin-top:auto; position:relative; z-index:1; transition:color .2s;
 }
 .ucLink::after { content:'→'; transition:transform .2s; }
-.ucCard:hover .ucLink { color:var(--uc-color,#00c896); }
+.ucCard:hover .ucLink { color:var(--uc-color,#00d4aa); }
 .ucCard:hover .ucLink::after { transform:translateX(4px); }
 
 /* ── Featured NFTs ── */
@@ -536,18 +536,18 @@
 .ctaSection { background:#000; padding:0 clamp(16px,4vw,48px) 120px; }
 .ctaCard {
   max-width:1280px; margin:0 auto;
-  background:linear-gradient(135deg,rgba(0,200,150,0.04) 0%,rgba(6,182,212,0.03) 50%,rgba(0,0,0,0.1) 100%);
-  border:1px solid rgba(0,200,150,0.12);
+  background:linear-gradient(135deg,rgba(0,212,170,0.04) 0%,rgba(6,182,212,0.03) 50%,rgba(0,0,0,0.1) 100%);
+  border:1px solid rgba(0,212,170,0.12);
   border-radius:40px; padding:100px 60px; text-align:center; position:relative; overflow:hidden;
 }
 .ctaGlow {
   position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
   width:600px; height:400px; border-radius:50%;
-  background:radial-gradient(ellipse,rgba(0,200,150,0.07) 0%,transparent 65%);
+  background:radial-gradient(ellipse,rgba(0,212,170,0.07) 0%,transparent 65%);
 }
 .ctaSignal {
   display:inline-flex; align-items:center; gap:8px; margin-bottom:20px;
-  font-family:'Space Mono',monospace; font-size:10px; color:#00c896;
+  font-family:'Space Mono',monospace; font-size:10px; color:#00d4aa;
   letter-spacing:0.18em; text-transform:uppercase; position:relative; z-index:2;
 }
 .ctaTitle {

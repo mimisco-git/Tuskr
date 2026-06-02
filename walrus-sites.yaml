@@ -1,0 +1,12 @@
+# Tuskr — Walrus Sites deployment config
+# This deploys the built frontend to Walrus decentralized storage
+# Run: walrus site publish dist/ --config walrus-sites.yaml --epochs 10
+
+object-id: ""              # filled after first publish
+http-object: ""            # filled after first publish
+
+routes:
+  # SPA routing — all paths serve index.html
+  /*:
+    headers:
+      x-source: walrus-sites
