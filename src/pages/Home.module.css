@@ -19,18 +19,70 @@
 
 /* Neural network canvas — fills hero */
 /* Neural canvas removed — clean void */
-/* ═══════════════════════════════════════════════
-   NO CSS LIGHTING NEEDED.
-   The new mascot image has the cyan glow baked in.
-   The image background is pure black (#000).
-   Black on black = perfect seamless blend.
-   The artwork IS the light source.
-═══════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   HERO GLOW — Amplifies the baked-in artwork light.
+   The image already has cyan glow. These CSS layers
+   extend that glow BEYOND the image bounds so it spills
+   onto the typography, buttons, and surrounding space.
+   
+   Technique: filter:blur() on small solid divs.
+   Small div + enormous blur = wide, soft, natural falloff.
+   This is how real light spreads from a point source.
+   
+   The glow syncs with the float animation position.
+   It sits BEHIND the mascot (z-index:1 vs mascot z-index:2).
+════════════════════════════════════════════════════════ */
 
-/* Hidden — glow is in the artwork itself */
-.lightCyan    { display: none; }
-.lightEmerald { display: none; }
-.lightWhite   { display: none; }
+/* Primary bloom — large cyan halo extending beyond artwork */
+.lightCyan {
+  position: absolute;
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: #00c8ff;
+  opacity: 0.45;
+  filter: blur(160px);
+  pointer-events: none;
+  z-index: 1;
+  backface-visibility: hidden;
+}
+
+/* Secondary emerald — offset slightly, adds color depth */
+.lightEmerald {
+  position: absolute;
+  bottom: 22%;
+  left: calc(50% + 40px);
+  transform: translateX(-50%);
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: #00ffb2;
+  opacity: 0.28;
+  filter: blur(140px);
+  pointer-events: none;
+  z-index: 1;
+  backface-visibility: hidden;
+}
+
+/* White core — tight and bright, sits at mascot chest */
+.lightWhite {
+  position: absolute;
+  bottom: 35%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: #ffffff;
+  opacity: 0.18;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 1;
+  backface-visibility: hidden;
+}
 
 /* Stars */
 /* Star field removed — void is cleaner */
@@ -138,45 +190,39 @@
 
 /* Mascot */
 .mascotWrap {
-  /*
-   * Image already has pure black background + baked cyan glow.
-   * Just position cleanly at bottom-center of hero.
-   * No blend modes, no masks — black on black = seamless.
-   */
   position: absolute;
   bottom: 0; left: 0; right: 0;
   display: flex; justify-content: center; align-items: flex-end;
   z-index: 2;
   pointer-events: none;
+  /* Isolate compositing layer — prevents shake propagating to page */
+  isolation: isolate;
 }
 .mascot {
-  /* Portrait image: 853x1280 — show upper 75% (head to waist) */
-  width: clamp(360px, 52vw, 680px);
-  height: auto;
-  max-height: 80vh;
+  /* Fixed width + fixed height = zero layout reflow = zero shake */
+  width: clamp(340px, 50vw, 640px);
+  height: clamp(460px, 68vw, 880px);
   object-fit: cover;
-  object-position: center 20%;
+  object-position: center 18%;
   display: block;
-
-  /* Gentle float — GPU only, zero layout shift */
-  animation: float 8s ease-in-out infinite;
-  will-change: transform;
-
-  /* No mix-blend-mode — the image background IS already black.
-     No mask needed — edges are already black in the artwork.
-     The baked cyan glow in the image blends naturally with #000 page. */
+  /* Backface-visibility forces GPU layer — smooth animation */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  animation: float 9s ease-in-out infinite;
+  /* No will-change:transform — causes too many compositor layers */
 }
-/* Vignette — blends mascot bottom into page */
+/* Thin vignette at very bottom to blend into next section */
 .hero::after {
   content:''; position:absolute; bottom:0; left:0; right:0;
-  height:22%;
+  height:18%;
   background: linear-gradient(to bottom, transparent 0%, #000000 100%);
   z-index: 3;
   pointer-events: none;
 }
 @keyframes float {
-  0%,100% { transform: translateY(0px) translateZ(0); }
-  50%      { transform: translateY(-10px) translateZ(0); }
+  0%   { transform: translateY(0) translateZ(0); }
+  50%  { transform: translateY(-14px) translateZ(0); }
+  100% { transform: translateY(0) translateZ(0); }
 }
 
 /* ── INTELLIGENCE STATEMENT ── */
