@@ -298,34 +298,25 @@ export default function Home() {
       {/* ════ HERO ════ */}
       <section className={s.hero}>
 
-        {/* ═══ THREE GIANT BLURRED LIGHT SOURCES ═══
-             Technique: solid colored div + filter:blur()
-             NOT radial-gradient — actual light simulation
-             All sit behind mascot via z-index
-        */}
-        {/* Light 1: Cyan #00E5FF — 1100px, blur 300px, 35% */}
-        <div className={s.lightCyan}/>
-        {/* Light 2: Emerald #00FFB2 — 850px, blur 270px, 20% */}
-        <div className={s.lightEmerald}/>
-        {/* Light 3: White — 500px, blur 220px, 12% */}
-        <div className={s.lightWhite}/>
+        {/* ── Pure black bg, mascot is the scene ── */}
 
-        {/* Star field */}
-        <div className={s.starField} aria-hidden>
-          {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} className={s.star} style={{
-              left:  `${Math.random() * 100}%`,
-              top:   `${Math.random() * 80}%`,
-              width: `${Math.random() * 2 + 1}px`,
-              height:`${Math.random() * 2 + 1}px`,
-              animationDelay: `${Math.random() * 4}s`,
-              animationDuration: `${Math.random() * 4 + 3}s`,
-            }}/>
-          ))}
+        {/* CSS glow — extends artwork light beyond image bounds */}
+        <div className={s.glow1} aria-hidden/>
+        <div className={s.glow2} aria-hidden/>
+        <div className={s.glow3} aria-hidden/>
+
+        {/* Mascot — full bleed, no frame, no border */}
+        <div className={s.mascotWrap}>
+          <img
+            src="/mascot-stand.jpg"
+            alt="Tuskr mascot"
+            className={s.mascot}
+            draggable={false}
+          />
         </div>
 
+        {/* Text overlay — floats above the mascot */}
         <div className={s.heroInner}>
-          {/* Signal label */}
           <div className={s.heroSignal}>
             <div className={s.signalDot}/>
             <span>AI-powered NFT intelligence</span>
@@ -333,7 +324,6 @@ export default function Home() {
             <span>Built on Sui + Walrus</span>
           </div>
 
-          {/* Headline */}
           <h1 className={s.heroTitle}>
             Discover what<br/>
             <span className={s.heroTitleAccent}>others miss.</span>
@@ -354,7 +344,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Stats row */}
           <div className={s.heroStats}>
             {[
               { n: counter.nfts.toLocaleString(), l: 'NFTs indexed' },
@@ -368,11 +357,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Mascot */}
-        <div className={s.mascotWrap}>
-          <img src="/mascot-stand.jpg" alt="Tuskr mascot" className={s.mascot} draggable={false}/>
         </div>
       </section>
 
