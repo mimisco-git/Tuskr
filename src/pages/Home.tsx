@@ -9,7 +9,7 @@ import s from './Home.module.css'
 const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
 
 /* ═══════════════════════════════════════
-   Intelligence feature set — Tuskr DNA
+   Intelligence feature set, Tuskr DNA
 ═══════════════════════════════════════ */
 const FEATURES = [
   {
@@ -18,7 +18,7 @@ const FEATURES = [
     color: '#00c896',
     tag: 'WALRUS BLOB',
     title: 'Always\npermanent.',
-    desc: 'Every NFT\'s media is certified on Walrus — erasure-coded across hundreds of nodes. Not IPFS. Not a server. A blob that outlasts any single point of failure.',
+    desc: 'Every NFT\'s media is certified on Walrus, erasure-coded across hundreds of nodes. Not IPFS. Not a server. A blob that outlasts any single point of failure.',
     points: ['On-chain blob certification for every file', 'Erasure-coded across hundreds of nodes', 'Media survives as long as Walrus runs'],
   },
   {
@@ -27,7 +27,7 @@ const FEATURES = [
     color: '#06b6d4',
     tag: 'SUI MOVE',
     title: 'Always\nprovable.',
-    desc: 'Every NFT is a Move object on Sui. Ownership is enforced at the protocol level — not a database, not a promise. The chain is the only truth.',
+    desc: 'Every NFT is a Move object on Sui. Ownership is enforced at the protocol level: not a database, not a promise. The chain is the only truth.',
     points: ['Move objects with formal ownership semantics', 'Royalties enforced on-chain at every sale', 'Full provenance from mint to current holder'],
   },
   {
@@ -66,7 +66,7 @@ const USE_CASES = [
     color: '#a78bfa',
     pre: 'Create',
     title: 'AI-generated intelligence.',
-    desc: 'Groq AI generates names, descriptions, and traits. You upload the art. Minted on Sui with media on Walrus — permanently.',
+    desc: 'Groq AI generates names, descriptions, and traits. You upload the art. Minted on Sui with media on Walrus, stored permanently.',
     tags: ['GROQ AI', 'WALRUS BLOB', 'SUI MINT'],
     to: '/mint/ai',
     cta: 'Start creating',
@@ -162,7 +162,7 @@ function NeuralHero() {
         if (n.y < 0 || n.y > H) n.vy *= -1
       })
 
-      // Draw connections — signal flow
+      // Draw connections: signal flow
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[j].x - nodes[i].x
@@ -335,7 +335,7 @@ export default function Home() {
 
           <p className={s.heroDesc}>
             AI-powered intelligence for NFTs, creators, communities,
-            and emerging opportunities — with media permanently stored on Walrus
+            and emerging opportunities, with media permanently stored on Walrus
             and ownership enforced by Sui Move.
           </p>
 
@@ -373,7 +373,7 @@ export default function Home() {
       {/* ════ INTELLIGENCE STATEMENT ════ */}
       <section className={s.statement}>
         <div className="container">
-          <div className={s.statementInner}>
+          <div className={s.statementInner} style={{ margin:'0 auto', textAlign:'center', alignItems:'center' }}>
             <div className={s.statementLabel}>
               <div className={s.signalDot}/>Intelligence finds value
             </div>
@@ -384,7 +384,7 @@ export default function Home() {
               For too long, NFT media has lived on servers that vanish.
               <strong> Tuskr fixes that.</strong> Every file on Walrus. Every NFT on Sui.
             </p>
-            <Link to="/marketplace" className={`btn btn-outline btn-lg ${s.statementCta}`}>
+            <Link to="/marketplace" className={`btn btn-outline btn-lg ${s.statementCta}`} style={{ margin:'0 auto' }}>
               Explore marketplace <Arrow/>
             </Link>
           </div>

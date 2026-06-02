@@ -178,7 +178,19 @@
   border-top: 1px solid rgba(255,255,255,0.06);
   padding: clamp(60px,10vw,120px) 0;
 }
-.statementInner { max-width: 640px; }
+.statement .container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.statementInner {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
 .statementLabel {
   display: flex; align-items: center; gap: 8px;
   font-family: 'Space Mono', monospace; font-size: 10px;
@@ -189,11 +201,11 @@
   font-family: 'Inter', sans-serif;
   font-size: clamp(40px, 7vw, 88px); font-weight: 800;
   letter-spacing: -0.04em; line-height: 1.0; color: #f5f5f7;
-  margin-bottom: 24px;
+  margin-bottom: 24px; text-align: center;
 }
 .statementDesc {
   font-size: 18px; color: rgba(245,245,247,0.4); line-height: 1.75;
-  max-width: 480px; margin-bottom: 40px;
+  max-width: 480px; margin-bottom: 40px; text-align: center;
 }
 .statementDesc strong { color: rgba(245,245,247,0.88); font-weight: 600; }
 .statementCta { display: inline-flex; align-items: center; gap: 10px; }
@@ -242,47 +254,109 @@
   text-align: center; margin-bottom: 44px; width: 100%;
 }
 
-/* ── Tab strip ── */
+/* ════════════════════════════════════════════════════════
+   FEATURE TAB STRIP — Walrus.xyz quality
+   
+   2x2 grid of large rounded rectangles.
+   Secret: 40% spacing, 30% typography, 20% proportions.
+   No glows. No gradients. Pure restraint.
+   Active = soft off-white. Inactive = dark charcoal.
+════════════════════════════════════════════════════════ */
+
+/* Outer container — centered, 2x2 grid */
 .featureTabs {
-  display: inline-flex; gap: 3px; justify-content: center; align-items: center;
-  width: fit-content; margin: 0 auto 52px; padding: 5px;
-  border-radius: 99px;
-  background: linear-gradient(180deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.02) 100%);
-  border: 1px solid rgba(255,255,255,0.1);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.04) inset,
-    0 1px 0 rgba(255,255,255,0.1) inset,
-    0 8px 32px rgba(0,0,0,0.35);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: fit-content;
+  min-width: clamp(320px, 56vw, 640px);
+  margin: 0 auto 52px;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
 }
+
+/* Each tab — large rectangle, generous padding */
 .featureTab {
-  position: relative; display: inline-flex; align-items: center; gap: 8px;
-  padding: 9px 20px; border-radius: 99px; border: none;
-  background: transparent; cursor: pointer;
-  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
-  letter-spacing: -0.01em; color: rgba(245,245,247,0.38); white-space: nowrap;
-  transition: color .22s, background .22s, box-shadow .22s, transform .15s;
-  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
-}
-.featureTab:not(.featureTabActive):hover {
-  color: rgba(245,245,247,0.72);
-  background: rgba(255,255,255,0.06);
-  transform: translateY(-1px);
-}
-.featureTab:active { transform: scale(0.97) !important; }
-.featureTabActive {
-  background: var(--tab-color,#00c896) !important;
-  color: #000 !important;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  /* Generous height and padding — Walrus proportions */
+  padding: 18px 28px;
+  min-height: 58px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+
+  /* Inactive: dark navy-charcoal */
+  background: #161D2B;
+  color: #8A8F98;
+
+  /* Extremely subtle depth — no neon, no glow */
   box-shadow:
-    0 0 20px -4px var(--tab-color,#00c896),
-    0 0 0 1px rgba(255,255,255,0.25) inset,
-    0 1px 0 rgba(255,255,255,0.35) inset,
-    0 4px 16px rgba(0,0,0,0.3);
+    0 1px 2px rgba(0,0,0,0.4),
+    0 0 0 1px rgba(255,255,255,0.04) inset;
+
+  transition:
+    background 0.18s ease,
+    color      0.18s ease,
+    box-shadow 0.18s ease,
+    transform  0.12s ease;
+
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
-.featureTabIcon { display:flex; align-items:center; justify-content:center; width:16px; height:16px; transition:transform .22s; }
-.featureTabIconActive { transform: scale(1.1); }
-.featureTabLabel { position:relative; z-index:1; }
+
+/* Hover — slightly brighter charcoal */
+.featureTab:not(.featureTabActive):hover {
+  background: #1e2736;
+  color: #b8bdc8;
+  transform: translateY(-1px);
+  box-shadow:
+    0 3px 8px rgba(0,0,0,0.45),
+    0 0 0 1px rgba(255,255,255,0.06) inset;
+}
+.featureTab:active { transform: scale(0.98) !important; }
+
+/* Active — soft off-white, dark text. Clean. No glow. */
+.featureTabActive {
+  background: #F4F4F4 !important;
+  color: #111111 !important;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.3),
+    0 0 0 1px rgba(0,0,0,0.08) inset;
+}
+
+/* Icon inside tab */
+.featureTabIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  transition: transform 0.18s;
+}
+.featureTabIconActive { transform: scale(1.05); }
+
+/* Icon color: active tabs show icon in dark (tab bg is white) */
+.featureTabActive .featureTabIcon svg {
+  stroke: #111111 !important;
+}
+
+.featureTabLabel {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
 
 /* ── Feature carousel ── */
 .featureCarousel {
@@ -503,7 +577,7 @@
   .heroCta .btn{width:100%;max-width:300px;justify-content:center;}
   .statement{padding:60px 0;}
   .statementTitle{font-size:clamp(36px,10vw,60px);}
-  .featureTabs{flex-wrap:wrap;justify-content:center;border-radius:20px;}
+  .featureTabs{grid-template-columns:1fr 1fr;min-width:0;width:100%;} .featureTabLabel{font-size:13px;} .featureTab{padding:14px 16px;min-height:50px;}
   .featureCardMain{padding:32px 28px;border-radius:28px;}
   .ctaCard{padding:60px 24px;border-radius:28px;}
   .ctaButtons{flex-direction:column;align-items:center;}
@@ -516,6 +590,5 @@
   .heroTitle{font-size:clamp(36px,13vw,56px);}
   .nftGrid{grid-template-columns:1fr 1fr;}
   .statsGrid{grid-template-columns:1fr 1fr;}
-  .featureTabLabel{display:none;}
-  .featureTab{padding:9px 14px;}
+  .featureTabs{grid-template-columns:1fr;width:100%;} .featureTab{min-height:48px;}
 }

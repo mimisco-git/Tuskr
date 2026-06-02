@@ -271,7 +271,7 @@
 
 /* ── Mobile fullscreen menu ── */
 .mobile {
-  position: fixed; inset: 0; top: 66px; background: #000; z-index: 99;
+  position: fixed; inset: 0; top: 64px; background: #000; z-index: 200; overflow-y: auto;
   overflow-y: auto; padding: 32px 24px 48px; display: flex; flex-direction: column;
 }
 .mobileNav { display: flex; flex-direction: column; flex: 1; }
