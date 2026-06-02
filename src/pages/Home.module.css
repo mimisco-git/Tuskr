@@ -3,89 +3,75 @@
    Bloomberg Terminal × OpenAI × Apple
 ═══════════════════════════════════════════════════ */
 
-/* ── HERO ── */
-/*
- * PHILOSOPHY: The mascot IS the hero. The image background is #000.
- * The page background is #000. Black on black = no border visible.
- *
- * SHAKING FIX: No animation at all on the mascot.
- * Walrus.xyz doesn't animate their mascot either.
- * Static character = zero shake, zero GPU layer conflicts.
- *
- * BORDER FIX: Image is displayed FULL WIDTH wider than viewport.
- * overflow:hidden on .hero clips left/right/bottom naturally.
- * Only the top edge needs a CSS gradient fade-to-black.
- * mix-blend-mode:screen handles any JPEG edge compression.
- *
- * GLOW: Three static filter:blur divs behind the mascot.
- * They extend upward past the image bounds to illuminate
- * the headline, eyebrow, and buttons from below.
- */
+/* ════════════════════════════════════════════════════════════
+   HERO — Walrus.xyz visual philosophy
+   
+   From reading walrus.xyz source:
+   - Pure black background
+   - Mascot is STATIC (no float animation — they don't animate it)
+   - Mascot displayed full-width, overflow:hidden clips edges
+   - Three filter:blur() glow divs sit BEHIND mascot
+   - Text floats above in upper hero area
+   - No mask, no mix-blend-mode complexity
+   - The image's own black bg = seamless with page black
+════════════════════════════════════════════════════════════ */
 
 .hero {
   position: relative;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end; /* content stacks from bottom up */
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: start;
   background: #000000;
   overflow: hidden;
 }
 
-/* ── GLOW LAYERS — static, behind mascot ── */
-/* filter:blur on a solid div = volumetric light physics */
-/* No animation = no shaking from these */
-
-/* Cyan primary bloom — rises from mascot into text area */
+/* ── GLOW — three filter:blur point lights behind mascot ─ */
 .glow1 {
   position: absolute;
-  bottom: 10%;
+  /* sits at mascot torso center */
+  bottom: 16%;
   left: 50%;
   transform: translateX(-50%);
   width: 800px;
   height: 800px;
   border-radius: 50%;
   background: #00ccff;
-  opacity: 0.48;
+  opacity: 0.46;
   filter: blur(220px);
   pointer-events: none;
   z-index: 1;
 }
-
-/* Emerald secondary — slightly offset, depth effect */
 .glow2 {
   position: absolute;
-  bottom: 14%;
-  left: calc(50% + 70px);
+  bottom: 20%;
+  left: calc(50% + 80px);
   transform: translateX(-50%);
-  width: 580px;
-  height: 580px;
+  width: 560px;
+  height: 560px;
   border-radius: 50%;
   background: #00ffaa;
-  opacity: 0.30;
+  opacity: 0.28;
   filter: blur(195px);
   pointer-events: none;
   z-index: 1;
 }
-
-/* White core — intensity at mascot chest */
 .glow3 {
   position: absolute;
-  bottom: 26%;
+  bottom: 34%;
   left: 50%;
   transform: translateX(-50%);
-  width: 320px;
-  height: 320px;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
   background: #ffffff;
-  opacity: 0.18;
-  filter: blur(120px);
+  opacity: 0.16;
+  filter: blur(110px);
   pointer-events: none;
   z-index: 1;
 }
 
-/* Aliases for old JSX references */
+/* legacy class aliases */
 .lightCyan    { display: none; }
 .lightEmerald { display: none; }
 .lightWhite   { display: none; }
@@ -93,72 +79,53 @@
 .star         { display: none; }
 .neuralCanvas { display: none; }
 
-/* ── MASCOT ── */
+/* ── MASCOT ──────────────────────────────────────────────── */
 /*
- * Full-bleed display. Wider than viewport so left/right edges
- * are clipped by overflow:hidden — no visible boundary.
- * Bottom sits at bottom of hero.
- * Top edge fades via mask-image into pure black.
- * mix-blend-mode:screen: black JPEG pixels = transparent.
- * NO animation on the image = NO shaking. Ever.
+ * Walrus.xyz approach:
+ * - Wrapper has overflow:hidden on mobile (clips left/right edges)
+ * - Image is max-width constrained, centered, mx-auto
+ * - NO animation (walrus mascot is static)
+ * - NO mix-blend-mode
+ * - NO mask
+ * - The image has pure black bg — black on black = invisible edges
+ *
+ * The only "edge" remaining is the top of the image, which has
+ * empty black space above the character. We handle that with
+ * a single ::after vignette on the hero.
  */
 .mascotWrap {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(600px, 92vw, 1100px);
+  /* In-flow at bottom of grid, not position:absolute */
+  position: relative;
   z-index: 2;
-  pointer-events: none;
-  /* translateZ creates GPU layer without animation jank */
-  transform: translate(-50%, 0) translateZ(0);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  /* Clip any horizontal overflow — this removes left/right edges */
+  overflow: hidden;
+  /* Pull image up slightly so it fills bottom of viewport */
+  margin-bottom: -2px;
 }
 
 .mascot {
   display: block;
-  width: 100%;
+  /* Wide enough that the black padding in the image extends offscreen */
+  width: clamp(520px, 75vw, 980px);
   height: auto;
-
-  /* Screen blend: makes near-black JPEG edges disappear */
-  mix-blend-mode: screen;
-
-  /*
-   * Mask: black at center (fully visible) → transparent at top edge.
-   * Only the TOP fades — left/right/bottom are clipped by hero overflow.
-   * This removes the top edge of the image seamlessly.
-   */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.4) 8%,
-    rgba(0,0,0,0.85) 18%,
-    black 30%,
-    black 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.4) 8%,
-    rgba(0,0,0,0.85) 18%,
-    black 30%,
-    black 100%
-  );
-
-  /* No animation — static = zero shake */
+  /* Static — zero animation = zero shake, ever */
 }
 
-/* Hero bottom overlap — dark fade at very bottom */
+/* Thin vignette merges mascot feet into page below */
 .hero::after {
   content: '';
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 15%;
+  height: 12%;
   background: linear-gradient(to bottom, transparent, #000000);
   z-index: 3;
   pointer-events: none;
 }
 
-/* ── HERO CONTENT — floats in upper portion of hero ── */
+/* ── HERO CONTENT ─────────────────────────────────────────── */
 .heroInner {
   position: relative;
   z-index: 4;
@@ -166,10 +133,10 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: clamp(90px, 13vw, 130px) 24px 0;
-  padding-bottom: clamp(280px, 38vw, 500px); /* space for mascot below */
+  padding: clamp(90px, 12vw, 130px) 24px clamp(40px, 6vw, 80px);
   max-width: 860px;
   width: 100%;
+  justify-self: center;
 }
 
 /* ── INTELLIGENCE STATEMENT ── */
