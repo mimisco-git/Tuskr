@@ -4,144 +4,146 @@
 ═══════════════════════════════════════════════════ */
 
 /* ════════════════════════════════════════════════════════════
-   HERO — Single column centered, mascot below text
+   HERO — Walrus layout: text top, mascot HUGE below, bleeds all edges
    
-   This matches Walrus.xyz exactly:
-   - Relative container
-   - Full-bleed atmospheric background (aurora image on walrus,
-     CSS radial glow on us since we have no aurora image)
-   - Centered single column: text top, mascot bottom
-   - Next section overlaps with negative margin-top + glass blur
+   From screenshots:
+   - Aurora atmospheric bg (teal bottom-left, purple top-right)
+   - Headline + button centered in top ~40% of viewport
+   - Mascot fills bottom ~60% — full width, no borders, cropped at edges
+   - Character appears to emerge FROM BELOW the text
+   - Next section slides up over the mascot with rounded top corners
 ════════════════════════════════════════════════════════════ */
 
 .hero {
   position: relative;
+  min-height: 100vh;
   background: #000000;
-  /* No overflow:hidden — let mascot extend freely below */
+  /* overflow:hidden clips mascot edges — no visible image border */
+  overflow: hidden;
 }
 
-/* Aurora substitute — radial glow atmosphere behind everything.
-   Walrus uses an actual aurora photo. We fake it with CSS.
-   Large, diffuse, low opacity. The mascot's baked glow does the rest. */
+/* Aurora atmosphere behind everything — matches Walrus bg exactly:
+   Deep dark with teal glow bottom-left, purple top-right, green right */
 .aurora {
   position: absolute;
   inset: 0;
-  /* Walrus atmosphere: deep aurora behind character.
-     Stronger in the lower half where mascot sits. */
-  background:
-    radial-gradient(ellipse 90% 70% at 50% 75%,
-      rgba(0,200,180,0.22) 0%,
-      rgba(0,160,200,0.10) 35%,
-      transparent 65%),
-    radial-gradient(ellipse 70% 55% at 20% 25%,
-      rgba(80,30,220,0.25) 0%,
-      transparent 60%),
-    radial-gradient(ellipse 55% 45% at 82% 18%,
-      rgba(0,100,220,0.16) 0%,
-      transparent 55%);
-  pointer-events: none;
   z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 55% at 5% 85%,
+      rgba(0,160,140,0.55) 0%,
+      rgba(0,120,100,0.25) 35%,
+      transparent 65%),
+    radial-gradient(ellipse 50% 50% at 95% 10%,
+      rgba(100,20,200,0.50) 0%,
+      rgba(60,10,140,0.20) 40%,
+      transparent 65%),
+    radial-gradient(ellipse 40% 45% at 92% 65%,
+      rgba(0,100,80,0.35) 0%,
+      transparent 55%),
+    radial-gradient(ellipse 70% 40% at 50% 100%,
+      rgba(0,140,160,0.30) 0%,
+      transparent 60%);
+  pointer-events: none;
 }
 
-/* Legacy glow class aliases — hidden */
+/* Legacy class aliases — hidden */
 .glow1, .glow2, .glow3,
 .lightCyan, .lightEmerald, .lightWhite,
 .starField, .star, .neuralCanvas { display: none; }
 
-/* Single centered content column — matches Walrus hero-content */
+/* Single centered column */
 .heroContent {
-  position: relative;
-  /* No z-index — avoids creating stacking context that traps blend mode */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Text block: centered, top of hero */
-.heroInner {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+/* Text block: centered, top portion of hero */
+.heroInner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  max-width: 800px;
+  max-width: 860px;
   width: 100%;
   margin: 0 auto;
-  /* Walrus: mt-10 md:mt-20 from top, then directly into mascot */
-  padding: clamp(100px, 14vw, 140px) 24px clamp(24px, 3vw, 40px);
+  padding: clamp(100px, 13vw, 140px) 24px clamp(32px, 4vw, 56px);
 }
 
+/* ── MASCOT ─────────────────────────────────────────────────
+   From screenshot: fills full width, bottom 55-60% of viewport.
+   Character fills edge to edge — no visible rectangle.
+   overflow:hidden on .hero clips left/right/bottom.
+   mix-blend-mode:screen removes JPEG near-black background.
+   object-position: center 20% shows head/face (top of character).
+   
+   CRITICAL: NO z-index, NO transform on wrapper.
+   These trap mix-blend-mode inside a stacking context
+   and make the black bg visible again.
+─────────────────────────────────────────────────────────── */
 .mascotWrap {
-  /* No stacking context — blend mode must bleed to page bg */
   position: relative;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  /* Mobile: clip overflow so mascot fills screen edge to edge */
-  overflow: hidden;
-}
-
-@media (min-width: 640px) {
-  .mascotWrap {
-    overflow: visible;
-  }
+  /* No z-index, no transform, no isolation — blend mode reaches page */
 }
 
 .mascot {
   display: block;
-  /* Walrus mascot: sm:max-w-[53.75rem] = 860px, centered, mx-auto */
-  /* Tuskr: we go bigger — 2x presence, fills the hero */
-  width: 100%;
-  max-width: 960px;
-  height: auto;
-  margin: 0 auto;
+  /* Full viewport width — clips at hero overflow:hidden edges */
+  width: 100vw;
+  /* Fixed viewport height — dominates bottom of hero */
+  height: 62vh;
+  /* Cover: fills the box, clips overflow.
+     object-position: shows the CHARACTER's face/upper body */
+  object-fit: cover;
+  object-position: center 18%;
   
-  /* mix-blend-mode:screen: JPEG near-black (#020304) → transparent.
-     Only works if NO ancestor has z-index/transform/isolation.
-     mascotWrap has none. heroContent has none. hero has none. */
+  /* Removes JPEG black rectangle — near-black → transparent */
   mix-blend-mode: screen;
 
-  /* Mask: fade top 10% only (removes empty black space above character).
-     Screen blend handles all other edges (left/right/bottom) naturally. */
+  /* Mask: only fade very top edge (empty black above head).
+     All other edges: overflow:hidden on .hero clips them.
+     Screen blend makes JPEG edges invisible anyway. */
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    black 10%,
+    rgba(0,0,0,0.6) 5%,
+    black 14%,
     black 100%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    black 10%,
+    rgba(0,0,0,0.6) 5%,
+    black 14%,
     black 100%
   );
 }
 
-/* Bottom fade — merges hero into next section */
-/* No hero::after vignette — the next section's frost strip does this */
-
-/* ── HERO TYPOGRAPHY ── */
+/* ── STATEMENT SECTION — slides up over mascot ──────────────
+   From screenshot 2:
+   - Mascot body visible at TOP of this section (above the panel)
+   - Dark rounded panel overlaps mascot by ~30% of mascot height
+   - Rounded top corners (large radius)
+   - NO blur/glass effect — just dark section with rounded corners
+   - Content: label, big headline, description, CTA button (centered)
+   This is NOT a glass card. It's the next full section pulling up.
+─────────────────────────────────────────────────────────── */
 
 /* ── INTELLIGENCE STATEMENT ── */
 .statement {
-  /*
-   * WALRUS-EXACT OVERLAP:
-   * This section pulls UP over the mascot's bottom.
-   * -mt-[22%] mobile | sm:-mt-[7rem] | md:-mt-[9rem] | lg:-mt-[12rem]
-   * Rounded top corners: 36px mobile, 48px desktop.
-   * Inside: a frost strip (backdrop-blur + dark gradient) at the very top
-   * that overlaps the mascot — mascot is hazily visible through the blur.
-   * Below the frost strip: solid black (continuation of page).
-   */
+  /* From screenshot 2: dark section slides UP over mascot body.
+     Rounded top corners. No glass/blur — just dark with rounded top. */
   position: relative;
   z-index: 10;
   background: #000000;
   border-radius: 36px 36px 0 0;
-  /* Overlap the mascot */
   margin-top: -22%;
-  overflow: hidden;
-  padding: 0 0 clamp(60px, 8vw, 100px);
+  padding: clamp(60px, 9vw, 120px) 0 clamp(60px, 8vw, 100px);
 }
 
 @media (min-width: 640px) {
@@ -151,50 +153,21 @@
   }
 }
 @media (min-width: 768px) {
-  .statement {
-    margin-top: -9rem;
-  }
+  .statement { margin-top: -9rem; }
 }
 @media (min-width: 1024px) {
-  .statement {
-    margin-top: -12rem;
-  }
+  .statement { margin-top: -14rem; }
 }
 
-/* Frost strip — sits at the very top of the section, overlapping mascot */
-.statement::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 12rem;
-  /* backdrop-blur makes the mascot hazily visible through this strip */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  /* Gradient darkens from rgba toward solid black — matching Walrus exactly */
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.60) 0%,
-    #000000 80%
-  );
-  border-radius: 48px 48px 0 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Content sits above the frost strip */
 .statement .container {
-  position: relative;
-  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  /* Push content below the frost strip */
-  padding-top: clamp(48px, 8vw, 96px);
 }
 
 .statementInner {
-  max-width: 700px;
+  max-width: 680px;
   display: flex;
   flex-direction: column;
   align-items: center;
