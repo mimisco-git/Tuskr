@@ -300,9 +300,10 @@ export default function Home() {
         {/* Neural network canvas */}
         <NeuralHero/>
 
-        {/* Emerald radial glow */}
+        {/* Atmospheric glow — teal center, purple top-left */}
         <div className={s.heroGlow}/>
         <div className={s.heroGlowRight}/>
+        <div className={s.heroPurple}/>
 
         {/* Star field */}
         <div className={s.starField} aria-hidden>
