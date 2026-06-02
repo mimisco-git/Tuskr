@@ -19,6 +19,7 @@
 .hero {
   position: relative;
   display: grid;
+  /* Text left col | Mascot right col */
   grid-template-columns: 1fr 1fr;
   align-items: center;
   min-height: 100vh;
@@ -27,82 +28,99 @@
   padding: 0 clamp(24px, 5vw, 80px);
 }
 
-/* ── GLOW — filter:blur point lights sit behind mascot z:1 ── */
+/* ── GLOW — behind mascot in right column ── */
+/* Positioned where the mascot character body actually sits:
+   right ~25% of viewport, vertically centered */
 .glow1 {
   position: absolute;
-  /* Centered on right half where mascot lives */
   top: 50%;
-  right: 0;
-  transform: translate(15%, -50%);
-  width: 700px;
-  height: 700px;
+  right: 22%;
+  transform: translate(50%, -50%);
+  width: 680px;
+  height: 680px;
   border-radius: 50%;
   background: #00ccff;
-  opacity: 0.50;
-  filter: blur(220px);
+  opacity: 0.52;
+  filter: blur(210px);
   pointer-events: none;
   z-index: 1;
 }
 .glow2 {
   position: absolute;
-  top: 60%;
-  right: 5%;
-  transform: translateY(-50%);
-  width: 500px;
-  height: 500px;
+  top: 58%;
+  right: 18%;
+  transform: translate(50%, -50%);
+  width: 480px;
+  height: 480px;
   border-radius: 50%;
   background: #00ffaa;
-  opacity: 0.30;
-  filter: blur(190px);
+  opacity: 0.32;
+  filter: blur(185px);
   pointer-events: none;
   z-index: 1;
 }
 .glow3 {
   position: absolute;
-  top: 40%;
-  right: 20%;
-  transform: translateY(-50%);
-  width: 280px;
-  height: 280px;
+  top: 38%;
+  right: 26%;
+  transform: translate(50%, -50%);
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
   background: #ffffff;
-  opacity: 0.16;
-  filter: blur(100px);
+  opacity: 0.18;
+  filter: blur(90px);
   pointer-events: none;
   z-index: 1;
 }
 
-/* legacy aliases */
-.lightCyan    { display: none; }
-.lightEmerald { display: none; }
-.lightWhite   { display: none; }
-.starField    { display: none; }
-.star         { display: none; }
-.neuralCanvas { display: none; }
+/* legacy */
+.lightCyan { display:none; } .lightEmerald { display:none; }
+.lightWhite { display:none; } .starField { display:none; }
+.star { display:none; } .neuralCanvas { display:none; }
 
-/* ── MASCOT ─────────────────────────────────────────────── */
+/* ── HERO TEXT — left grid column ── */
+.heroInner {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: clamp(90px, 12vw, 130px) 0 clamp(60px, 8vw, 100px);
+  max-width: 560px;
+  /* Stays in left column naturally */
+}
+
+/* ── MASCOT — right grid column, bleeds right edge ── */
 .mascotWrap {
-  position: absolute;
-  /* Right column: sits on right half, bleeds off-screen edge */
-  right: -5%;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 52vw;
-  max-width: 680px;
-  height: auto;
+  position: relative;
   z-index: 2;
+  /* Overflow right edge of viewport for the "breaking the frame" effect */
+  margin-right: -6%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Don't force height — let the image aspect ratio control it */
   pointer-events: none;
 }
 
 .mascot {
   display: block;
+  /* Portrait image 853x1280 (ratio 0.667).
+     Right column = 50vw. Must stay within it.
+     height:90vh * 0.667 ratio = 60vw — too wide, bleeds into text.
+     Constrain both: height 90vh AND max-width 44vw.
+     At 44vw max-width, height = 44vw / 0.667 = 66vw... still too tall.
+     Let object-fit:contain do the work inside a bounded box. */
   width: 100%;
-  height: auto;
-  /* Image has pure black bg — black on black page = no visible border.
-     No mask. No blend mode. overflow:hidden on .hero clips the edge. */
+  height: 90vh;
+  max-height: 900px;
+  object-fit: contain;
+  object-position: center center;
+  mix-blend-mode: screen;
 }
 
-/* Bottom vignette blends mascot feet into next section */
 .hero::after {
   content: '';
   position: absolute;
@@ -113,19 +131,7 @@
   pointer-events: none;
 }
 
-/* ── HERO TEXT — left column ─────────────────────────────── */
-.heroInner {
-  position: relative;
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  padding: clamp(90px, 12vw, 130px) 0 clamp(60px, 8vw, 100px);
-  max-width: 560px;
-}
-
-/* ── MOBILE: stack vertically ─────────────────────────────── */
+/* ── MOBILE ── */
 @media (max-width: 768px) {
   .hero {
     grid-template-columns: 1fr;
@@ -135,37 +141,32 @@
   .heroInner {
     align-items: center;
     text-align: center;
-    padding-bottom: 380px; /* room for mascot below */
+    padding-top: clamp(90px, 15vw, 120px);
+    padding-bottom: 24px;
+    max-width: 100%;
   }
   .mascotWrap {
-    right: auto;
-    left: 50%;
-    top: auto;
-    bottom: -40px;
-    transform: translateX(-50%);
-    width: 90vw;
-    max-width: 420px;
+    margin-right: 0;
+    justify-content: center;
+    min-height: auto;
+    height: 60vw;
+    max-height: 380px;
+  }
+  .mascot {
+    height: 100%;
+    width: auto;
   }
   .glow1 {
-    right: auto;
-    left: 50%;
-    top: auto;
-    bottom: 15%;
-    transform: translateX(-50%);
+    top: 65%; right: 50%;
+    transform: translate(50%, -50%);
   }
   .glow2 {
-    right: auto;
-    left: 60%;
-    top: auto;
-    bottom: 20%;
-    transform: none;
+    top: 70%; right: 45%;
+    transform: translate(50%, -50%);
   }
   .glow3 {
-    right: auto;
-    left: 50%;
-    top: auto;
-    bottom: 32%;
-    transform: translateX(-50%);
+    top: 60%; right: 50%;
+    transform: translate(50%, -50%);
   }
 }
 
