@@ -17,88 +17,55 @@
   background: #000000;
 }
 
-/* Neural network canvas — fills hero */
-/* Neural canvas removed — clean void */
-/* ════════════════════════════════════════════════════════
-   HERO GLOW — Amplifies the baked-in artwork light.
-   The image already has cyan glow. These CSS layers
-   extend that glow BEYOND the image bounds so it spills
-   onto the typography, buttons, and surrounding space.
+/* ═══════════════════════════════════════════════════
+   GLOW LAYERS  z-index:1  (mascot is z-index:2)
    
-   Technique: filter:blur() on small solid divs.
-   Small div + enormous blur = wide, soft, natural falloff.
-   This is how real light spreads from a point source.
+   Static divs with filter:blur — real light physics.
+   Positioned at mascot center so light bleeds outward
+   past the image bounds onto text, buttons, stats.
    
-   The glow syncs with the float animation position.
-   It sits BEHIND the mascot (z-index:1 vs mascot z-index:2).
-════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════════
-   GLOW — Three blurred light sources behind mascot.
-   These sit at z-index:1, mascot is z-index:2.
-   
-   Positioned at the mascot's body center.
-   Large blur radius causes light to spill outward onto:
-   — Hero headline and description text
-   — CTA buttons
-   — Stats row
-   
-   Hero overflow:hidden clips any excess spill.
-═══════════════════════════════════════════════════════ */
-
-/* Cyan — primary wide bloom */
+   No animation on these — they are static light sources.
+   Only the mascotWrap floats.
+═══════════════════════════════════════════════════ */
 .lightCyan {
   position: absolute;
-  bottom: 25%;
+  bottom: 22%;
   left: 50%;
   transform: translateX(-50%);
-  width: 700px;
-  height: 700px;
+  width: 720px; height: 720px;
   border-radius: 50%;
-  background: #00d4ff;
-  opacity: 0.55;
-  filter: blur(200px);
+  background: #00ccff;
+  opacity: 0.5;
+  filter: blur(210px);
   pointer-events: none;
   z-index: 1;
-  backface-visibility: hidden;
 }
-
-/* Emerald — warm-green fill, offset right */
 .lightEmerald {
   position: absolute;
-  bottom: 28%;
-  left: calc(50% + 60px);
+  bottom: 26%;
+  left: calc(50% + 55px);
   transform: translateX(-50%);
-  width: 500px;
-  height: 500px;
+  width: 520px; height: 520px;
   border-radius: 50%;
-  background: #00ffb2;
-  opacity: 0.35;
-  filter: blur(180px);
+  background: #00ffaa;
+  opacity: 0.32;
+  filter: blur(185px);
   pointer-events: none;
   z-index: 1;
-  backface-visibility: hidden;
 }
-
-/* White — bright core at chest/face level */
 .lightWhite {
   position: absolute;
-  bottom: 40%;
+  bottom: 38%;
   left: 50%;
   transform: translateX(-50%);
-  width: 280px;
-  height: 280px;
+  width: 300px; height: 300px;
   border-radius: 50%;
   background: #ffffff;
-  opacity: 0.22;
-  filter: blur(100px);
+  opacity: 0.20;
+  filter: blur(110px);
   pointer-events: none;
   z-index: 1;
-  backface-visibility: hidden;
 }
-
-/* Stars */
-/* Star field removed — void is cleaner */
 
 /* Hero content */
 .heroInner {
