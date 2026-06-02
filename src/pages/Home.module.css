@@ -13,8 +13,7 @@
   justify-content: center;
   overflow: hidden;
   padding-bottom: 0;
-
-  background: #000;
+  background: #000000;
 }
 
 /* Neural network canvas — fills hero */
@@ -29,45 +28,64 @@
 
 /* Emerald radial glow — left */
 .heroGlow {
-  position: absolute;
   /*
-   * Walrus.xyz: the teal glow is centered behind the mascot
-   * and radiates outward. It sits at the BOTTOM CENTER of the hero
-   * where the mascot stands. Strong teal opacity, large radius.
+   * Single precision bloom — sits directly behind the mascot center.
+   * Cyan (#00E5FF) + Teal (#00FFC8) bloom.
+   * 5-8% opacity max. Fades to pure black in 50% of its radius.
+   * Black remains dominant: this is a glow on a focal object,
+   * not a background color.
    */
-  bottom: -60px;
+  position: absolute;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 900px; height: 700px; border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 65%,
-    rgba(0,212,170,0.52) 0%,
-    rgba(0,190,160,0.28) 22%,
-    rgba(0,160,140,0.12) 45%,
-    transparent 68%);
-  pointer-events: none; z-index: 0;
-  animation: gPulse 9s ease-in-out infinite alternate;
+  width: 780px;
+  height: 520px;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 60% 55% at 50% 62%,
+    rgba(0,255,200,0.07) 0%,
+    rgba(0,229,255,0.05) 18%,
+    rgba(0,200,220,0.02) 36%,
+    transparent 52%
+  );
+  /* No animation — static, calm, premium */
 }
+
+/* White core highlight — very small, directly behind mascot head */
 .heroGlowRight {
   position: absolute;
-  top: -20px; right: -40px;
-  width: 460px; height: 460px; border-radius: 50%;
-  background: radial-gradient(ellipse at 60% 40%,
-    rgba(0,160,200,0.15) 0%,
-    transparent 65%);
-  pointer-events: none; z-index: 0;
-  animation: gPulse 14s ease-in-out infinite alternate-reverse;
+  bottom: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 280px;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(255,255,255,0.04) 0%,
+    rgba(0,229,255,0.03) 30%,
+    transparent 60%
+  );
 }
-/* Purple glow top-left — walrus signature */
+
+/* Electric blue accent — barely visible, bottom edge */
 .heroPurple {
   position: absolute;
-  top: -80px; left: -80px;
-  width: 520px; height: 520px; border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 40%,
-    rgba(100,20,220,0.38) 0%,
-    rgba(70,10,170,0.16) 38%,
-    transparent 70%);
-  pointer-events: none; z-index: 0;
-  animation: gPulse 16s ease-in-out infinite alternate;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1000px;
+  height: 200px;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse 70% 100% at 50% 100%,
+    rgba(0,150,255,0.04) 0%,
+    transparent 70%
+  );
 }
 @keyframes gPulse {
   from { opacity:0.7; transform:scale(1); }
@@ -189,7 +207,7 @@
 }
 .hero::after {
   content:''; position:absolute; bottom:0; left:0; right:0; height:30%;
-  background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,0.75) 55%,#000 100%);
+  background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,0.65) 52%,#000000 100%);
   z-index:2; pointer-events:none;
 }
 @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }

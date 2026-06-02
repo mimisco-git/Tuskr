@@ -297,8 +297,6 @@ export default function Home() {
 
       {/* ════ HERO ════ */}
       <section className={s.hero}>
-        {/* Neural network canvas */}
-        <NeuralHero/>
 
         {/* Atmospheric glow — teal center, purple top-left */}
         <div className={s.heroGlow}/>
