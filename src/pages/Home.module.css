@@ -12,8 +12,8 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding-bottom: 0;
-  /* OLED black — zero compromises */
+  /* Extra bottom space for the absolute-positioned mascot */
+  padding-bottom: clamp(280px, 40vw, 520px);
   background: #000000;
 }
 
@@ -48,7 +48,6 @@
   filter: blur(320px);
   pointer-events: none;
   z-index: 1;
-  will-change: opacity;
 }
 
 /* Light 2 — Emerald #00FFB2 — secondary fill, offset for depth */
@@ -65,7 +64,6 @@
   filter: blur(280px);
   pointer-events: none;
   z-index: 1;
-  will-change: opacity;
 }
 
 /* Light 3 — White — tight core directly at mascot center */
@@ -82,7 +80,6 @@
   filter: blur(180px);
   pointer-events: none;
   z-index: 1;
-  will-change: opacity;
 }
 
 /* Stars */
@@ -93,7 +90,8 @@
   position: relative; z-index: 4;
   display: flex; flex-direction: column; align-items: center;
   text-align: center;
-  padding: clamp(100px,14vw,140px) 24px 40px;
+  /* Top padding clears navbar; bottom padding keeps content above mascot */
+  padding: clamp(100px,14vw,140px) 24px clamp(24px,4vw,48px);
   max-width: 860px;
 }
 
@@ -190,42 +188,49 @@
 
 /* Mascot */
 .mascotWrap {
-  /* Sits between lights (z:1) and text (z:3) */
-  position: relative; z-index: 2;
-  width: 100%; display: flex; justify-content: center;
-  /* Pull up to overlap hero content — mascot bleeds through */
-  margin-top: -20px;
-  margin-bottom: -60px;
+  /* Fixed position inside hero — no layout shift */
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  display: flex; justify-content: center; align-items: flex-end;
+  z-index: 2;
+  pointer-events: none;
 }
 .mascot {
-  width: clamp(600px, 90vw, 1100px);
-  height: clamp(340px, 48vw, 640px);
-  object-fit: cover;
-  object-position: center 12%;
+  /* Natural PNG dimensions — no rectangular crop */
+  width: clamp(560px, 85vw, 1000px);
+  height: auto;
+  max-height: 72vh;
+  object-fit: contain;
   display: block;
+
+  /* float uses transform:translateY — GPU-composited, zero layout shift */
   animation: float 8s ease-in-out infinite;
-  /* mix-blend-mode:screen removes the dark PNG background naturally */
+  will-change: transform;
+
+  /* Screen blend: pure-black PNG areas become transparent */
   mix-blend-mode: screen;
-  /* Feathered radial mask — dissolves all 4 edges into black
-     No visible rectangular frame. Artwork bleeds to void. */
+
+  /* Radial mask: dissolves all edges into black void
+     Center stays fully opaque. Edges fade to nothing.
+     NO rectangular border remains. */
   -webkit-mask-image: radial-gradient(
-    ellipse 78% 75% at 50% 38%,
+    ellipse 72% 70% at 50% 40%,
     black 0%,
-    black 18%,
-    rgba(0,0,0,0.92) 32%,
-    rgba(0,0,0,0.70) 46%,
-    rgba(0,0,0,0.35) 60%,
-    rgba(0,0,0,0.08) 72%,
+    black 22%,
+    rgba(0,0,0,0.88) 38%,
+    rgba(0,0,0,0.60) 52%,
+    rgba(0,0,0,0.25) 64%,
+    rgba(0,0,0,0.04) 74%,
     transparent 82%
   );
   mask-image: radial-gradient(
-    ellipse 78% 75% at 50% 38%,
+    ellipse 72% 70% at 50% 40%,
     black 0%,
-    black 18%,
-    rgba(0,0,0,0.92) 32%,
-    rgba(0,0,0,0.70) 46%,
-    rgba(0,0,0,0.35) 60%,
-    rgba(0,0,0,0.08) 72%,
+    black 22%,
+    rgba(0,0,0,0.88) 38%,
+    rgba(0,0,0,0.60) 52%,
+    rgba(0,0,0,0.25) 64%,
+    rgba(0,0,0,0.04) 74%,
     transparent 82%
   );
 }
@@ -243,8 +248,8 @@
   pointer-events: none;
 }
 @keyframes float {
-  0%,100% { transform: translateY(0px); }
-  50%      { transform: translateY(-12px); }
+  0%,100% { transform: translateY(0px) translateZ(0); }
+  50%      { transform: translateY(-10px) translateZ(0); }
 }
 
 /* ── INTELLIGENCE STATEMENT ── */
