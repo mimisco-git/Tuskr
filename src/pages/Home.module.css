@@ -44,11 +44,14 @@
 .starField, .star, .neuralCanvas { display: none; }
 
 .heroContent {
+  /* No position:relative here — we don't want this trapping the mascot */
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  /* Ensure text block sits at top of hero, above mascot */
+  width: 100%;
 }
 
 /* ── TEXT BLOCK ── */
@@ -62,8 +65,9 @@
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
-  /* Top clears navbar. Large bottom padding = mascot fills below this */
-  padding: clamp(96px, 13vw, 136px) 24px clamp(260px, 42vh, 520px);
+  /* Top clears navbar. Bottom: natural content padding only.
+     Mascot is absolute to .hero so no padding-bottom needed here. */
+  padding: clamp(96px, 13vw, 136px) 24px 48px;
 }
 
 /* ── MASCOT ─────────────────────────────────────────────────
