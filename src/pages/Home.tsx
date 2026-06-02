@@ -372,7 +372,7 @@ export default function Home() {
 
         {/* Mascot */}
         <div className={s.mascotWrap}>
-          <img src="/mascot-stand.png" alt="Tuskr mascot" className={s.mascot} draggable={false}/>
+          <img src="/mascot-stand.jpg" alt="Tuskr mascot" className={s.mascot} draggable={false}/>
         </div>
       </section>
 
