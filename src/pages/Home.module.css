@@ -33,52 +33,65 @@
    It sits BEHIND the mascot (z-index:1 vs mascot z-index:2).
 ════════════════════════════════════════════════════════ */
 
-/* Primary bloom — large cyan halo extending beyond artwork */
+/* ═══════════════════════════════════════════════════════
+   GLOW — Three blurred light sources behind mascot.
+   These sit at z-index:1, mascot is z-index:2.
+   
+   Positioned at the mascot's body center.
+   Large blur radius causes light to spill outward onto:
+   — Hero headline and description text
+   — CTA buttons
+   — Stats row
+   
+   Hero overflow:hidden clips any excess spill.
+═══════════════════════════════════════════════════════ */
+
+/* Cyan — primary wide bloom */
 .lightCyan {
   position: absolute;
-  bottom: 18%;
+  bottom: 25%;
   left: 50%;
   transform: translateX(-50%);
-  width: 560px;
-  height: 560px;
+  width: 700px;
+  height: 700px;
   border-radius: 50%;
-  background: #00c8ff;
-  opacity: 0.45;
-  filter: blur(160px);
+  background: #00d4ff;
+  opacity: 0.55;
+  filter: blur(200px);
   pointer-events: none;
   z-index: 1;
   backface-visibility: hidden;
 }
 
-/* Secondary emerald — offset slightly, adds color depth */
+/* Emerald — warm-green fill, offset right */
 .lightEmerald {
   position: absolute;
-  bottom: 22%;
-  left: calc(50% + 40px);
+  bottom: 28%;
+  left: calc(50% + 60px);
   transform: translateX(-50%);
-  width: 380px;
-  height: 380px;
+  width: 500px;
+  height: 500px;
   border-radius: 50%;
   background: #00ffb2;
-  opacity: 0.28;
-  filter: blur(140px);
+  opacity: 0.35;
+  filter: blur(180px);
   pointer-events: none;
   z-index: 1;
   backface-visibility: hidden;
 }
 
-/* White core — tight and bright, sits at mascot chest */
+/* White — bright core at chest/face level */
 .lightWhite {
   position: absolute;
-  bottom: 35%;
+  bottom: 40%;
   left: 50%;
   transform: translateX(-50%);
-  width: 200px;
-  height: 200px;
+  width: 280px;
+  height: 280px;
   border-radius: 50%;
   background: #ffffff;
-  opacity: 0.18;
-  filter: blur(90px);
+  opacity: 0.22;
+  filter: blur(100px);
   pointer-events: none;
   z-index: 1;
   backface-visibility: hidden;
@@ -195,34 +208,55 @@
   display: flex; justify-content: center; align-items: flex-end;
   z-index: 2;
   pointer-events: none;
-  /* Isolate compositing layer — prevents shake propagating to page */
-  isolation: isolate;
 }
 .mascot {
-  /* Fixed width + fixed height = zero layout reflow = zero shake */
-  width: clamp(340px, 50vw, 640px);
-  height: clamp(460px, 68vw, 880px);
-  object-fit: cover;
-  object-position: center 18%;
+  /* Fixed dimensions stop reflow-based shaking */
+  width: clamp(340px, 48vw, 620px);
+  height: clamp(460px, 65vw, 860px);
+
+  /* contain keeps full image, no rectangular clip */
+  object-fit: contain;
+  object-position: center bottom;
   display: block;
-  /* Backface-visibility forces GPU layer — smooth animation */
+
+  /* mix-blend-mode:screen makes near-black JPEG edges transparent.
+     Screen formula: result = 1 - (1-a)(1-b)
+     When image pixel is near #000: result ≈ page color (#000) = invisible.
+     This eliminates the rectangular border completely. */
+  mix-blend-mode: screen;
+
+  /* Extra feather mask for any remaining edge artifacts */
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 88% at 50% 52%,
+    black 0%, black 55%,
+    rgba(0,0,0,0.85) 68%,
+    rgba(0,0,0,0.4) 80%,
+    transparent 92%
+  );
+  mask-image: radial-gradient(
+    ellipse 80% 88% at 50% 52%,
+    black 0%, black 55%,
+    rgba(0,0,0,0.85) 68%,
+    rgba(0,0,0,0.4) 80%,
+    transparent 92%
+  );
+
+  /* GPU layer for smooth float */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   animation: float 9s ease-in-out infinite;
-  /* No will-change:transform — causes too many compositor layers */
 }
-/* Thin vignette at very bottom to blend into next section */
+/* Bottom vignette */
 .hero::after {
   content:''; position:absolute; bottom:0; left:0; right:0;
-  height:18%;
+  height:20%;
   background: linear-gradient(to bottom, transparent 0%, #000000 100%);
   z-index: 3;
   pointer-events: none;
 }
 @keyframes float {
-  0%   { transform: translateY(0) translateZ(0); }
-  50%  { transform: translateY(-14px) translateZ(0); }
-  100% { transform: translateY(0) translateZ(0); }
+  0%,100% { transform: translateY(0) translateZ(0); }
+  50%      { transform: translateY(-14px) translateZ(0); }
 }
 
 /* ── INTELLIGENCE STATEMENT ── */
