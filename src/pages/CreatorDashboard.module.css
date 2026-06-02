@@ -4,14 +4,14 @@
 .avatar {
   width:60px; height:60px; border-radius:16px;
   background:rgba(0,212,170,0.1); border:1.5px solid rgba(0,212,170,0.3);
-  color:var(--a); font-family:'Space Grotesk',sans-serif;
+  color:var(--a); font-family:'Inter',-apple-system,sans-serif;
   font-size:22px; font-weight:700;
   display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
 .eyebrow { display:flex; align-items:center; gap:7px; font-family:'Space Mono',monospace; font-size:10px; color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:6px; }
 .eyebrowDot { width:6px; height:6px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 2s infinite; }
 @keyframes pulse{50%{opacity:0.3;}}
-.title { font-family:'Space Grotesk',sans-serif; font-size:clamp(26px,3.5vw,40px); font-weight:700; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:4px; }
+.title { font-family:'Inter',-apple-system,sans-serif; font-size:clamp(26px,3.5vw,40px); font-weight:700; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:4px; }
 .addr { font-family:'Space Mono',monospace; font-size:12px; color:rgba(250,248,245,0.3); }
 
 .statsRow { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px; }
@@ -22,13 +22,13 @@
   border-radius:20px; padding:22px 20px; transition:border-color 0.2s;
 }
 .statCard:hover { border-color:rgba(255,255,255,0.15); }
-.statVal { font-family:'Space Grotesk',sans-serif; font-size:26px; font-weight:700; color:#fff; letter-spacing:-0.03em; line-height:1; margin-bottom:6px; }
+.statVal { font-family:'Inter',-apple-system,sans-serif; font-size:26px; font-weight:700; color:#fff; letter-spacing:-0.03em; line-height:1; margin-bottom:6px; }
 .statLabel { font-size:14px; font-weight:500; color:rgba(250,248,245,0.6); margin-bottom:3px; }
 .statSub { font-family:'Space Mono',monospace; font-size:10px; color:rgba(250,248,245,0.28); letter-spacing:0.08em; }
 
 .charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:28px; }
 .chartCard { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:22px; }
-.chartTitle { font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:600; color:rgba(250,248,245,0.6); margin-bottom:16px; }
+.chartTitle { font-family:'Inter',-apple-system,sans-serif; font-size:15px; font-weight:600; color:rgba(250,248,245,0.6); margin-bottom:16px; }
 
 .tableCard { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:20px; overflow:hidden; }
 .tableHeader { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid rgba(255,255,255,0.06); }
@@ -38,7 +38,7 @@
 .tableRow:last-child { border-bottom:none; }
 .tableRow:hover { background:rgba(255,255,255,0.02); }
 .tableNFT { font-size:14px; font-weight:600; color:#fff; }
-.tablePrice { font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:700; color:var(--a); }
+.tablePrice { font-family:'Inter',-apple-system,sans-serif; font-size:14px; font-weight:700; color:var(--a); }
 .tableBuyer { font-family:'Space Mono',monospace; font-size:11px; color:rgba(250,248,245,0.4); }
 .tableDate { font-family:'Space Mono',monospace; font-size:11px; color:rgba(250,248,245,0.3); }
 

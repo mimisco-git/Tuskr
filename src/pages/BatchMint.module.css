@@ -3,12 +3,12 @@
 .eyebrow { display:flex; align-items:center; gap:7px; font-family:var(--f-mono); font-size:10px; color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px; }
 .eyebrowDot { width:6px; height:6px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 2s infinite; }
 @keyframes pulse{50%{opacity:0.3;}}
-.header { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,44px); font-weight:800; letter-spacing:-0.03em; color:#fff; margin-bottom:8px; }
+.header { font-family:'Inter',-apple-system,sans-serif; font-size:clamp(28px,4vw,44px); font-weight:800; letter-spacing:-0.03em; color:#fff; margin-bottom:8px; }
 .sub { font-size:15px; color:rgba(255,255,255,0.4); margin-bottom:36px; }
 .drop { border:2px dashed rgba(255,255,255,0.12); border-radius:var(--r-2xl); padding:56px 28px; text-align:center; cursor:pointer; transition:all 0.2s; min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; }
 .drop:hover,.dropActive { border-color:rgba(0,212,170,0.35); background:rgba(0,212,170,0.04); }
 .dropIcon { font-size:44px; }
-.dropTitle { font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; color:rgba(255,255,255,0.7); }
+.dropTitle { font-family:'Inter',-apple-system,sans-serif; font-size:20px; font-weight:700; color:rgba(255,255,255,0.7); }
 .dropSub { font-size:13px; color:rgba(255,255,255,0.3); }
 .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:24px 0; }
 @media(max-width:768px){.grid{grid-template-columns:repeat(3,1fr);}}

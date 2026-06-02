@@ -32,7 +32,7 @@ const CustomTip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null
   return (
     <div style={{ background:'#111', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'8px 12px' }}>
-      <p style={{ fontFamily:'Space Grotesk,sans-serif', fontSize:16, fontWeight:700, color:'#00d4aa' }}>{payload[0].value} SUI</p>
+      <p style={{ fontFamily:'Inter,sans-serif', fontSize:16, fontWeight:700, color:'#00d4aa' }}>{payload[0].value} SUI</p>
     </div>
   )
 }
@@ -120,7 +120,7 @@ export default function NFTDetail() {
   /* Not found */
   if (notFound || !nft) return (
     <main className={s.page}><div className="container" style={{ textAlign:'center', padding:'80px 0' }}>
-      <p style={{ fontFamily:'Space Grotesk,sans-serif', fontSize:22, color:'rgba(255,255,255,0.4)', marginBottom:20 }}>NFT not found.</p>
+      <p style={{ fontFamily:'Inter,sans-serif', fontSize:22, color:'rgba(255,255,255,0.4)', marginBottom:20 }}>NFT not found.</p>
       <Link to="/marketplace" className="btn btn-outline">Back to marketplace</Link>
     </div></main>
   )

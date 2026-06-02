@@ -127,7 +127,7 @@ export default function AIGenerator() {
           })}
         </div>
 
-        {/* STEP 1 — Prompt */}
+        {/* STEP 1, Prompt */}
         {step === 'prompt' && (
           <div className={s.card}>
             <div className={s.fieldGroup}>
@@ -171,7 +171,7 @@ export default function AIGenerator() {
           </div>
         )}
 
-        {/* STEP 2 — Review + Upload */}
+        {/* STEP 2, Review + Upload */}
         {step === 'review' && concept && (
           <div className={s.reviewLayout}>
 
@@ -290,7 +290,7 @@ export default function AIGenerator() {
           </div>
         )}
 
-        {/* STEP 3 — Minting */}
+        {/* STEP 3, Minting */}
         {step === 'mint' && (
           <div className={s.statusCard}>
             <div className={s.spinner} style={{ width:48, height:48, borderWidth:3 }}/>
@@ -304,7 +304,7 @@ export default function AIGenerator() {
           </div>
         )}
 
-        {/* STEP 4 — Done */}
+        {/* STEP 4, Done */}
         {step === 'done' && (
           <div className={s.statusCard}>
             <div className={s.doneCheck}>✓</div>

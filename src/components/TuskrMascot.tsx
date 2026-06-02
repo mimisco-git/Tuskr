@@ -1,11 +1,11 @@
 /**
  * TuskrMascot.tsx
- * High-quality SVG mascot — back view, premium 3D render quality.
+ * High-quality SVG mascot, back view, premium 3D render quality.
  *
  * Lighting model:
  *   - Key light: top-center (cool white)
  *   - Fill light: left-above (soft blue)
- *   - Rim light: behind bottom (strong teal/cyan glow — the signature look)
+ *   - Rim light: behind bottom (strong teal/cyan glow, the signature look)
  *   - Ambient occlusion: dark crevices at helmet-body join
  *   - Specular: small bright hotspot top-center of body
  *
@@ -31,7 +31,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
       aria-label="Tuskr mascot"
     >
       <defs>
-        {/* ── Body gradients — 3-layer lighting simulation ── */}
+        {/* ── Body gradients, 3-layer lighting simulation ── */}
 
         {/* Base body color: saturated teal in lit areas */}
         <radialGradient id="bodyBase" cx="42%" cy="34%" r="62%">
@@ -42,7 +42,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
           <stop offset="100%" stopColor="#002828"/>
         </radialGradient>
 
-        {/* Rim light — strong teal glow at bottom-left edge (backlit) */}
+        {/* Rim light, strong teal glow at bottom-left edge (backlit) */}
         <radialGradient id="rimLight" cx="18%" cy="88%" r="55%">
           <stop offset="0%"   stopColor="rgba(0,230,210,0.72)"/>
           <stop offset="28%"  stopColor="rgba(0,200,180,0.38)"/>
@@ -50,21 +50,21 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
           <stop offset="100%" stopColor="transparent"/>
         </radialGradient>
 
-        {/* Rim light right — slightly less intense */}
+        {/* Rim light right, slightly less intense */}
         <radialGradient id="rimLightR" cx="82%" cy="82%" r="45%">
           <stop offset="0%"   stopColor="rgba(0,200,180,0.55)"/>
           <stop offset="40%"  stopColor="rgba(0,160,140,0.2)"/>
           <stop offset="100%" stopColor="transparent"/>
         </radialGradient>
 
-        {/* Key light specular — top center highlight */}
+        {/* Key light specular, top center highlight */}
         <radialGradient id="specBody" cx="50%" cy="22%" r="35%">
           <stop offset="0%"   stopColor="rgba(180,255,248,0.28)"/>
           <stop offset="50%"  stopColor="rgba(100,240,220,0.08)"/>
           <stop offset="100%" stopColor="transparent"/>
         </radialGradient>
 
-        {/* Right shadow — opposite key light */}
+        {/* Right shadow, opposite key light */}
         <radialGradient id="shadowR" cx="88%" cy="42%" r="48%">
           <stop offset="0%"   stopColor="rgba(0,10,10,0.65)"/>
           <stop offset="55%"  stopColor="rgba(0,10,10,0.28)"/>
@@ -78,7 +78,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
           <stop offset="100%" stopColor="rgba(0,4,4,0.72)"/>
         </linearGradient>
 
-        {/* AO — ambient occlusion at helmet-body join */}
+        {/* AO, ambient occlusion at helmet-body join */}
         <radialGradient id="aoJoin" cx="50%" cy="50%" r="50%">
           <stop offset="0%"  stopColor="rgba(0,0,0,0.7)"/>
           <stop offset="100%" stopColor="transparent"/>
@@ -92,14 +92,14 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
           <stop offset="100%" stopColor="#04060f"/>
         </radialGradient>
 
-        {/* Helmet specular — subtle blue-white highlight */}
+        {/* Helmet specular, subtle blue-white highlight */}
         <radialGradient id="helmetSpec" cx="34%" cy="24%" r="40%">
           <stop offset="0%"  stopColor="rgba(120,140,255,0.22)"/>
           <stop offset="60%"  stopColor="rgba(80,100,200,0.06)"/>
           <stop offset="100%" stopColor="transparent"/>
         </radialGradient>
 
-        {/* Helmet rim — teal glow catching backlight */}
+        {/* Helmet rim, teal glow catching backlight */}
         <radialGradient id="helmetRim" cx="50%" cy="90%" r="55%">
           <stop offset="0%"  stopColor="rgba(0,200,180,0.35)"/>
           <stop offset="50%"  stopColor="rgba(0,160,140,0.1)"/>
@@ -189,7 +189,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
 
       {/* ══ BODY ══ */}
 
-      {/* 1. Rim light glow — rendered BEHIND body for bloom effect */}
+      {/* 1. Rim light glow, rendered BEHIND body for bloom effect */}
       <ellipse cx="300" cy="410" rx="195" ry="200"
         fill="none"
         stroke="rgba(0,220,200,0.18)"
@@ -200,7 +200,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
       {/* 2. Base body shape */}
       <ellipse cx="300" cy="410" rx="192" ry="196" fill="url(#bodyBase)"/>
 
-      {/* 3. Rim light left — strong teal at back-left edge */}
+      {/* 3. Rim light left, strong teal at back-left edge */}
       <ellipse cx="300" cy="410" rx="192" ry="196" fill="url(#rimLight)"/>
 
       {/* 4. Rim light right */}
@@ -209,13 +209,13 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
       {/* 5. Key light specular */}
       <ellipse cx="300" cy="410" rx="192" ry="196" fill="url(#specBody)"/>
 
-      {/* 6. Shadow right — opposite key light */}
+      {/* 6. Shadow right, opposite key light */}
       <ellipse cx="300" cy="410" rx="192" ry="196" fill="url(#shadowR)"/>
 
       {/* 7. Bottom fade */}
       <ellipse cx="300" cy="410" rx="192" ry="196" fill="url(#bodyBottom)"/>
 
-      {/* 8. Butt crease — center vertical AO line */}
+      {/* 8. Butt crease, center vertical AO line */}
       <path
         d="M 298 228 Q 299 320 300 410 Q 300 480 300 570"
         stroke="rgba(0,20,20,0.45)"
@@ -233,7 +233,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
         transform="rotate(-8,238,390)"
       />
 
-      {/* ══ AO — helmet meeting body ══ */}
+      {/* ══ AO, helmet meeting body ══ */}
       <ellipse cx="300" cy="248" rx="148" ry="38"
         fill="rgba(0,0,0,0.45)"
         filter="url(#softBlur)"
@@ -265,7 +265,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
       {/* Knit texture dome */}
       <ellipse cx="300" cy="110" rx="120" ry="92" fill="url(#knitDome)"/>
 
-      {/* Knit rows — subtle horizontal lines */}
+      {/* Knit rows, subtle horizontal lines */}
       {[44,55,64,73,82,91,100,109,118,127,136,145,154].map((y, i) => {
         const hw = Math.sqrt(Math.max(0, 120 * 120 - (y - 110) * (y - 110))) * 0.96
         return hw > 6 ? (
@@ -308,7 +308,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
         fill="url(#visor)"
       />
 
-      {/* Visor gloss reflection — top half */}
+      {/* Visor gloss reflection, top half */}
       <path
         d="M 132 205 Q 300 226 468 205 Q 474 212 470 219 Q 300 238 130 219 Z"
         fill="url(#visorGloss)"
@@ -331,7 +331,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
       />
 
       {/* ══ WHISKERS ══ */}
-      {/* Left — 4 whiskers spreading outward */}
+      {/* Left, 4 whiskers spreading outward */}
       {[
         { x1:120, y1:355, x2:0,   y2:338, w:2.8, o:0.72 },
         { x1:118, y1:370, x2:-4,  y2:365, w:2.2, o:0.55 },
@@ -398,8 +398,8 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
         fill="none"
       />
 
-      {/* ══ RIM LIGHT EDGE HIGHLIGHT — the signature 3D detail ══ */}
-      {/* Left body rim — bright teal line at the back-lit edge */}
+      {/* ══ RIM LIGHT EDGE HIGHLIGHT, the signature 3D detail ══ */}
+      {/* Left body rim, bright teal line at the back-lit edge */}
       <path
         d="M 165 260 Q 110 340 112 430 Q 112 500 148 555"
         stroke="rgba(0,220,205,0.55)"
@@ -418,7 +418,7 @@ export default function TuskrMascot({ className = '', style, size = 600 }: Props
         filter="url(#bloom)"
       />
 
-      {/* ══ OVERALL LENS SHEEN — adds the 3D depth illusion ══ */}
+      {/* ══ OVERALL LENS SHEEN, adds the 3D depth illusion ══ */}
       {/* Subtle catch-light on body */}
       <ellipse cx="252" cy="308" rx="44" ry="60"
         fill="rgba(0,230,215,0.05)"

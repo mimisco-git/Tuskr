@@ -1,5 +1,5 @@
 /**
- * useXP.ts — Real XP system for Tuskr.
+ * useXP.ts, Real XP system for Tuskr.
  * XP is earned from real on-chain actions and stored in localStorage.
  * The leaderboard is cross-device via a shared Walrus blob key (best effort).
  */
@@ -177,5 +177,5 @@ export function useXP(address?: string) {
   return { me, initUser, awardXP, dailyCheckIn, getLeaderboard, nextLevelXP, LEVEL_THRESHOLDS }
 }
 
-// No more seedMockLeaderboard — real users only
+// No more seedMockLeaderboard, real users only
 export function seedMockLeaderboard() { /* disabled */ }

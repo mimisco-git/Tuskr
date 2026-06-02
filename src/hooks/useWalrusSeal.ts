@@ -1,6 +1,6 @@
 /**
  * useWalrusSeal.ts
- * Walrus Seal — threshold encryption for NFT content gating.
+ * Walrus Seal, threshold encryption for NFT content gating.
  * Docs: https://docs.walrus.site/seal/
  *
  * Flow:

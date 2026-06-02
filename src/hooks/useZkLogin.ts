@@ -1,6 +1,6 @@
 /**
  * useZkLogin.ts
- * Sui zkLogin — email/Google sign-in → Sui wallet
+ * Sui zkLogin, email/Google sign-in → Sui wallet
  * Docs: https://docs.sui.io/concepts/cryptography/zklogin
  */
 import { useState } from 'react'

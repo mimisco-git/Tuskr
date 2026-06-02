@@ -1,5 +1,5 @@
 /**
- * useAIGenerator.ts — uses Groq (llama3-70b) for fast, free NFT concept generation.
+ * useAIGenerator.ts, uses Groq (llama3-70b) for fast, free NFT concept generation.
  * Add VITE_GROQ_API_KEY to Vercel environment variables.
  * Get a free key at: https://console.groq.com
  */
@@ -44,7 +44,7 @@ export function useAIGenerator() {
             {
               role: 'system',
               content: `You are an NFT creative director for Tuskr, a premium NFT marketplace on Sui blockchain with media stored on Walrus.
-Generate compelling, unique NFT concepts. Respond ONLY with valid JSON — no markdown, no explanation, just raw JSON.
+Generate compelling, unique NFT concepts. Respond ONLY with valid JSON, no markdown, no explanation, just raw JSON.
 Required fields: name (creative title), description (1-2 evocative sentences), traits (array of 4-6 {trait_type, value} objects), prompt (detailed image generation prompt), style (art style name).`
             },
             {

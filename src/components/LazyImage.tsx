@@ -35,7 +35,7 @@ export default function LazyImage({ src, alt, className = '', aspectRatio = '1' 
       {/* Shimmer placeholder */}
       {!loaded && <div className={`${s.shimmer} skeleton`} />}
 
-      {/* Real image — only loads when in viewport */}
+      {/* Real image, only loads when in viewport */}
       {inView && (
         <img
           src={src}

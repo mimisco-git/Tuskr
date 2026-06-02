@@ -59,7 +59,7 @@ export default function Footer() {
   const wrapRef      = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
 
-  /* Intersection Observer — triggers animations when footer enters view */
+  /* Intersection Observer, triggers animations when footer enters view */
   useEffect(() => {
     const el = wrapRef.current
     if (!el) return
@@ -117,7 +117,7 @@ export default function Footer() {
         <div className={s.glowLayer}/>
 
         {/*
-         * TUSKR wordmark — full viewport width
+         * TUSKR wordmark, full viewport width
          * Each letter is a span for staggered entrance animation
          * visible class starts animations via IntersectionObserver
          */}
@@ -134,7 +134,7 @@ export default function Footer() {
         </div>
 
         {/*
-         * Mascot — z-index above wordmark
+         * Mascot, z-index above wordmark
          * mix-blend-mode:screen in CSS removes dark background
          * Slides up via animation when section enters view
          */}

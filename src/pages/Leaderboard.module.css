@@ -3,12 +3,12 @@
 .eyebrow { display:flex; align-items:center; gap:7px; font-family:'Space Mono',monospace; font-size:10px; color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:10px; }
 .eyebrowDot { width:6px; height:6px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 2s infinite; }
 @keyframes pulse{50%{opacity:0.3;}}
-.title { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4.5vw,52px); font-weight:700; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:6px; }
+.title { font-family:'Inter',-apple-system,sans-serif; font-size:clamp(28px,4.5vw,52px); font-weight:700; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:6px; }
 .sub { font-size:15px; color:rgba(250,248,245,0.4); }
 
 .checkInBtn {
   display:flex; align-items:center; gap:8px; padding:12px 22px; border-radius:99px;
-  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600;
+  font-family:'Inter',-apple-system,sans-serif; font-size:14px; font-weight:600;
   color:#000; background:var(--a); border:none; cursor:pointer;
   transition:all 0.2s; white-space:nowrap; flex-shrink:0;
 }
@@ -26,7 +26,7 @@
   width:48px; height:48px; border-radius:14px;
   background:rgba(0,212,170,0.1); border:1.5px solid rgba(0,212,170,0.3);
   display:flex; align-items:center; justify-content:center;
-  font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; color:var(--a);
+  font-family:'Inter',-apple-system,sans-serif; font-size:18px; font-weight:700; color:var(--a);
   flex-shrink:0;
 }
 .myInfo { display:flex; flex-direction:column; gap:6px; }
@@ -36,7 +36,7 @@
 .myStreak svg { color:var(--a); }
 .myStats { display:flex; gap:28px; }
 .myStat {}
-.myStatN { font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; color:#fff; letter-spacing:-0.03em; line-height:1; margin-bottom:3px; }
+.myStatN { font-family:'Inter',-apple-system,sans-serif; font-size:24px; font-weight:700; color:#fff; letter-spacing:-0.03em; line-height:1; margin-bottom:3px; }
 .myStatL { font-family:'Space Mono',monospace; font-size:9px; color:rgba(250,248,245,0.3); text-transform:uppercase; letter-spacing:0.1em; }
 .myProgress { grid-column:1/-1; display:flex; flex-direction:column; gap:6px; }
 .myProgressLabel { display:flex; justify-content:space-between; font-family:'Space Mono',monospace; font-size:10px; color:rgba(250,248,245,0.3); }
@@ -45,7 +45,7 @@
 
 .connectPrompt { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:40px; text-align:center; margin-bottom:24px; }
 .connectIcon { font-size:32px; color:rgba(250,248,245,0.2); margin-bottom:12px; display:flex; justify-content:center; }
-.connectTitle { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; color:rgba(250,248,245,0.5); margin-bottom:6px; }
+.connectTitle { font-family:'Inter',-apple-system,sans-serif; font-size:18px; font-weight:700; color:rgba(250,248,245,0.5); margin-bottom:6px; }
 .connectSub { font-size:14px; color:rgba(250,248,245,0.25); }
 
 /* Main grid */
@@ -78,7 +78,7 @@
 .rowAvatar {
   width:36px; height:36px; border-radius:10px; border:1.5px solid;
   display:flex; align-items:center; justify-content:center;
-  font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700;
+  font-family:'Inter',-apple-system,sans-serif; font-size:13px; font-weight:700;
   color:rgba(250,248,245,0.8); background:rgba(255,255,255,0.04); flex-shrink:0;
 }
 .rowInfo { min-width:0; }
@@ -91,11 +91,11 @@
 .rowLvl { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.06em; }
 .rowBar { width:80px; height:3px; background:rgba(255,255,255,0.08); border-radius:2px; overflow:hidden; }
 .rowBarFill { height:100%; border-radius:2px; transition:width 0.4s; }
-.rowXP { font-family:'Space Grotesk',sans-serif; font-size:15px; font-weight:700; color:#fff; letter-spacing:-0.02em; }
+.rowXP { font-family:'Inter',-apple-system,sans-serif; font-size:15px; font-weight:700; color:#fff; letter-spacing:-0.02em; }
 
 .emptyBoard { padding:60px 24px; text-align:center; }
 .emptyIcon { font-size:32px; color:rgba(250,248,245,0.15); display:flex; justify-content:center; margin-bottom:12px; }
-.emptyTitle { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:700; color:rgba(250,248,245,0.35); margin-bottom:6px; }
+.emptyTitle { font-family:'Inter',-apple-system,sans-serif; font-size:18px; font-weight:700; color:rgba(250,248,245,0.35); margin-bottom:6px; }
 .emptySub { font-size:13px; color:rgba(250,248,245,0.2); }
 
 /* Side panel */

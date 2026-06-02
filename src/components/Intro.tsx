@@ -1,5 +1,5 @@
 /**
- * Intro.tsx — Tuskr Terminal Intro
+ * Intro.tsx, Tuskr Terminal Intro
  * Hermians-style multi-scene experience:
  *
  * Scene 0: PRESS ANY KEY / TAP TO ENTER
@@ -48,7 +48,7 @@ const BOOT_LINES = [
   'SELECT YOUR NODE TO CONTINUE',
 ]
 
-// Wallet options — Sui ecosystem
+// Wallet options, Sui ecosystem
 const WALLET_OPTIONS = [
   { id: 'slushie',  label: 'Slushie Wallet',  desc: 'Official Sui wallet',    icon: '❄️' },
   { id: 'phantom',  label: 'Phantom',          desc: 'Multi-chain wallet',     icon: '👻' },
@@ -56,7 +56,7 @@ const WALLET_OPTIONS = [
   { id: 'email',    label: 'Email (zkLogin)',   desc: 'No wallet required',    icon: '✉️' },
 ]
 
-// ── SCENE 0 — Press any key ─────────────────────────────────
+// ── SCENE 0, Press any key ─────────────────────────────────
 function SceneZero({ onNext }: { onNext: () => void }) {
   const [blink, setBlink] = useState(true)
 
@@ -95,7 +95,7 @@ function SceneZero({ onNext }: { onNext: () => void }) {
   )
 }
 
-// ── SCENE 1 — Character rain ────────────────────────────────
+// ── SCENE 1, Character rain ────────────────────────────────
 function SceneRain({ onNext }: { onNext: () => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -141,7 +141,7 @@ function SceneRain({ onNext }: { onNext: () => void }) {
   )
 }
 
-// ── SCENE 2 — ASCII art reveal ──────────────────────────────
+// ── SCENE 2, ASCII art reveal ──────────────────────────────
 function SceneASCII({ onNext }: { onNext: () => void }) {
   const [revealed, setRevealed] = useState('')
   const target = TUSKR_ASCII
@@ -170,7 +170,7 @@ function SceneASCII({ onNext }: { onNext: () => void }) {
   )
 }
 
-// ── SCENE 3 — Terminal boot ─────────────────────────────────
+// ── SCENE 3, Terminal boot ─────────────────────────────────
 function SceneBoot({ onNext }: { onNext: () => void }) {
   const [lines, setLines] = useState<string[]>([])
 
@@ -210,7 +210,7 @@ function SceneBoot({ onNext }: { onNext: () => void }) {
   )
 }
 
-// ── SCENE 4 — Wallet selector ───────────────────────────────
+// ── SCENE 4, Wallet selector ───────────────────────────────
 function SceneWallet({ onDone }: { onDone: () => void }) {
   const wallets = useWallets()
   const { mutate: connect } = useConnectWallet()
@@ -235,7 +235,7 @@ function SceneWallet({ onDone }: { onDone: () => void }) {
     SFX.keypress()
 
     if (selected === 'email') {
-      // zkLogin — for now skip straight through
+      // zkLogin, for now skip straight through
       setTimeout(() => { setConnecting(false); onDone() }, 1200)
       return
     }
@@ -306,7 +306,7 @@ function SceneWallet({ onDone }: { onDone: () => void }) {
             {connecting ? 'CONNECTING...' : selected ? `CONNECT ${selected.toUpperCase()}` : 'SELECT A NODE'}
           </motion.button>
           <button className={styles.skipBtn} onClick={() => { SFX.keypress(); onDone() }}>
-            SKIP — BROWSE WITHOUT WALLET
+            SKIP, BROWSE WITHOUT WALLET
           </button>
         </div>
       </div>

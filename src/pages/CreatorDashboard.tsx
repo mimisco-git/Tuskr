@@ -20,7 +20,7 @@ function CustomTooltip({ active, payload, label }: any) {
   return (
     <div style={{ background:'#111', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, padding:'10px 14px' }}>
       <p style={{ fontFamily:'Space Mono,monospace', fontSize:10, color:'rgba(255,255,255,0.4)', marginBottom:4 }}>{label}</p>
-      <p style={{ fontFamily:'Space Grotesk,sans-serif', fontSize:16, fontWeight:700, color:'#00d4aa' }}>{payload[0]?.value?.toFixed(2)} SUI</p>
+      <p style={{ fontFamily:'Inter,sans-serif', fontSize:16, fontWeight:700, color:'#00d4aa' }}>{payload[0]?.value?.toFixed(2)} SUI</p>
     </div>
   )
 }
@@ -72,7 +72,7 @@ export default function CreatorDashboard() {
         }))
       setSales(mySales)
 
-      // 4. Build chart — last 7 days
+      // 4. Build chart, last 7 days
       const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
       const today = new Date().getDay()
       const pts: ChartPoint[] = days.map((d, i) => {
@@ -93,7 +93,7 @@ export default function CreatorDashboard() {
 
   if (!account) return (
     <main style={{ padding:'100px 0', textAlign:'center' }}>
-      <p style={{ fontFamily:'Space Grotesk,sans-serif', fontSize:22, color:'rgba(255,255,255,0.35)', marginBottom:20 }}>Connect wallet to view your dashboard</p>
+      <p style={{ fontFamily:'Inter,sans-serif', fontSize:22, color:'rgba(255,255,255,0.35)', marginBottom:20 }}>Connect wallet to view your dashboard</p>
       <Link to="/marketplace" className="btn btn-outline">Browse marketplace</Link>
     </main>
   )

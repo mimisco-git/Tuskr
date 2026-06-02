@@ -1,6 +1,6 @@
 /**
  * Auction.tsx
- * Timed auction UI — wired to tuskr_auction.move contract.
+ * Timed auction UI, wired to tuskr_auction.move contract.
  * Shows active auctions, lets users bid, settle after end.
  */
 import { useState, useEffect } from 'react'

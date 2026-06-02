@@ -3,7 +3,7 @@
 .eyebrow { display:flex; align-items:center; gap:7px; font-family:'Space Mono',monospace; font-size:10px; color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:10px; }
 .eyebrowDot { width:6px; height:6px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 2s infinite; }
 @keyframes pulse{50%{opacity:0.3;}}
-.title { font-family:'Space Grotesk',sans-serif; font-size:clamp(28px,4vw,48px); font-weight:700; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:6px; }
+.title { font-family:'Inter',-apple-system,sans-serif; font-size:clamp(28px,4vw,48px); font-weight:700; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:6px; }
 .sub { font-size:15px; color:rgba(250,248,245,0.4); }
 
 .liveBadge { display:flex; align-items:center; gap:7px; padding:7px 14px; border-radius:99px; background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.22); font-family:'Space Mono',monospace; font-size:10px; color:var(--a); letter-spacing:0.1em; }
@@ -25,7 +25,7 @@
 .eventType { font-family:'Space Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:3px; }
 .eventName { font-size:15px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .eventMeta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
-.eventAmount { font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; color:#fff; }
+.eventAmount { font-family:'Inter',-apple-system,sans-serif; font-size:16px; font-weight:700; color:#fff; }
 .eventActor { font-family:'Space Mono',monospace; font-size:10px; color:rgba(250,248,245,0.35); }
 .eventTime { font-family:'Space Mono',monospace; font-size:10px; color:rgba(250,248,245,0.25); }
 .eventLink { font-size:14px; color:rgba(250,248,245,0.3); text-decoration:none; transition:color 0.2s; }
@@ -33,7 +33,7 @@
 
 .empty { text-align:center; padding:80px 20px; }
 .emptyIcon { font-size:48px; margin-bottom:14px; }
-.emptyTitle { font-family:'Space Grotesk',sans-serif; font-size:20px; font-weight:700; color:rgba(250,248,245,0.4); margin-bottom:8px; }
+.emptyTitle { font-family:'Inter',-apple-system,sans-serif; font-size:20px; font-weight:700; color:rgba(250,248,245,0.4); margin-bottom:8px; }
 .emptySub { font-size:14px; color:rgba(250,248,245,0.25); }
 
 @media(max-width:768px) {

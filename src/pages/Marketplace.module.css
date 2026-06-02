@@ -3,7 +3,7 @@
 .eyebrow { display:flex; align-items:center; gap:7px; font-family:'Space Mono',monospace; font-size:10px; color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:10px; }
 .eyebrowDot { width:6px; height:6px; border-radius:50%; background:var(--a); box-shadow:0 0 8px var(--a); animation:pulse 2s infinite; }
 @keyframes pulse{50%{opacity:0.3;}}
-.title { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,5vw,52px); font-weight:700; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:8px; }
+.title { font-family:'Inter',-apple-system,sans-serif; font-size:clamp(32px,5vw,52px); font-weight:700; letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:8px; }
 .sub { font-size:15px; color:rgba(250,248,245,0.4); }
 
 .controls { display:flex; align-items:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
@@ -17,11 +17,11 @@
 .cardWrap { position:relative; border-radius:20px; cursor:pointer; transition:all 0.15s; }
 .cardWrap:hover { transform:translateY(-2px); }
 .cardSelected { outline:2px solid var(--a); outline-offset:3px; }
-.buyingOverlay { position:absolute; inset:0; background:rgba(0,0,0,0.6); border-radius:20px; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; color:#fff; backdrop-filter:blur(4px); }
+.buyingOverlay { position:absolute; inset:0; background:rgba(0,0,0,0.6); border-radius:20px; display:flex; align-items:center; justify-content:center; font-family:'Inter',-apple-system,sans-serif; font-size:16px; font-weight:600; color:#fff; backdrop-filter:blur(4px); }
 
 .empty { text-align:center; padding:80px 20px; }
 .emptyIcon { font-size:48px; margin-bottom:14px; }
-.emptyTitle { font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:700; color:rgba(250,248,245,0.4); margin-bottom:8px; }
+.emptyTitle { font-family:'Inter',-apple-system,sans-serif; font-size:22px; font-weight:700; color:rgba(250,248,245,0.4); margin-bottom:8px; }
 .emptySub { font-size:15px; color:rgba(250,248,245,0.25); margin-bottom:24px; }
 
 @media(max-width:1060px) { .grid{grid-template-columns:repeat(3,1fr);} }
