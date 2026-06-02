@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSuiClient } from '@mysten/dapp-kit'
@@ -6,47 +6,232 @@ import NFTCard, { NFT } from '../components/NFTCard'
 import usePageTitle from '../hooks/usePageTitle'
 import s from './Home.module.css'
 
-// Featured NFTs loaded from real chain listings below
+const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
 
+/* ═══════════════════════════════════════
+   Intelligence feature set — Tuskr DNA
+═══════════════════════════════════════ */
 const FEATURES = [
-  { tab:'Permanent', icon:'permanent', tag:'WALRUS BLOB', title:'Always\npermanent.',
-    color:'#00d4aa',
-    desc:'Your NFT media is stored as a certified, erasure-coded blob on Walrus. Not IPFS, not a server. A blob that outlasts any single node.',
-    points:['On-chain blob certification for every file','Erasure-coded across hundreds of nodes','Media survives as long as Walrus runs'] },
-  { tab:'Provable', icon:'provable', tag:'SUI MOVE', title:'Always\nprovable.',
-    color:'#60a5fa',
-    desc:'Every NFT is a Move object on Sui. Ownership enforced at the protocol level, not in a database. The chain is the only truth.',
-    points:['Move objects with formal ownership semantics','Royalties enforced on-chain at every sale','Full provenance from mint to current holder'] },
-  { tab:'Programmable', icon:'programmable', tag:'SUI PTB', title:'Always\nprogrammable.',
-    color:'#a78bfa',
-    desc:'Sui Programmable Transaction Blocks let you buy dozens of NFTs atomically. All succeed or all revert. One signature, one fee.',
-    points:['Bulk-buy up to 20 NFTs in one transaction','Atomic: never a partial purchase','Gas-efficient batch operations'] },
-  { tab:'Private', icon:'private', tag:'WALRUS SEAL', title:'Private\nby design.',
-    color:'#f59e0b',
-    desc:'Walrus Seal threshold encryption ensures only the verified NFT holder can decrypt the full file. Preview is public; the original is yours.',
-    points:['AES-256-GCM keyed to NFT ownership','Threshold decryption via Seal nodes','First marketplace with native content gating'] },
+  {
+    tab: 'Intelligence',
+    icon: 'intelligence',
+    color: '#00c896',
+    tag: 'WALRUS BLOB',
+    title: 'Always\npermanent.',
+    desc: 'Every NFT\'s media is certified on Walrus — erasure-coded across hundreds of nodes. Not IPFS. Not a server. A blob that outlasts any single point of failure.',
+    points: ['On-chain blob certification for every file', 'Erasure-coded across hundreds of nodes', 'Media survives as long as Walrus runs'],
+  },
+  {
+    tab: 'Opportunities',
+    icon: 'opportunities',
+    color: '#06b6d4',
+    tag: 'SUI MOVE',
+    title: 'Always\nprovable.',
+    desc: 'Every NFT is a Move object on Sui. Ownership is enforced at the protocol level — not a database, not a promise. The chain is the only truth.',
+    points: ['Move objects with formal ownership semantics', 'Royalties enforced on-chain at every sale', 'Full provenance from mint to current holder'],
+  },
+  {
+    tab: 'Creation',
+    icon: 'creation',
+    color: '#a78bfa',
+    tag: 'SUI PTB',
+    title: 'Always\nprogrammable.',
+    desc: 'Sui Programmable Transaction Blocks let you buy dozens of NFTs atomically. All succeed or all revert. One signature, one fee, zero partial states.',
+    points: ['Bulk-buy up to 20 NFTs in one transaction', 'Atomic: never a partial purchase', 'Gas-efficient batch operations'],
+  },
+  {
+    tab: 'Ecosystem',
+    icon: 'ecosystem',
+    color: '#f59e0b',
+    tag: 'WALRUS SEAL',
+    title: 'Private\nby design.',
+    desc: 'Walrus Seal threshold encryption ensures only the verified NFT holder can decrypt the full resolution file. Preview is public. The original is yours.',
+    points: ['AES-256-GCM keyed to NFT ownership', 'Threshold decryption via Seal nodes', 'First marketplace with native content gating'],
+  },
+]
+
+const USE_CASES = [
+  {
+    icon: 'trade',
+    color: '#00c896',
+    pre: 'Discover',
+    title: 'Find alpha before the crowd.',
+    desc: 'Scan emerging collections. Detect volume spikes. Buy in bulk atomically with PTB. Move-enforced royalties on every transfer.',
+    tags: ['SUI PTB', 'WALRUS BLOB', 'MOVE'],
+    to: '/marketplace',
+    cta: 'Explore marketplace',
+  },
+  {
+    icon: 'create',
+    color: '#a78bfa',
+    pre: 'Create',
+    title: 'AI-generated intelligence.',
+    desc: 'Groq AI generates names, descriptions, and traits. You upload the art. Minted on Sui with media on Walrus — permanently.',
+    tags: ['GROQ AI', 'WALRUS BLOB', 'SUI MINT'],
+    to: '/mint/ai',
+    cta: 'Start creating',
+  },
+  {
+    icon: 'encrypt',
+    color: '#f59e0b',
+    pre: 'Gate',
+    title: 'Signal-locked content.',
+    desc: 'Lock full-resolution media behind Walrus Seal. Only verified holders decrypt. The first marketplace with native content gating.',
+    tags: ['SEAL', 'AES-256', 'THRESHOLD'],
+    to: '/mint',
+    cta: 'Gate your content',
+  },
 ]
 
 const PARTNERS = [
-  'Bluefin','Cetus DEX','Baselight','Talus Network',
-  'Everlyn','Cudis','Sui Foundation','Mysten Labs',
-  'Walrus Protocol','DeepSurge','Move Language','Slushie Wallet',
+  'Bluefin', 'Cetus DEX', 'Baselight', 'Talus Network',
+  'Everlyn', 'Cudis', 'Sui Foundation', 'Mysten Labs',
+  'Walrus Protocol', 'DeepSurge', 'Move Language', 'Slushie Wallet',
 ]
 
-const STARS = [
-  { left:'9%',  top:'14%', w:3, dur:5,   del:0,   op:0.7 },
-  { left:'13%', top:'28%', w:2, dur:7,   del:2.4, op:0.5 },
-  { left:'4%',  top:'45%', w:4, dur:4.5, del:1.1, op:0.6 },
-  { left:'22%', top:'18%', w:7, dur:6,   del:3.6, op:0.4 },
-  { left:'35%', top:'8%',  w:2, dur:4,   del:0.5, op:0.8 },
-  { left:'68%', top:'22%', w:5, dur:5.5, del:0.8, op:0.6 },
-  { left:'88%', top:'30%', w:7, dur:7.5, del:3,   op:0.4 },
-  { left:'94%', top:'12%', w:2, dur:4.5, del:1.2, op:0.9 },
-  { left:'82%', top:'45%', w:4, dur:5,   del:3.8, op:0.5 },
-  { left:'55%', top:'35%', w:3, dur:6,   del:0.6, op:0.6 },
-  { left:'60%', top:'8%',  w:2, dur:3.5, del:1.5, op:0.8 },
-]
+/* ═════════════════ SVG ICONS ═════════════════ */
+function FeatureIcon({ type, size = 48, color = '#00c896' }: { type: string; size?: number; color?: string }) {
+  const p = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: color, strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+  if (type === 'intelligence' || type === 'permanent') return (
+    <svg {...p}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M12 8v6M9 11l3 3 3-3" strokeWidth={1.3}/></svg>
+  )
+  if (type === 'opportunities' || type === 'provable') return (
+    <svg {...p}><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/><polyline points="9,12 11,14 15,10" strokeWidth={1.8}/></svg>
+  )
+  if (type === 'creation' || type === 'programmable') return (
+    <svg {...p}><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8l3 3-3 3M13 14h4" strokeWidth={1.4}/></svg>
+  )
+  if (type === 'ecosystem' || type === 'private') return (
+    <svg {...p}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1.5" fill={color} stroke="none"/></svg>
+  )
+  if (type === 'trade') return (
+    <svg {...p}><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg>
+  )
+  if (type === 'create') return (
+    <svg {...p}><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+  )
+  if (type === 'encrypt') return (
+    <svg {...p}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M12 15v2" strokeWidth={2}/></svg>
+  )
+  return null
+}
 
+/* ═════════════════ NEURAL NETWORK HERO ═════════════════ */
+function NeuralHero() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const NODE_COUNT = 36
+    const nodes: { x: number; y: number; vx: number; vy: number; r: number; pulse: number; speed: number }[] = []
+
+    for (let i = 0; i < NODE_COUNT; i++) {
+      nodes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 2 + 1.5,
+        pulse: Math.random() * Math.PI * 2,
+        speed: Math.random() * 0.02 + 0.01,
+      })
+    }
+
+    let frame = 0
+    const CONNECTION_DIST = 160
+
+    const draw = () => {
+      const W = canvas.width, H = canvas.height
+      ctx.clearRect(0, 0, W, H)
+      frame++
+
+      // Move nodes
+      nodes.forEach(n => {
+        n.x += n.vx; n.y += n.vy; n.pulse += n.speed
+        if (n.x < 0 || n.x > W) n.vx *= -1
+        if (n.y < 0 || n.y > H) n.vy *= -1
+      })
+
+      // Draw connections — signal flow
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[j].x - nodes[i].x
+          const dy = nodes[j].y - nodes[i].y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist > CONNECTION_DIST) continue
+
+          const alpha = (1 - dist / CONNECTION_DIST) * 0.35
+          // Signal traveling along edge
+          const sig = (Math.sin(frame * 0.03 + i * 0.5) + 1) / 2
+
+          const grd = ctx.createLinearGradient(nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y)
+          grd.addColorStop(0, `rgba(0,200,150,${alpha * (1 - sig)})`)
+          grd.addColorStop(sig, `rgba(6,182,212,${alpha * 1.4})`)
+          grd.addColorStop(1, `rgba(0,200,150,${alpha * sig})`)
+
+          ctx.beginPath()
+          ctx.strokeStyle = grd
+          ctx.lineWidth = 0.8
+          ctx.moveTo(nodes[i].x, nodes[i].y)
+          ctx.lineTo(nodes[j].x, nodes[j].y)
+          ctx.stroke()
+        }
+      }
+
+      // Draw nodes
+      nodes.forEach((n, i) => {
+        const glow = (Math.sin(n.pulse) + 1) / 2
+        const bright = 0.5 + glow * 0.5
+        const isHub = i % 6 === 0
+
+        // Outer ring
+        if (isHub) {
+          ctx.beginPath()
+          ctx.arc(n.x, n.y, n.r * 3.5, 0, Math.PI * 2)
+          ctx.fillStyle = `rgba(0,200,150,${0.06 * bright})`
+          ctx.fill()
+        }
+
+        // Glow
+        const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * (isHub ? 5 : 3))
+        grad.addColorStop(0, `rgba(0,200,150,${0.7 * bright})`)
+        grad.addColorStop(1, 'rgba(0,200,150,0)')
+        ctx.beginPath()
+        ctx.arc(n.x, n.y, n.r * (isHub ? 5 : 3), 0, Math.PI * 2)
+        ctx.fillStyle = grad
+        ctx.fill()
+
+        // Core dot
+        ctx.beginPath()
+        ctx.arc(n.x, n.y, n.r * (isHub ? 1.6 : 1), 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(0,200,150,${0.8 * bright})`
+        ctx.fill()
+      })
+
+      requestAnimationFrame(draw)
+    }
+
+    const anim = requestAnimationFrame(draw)
+    return () => {
+      window.removeEventListener('resize', resize)
+      cancelAnimationFrame(anim)
+    }
+  }, [])
+
+  return <canvas ref={canvasRef} className={s.neuralCanvas} aria-hidden/>
+}
+
+/* ═════════════════ ARROW ═════════════════ */
 function Arrow() {
   return (
     <svg width="12" height="12" viewBox="0 0 9 9" fill="none" aria-hidden>
@@ -57,107 +242,36 @@ function Arrow() {
   )
 }
 
-/* Use case SVG icons */
-function UCIcon({ type, color }: { type: string; color: string }) {
-  const p = { width:48, height:48, viewBox:"0 0 24 24", fill:"none", stroke:color, strokeWidth:1.5, strokeLinecap:"round" as const, strokeLinejoin:"round" as const }
-  if (type === 'trade') return (
-    <svg {...p}>
-      <path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/>
-      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
-      <path d="M9 10V6.5a2.5 2.5 0 0 1 5 0V10" strokeWidth={1.3}/>
-    </svg>
-  )
-  if (type === 'create') return (
-    <svg {...p}>
-      <path d="M12 20h9"/>
-      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-      <circle cx="7" cy="7" r="3" strokeWidth={1.3}/>
-    </svg>
-  )
-  if (type === 'encrypt') return (
-    <svg {...p}>
-      <rect x="3" y="11" width="18" height="11" rx="2"/>
-      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      <path d="M12 15v2" strokeWidth={2}/>
-    </svg>
-  )
-  return null
-}
-
-/* Premium SVG icons for each feature */
-function FeatureIcon({ type, size=52, color='#00d4aa' }: { type:string; size?:number; color?:string }) {
-  const s = { width:size, height:size, strokeWidth:1.5, fill:'none', stroke:color, strokeLinecap:'round' as const, strokeLinejoin:'round' as const }
-  if (type === 'permanent') return (
-    <svg viewBox="0 0 24 24" {...s}>
-      <ellipse cx="12" cy="5" rx="9" ry="3"/>
-      <path d="M21 12c0 1.66-4.03 3-9 3S3 13.66 3 12"/>
-      <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
-      <path d="M12 8v6M9 11l3 3 3-3" strokeWidth={1.4}/>
-    </svg>
-  )
-  if (type === 'provable') return (
-    <svg viewBox="0 0 24 24" {...s}>
-      <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.25C17.25 22.15 21 17.25 21 12V7L12 2z"/>
-      <polyline points="9,12 11,14 15,10" strokeWidth={1.8}/>
-    </svg>
-  )
-  if (type === 'programmable') return (
-    <svg viewBox="0 0 24 24" {...s}>
-      <rect x="2" y="3" width="20" height="14" rx="2"/>
-      <path d="M8 21h8M12 17v4"/>
-      <path d="M8 9l4-4 4 4M8 15l4 4 4-4" strokeWidth={1.4}/>
-    </svg>
-  )
-  if (type === 'private') return (
-    <svg viewBox="0 0 24 24" {...s}>
-      <rect x="3" y="11" width="18" height="11" rx="2"/>
-      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      <circle cx="12" cy="16" r="1.5" fill={color} stroke="none"/>
-    </svg>
-  )
-  return null
-}
-
-/* Small icon for side cards */
-function FeatureIconSmall({ type, color }: { type:string; color:string }) {
-  return <FeatureIcon type={type} size={28} color={color}/>
-}
-
+/* ═════════════════ HOME ═════════════════ */
 export default function Home() {
   usePageTitle()
   const [activeFeat, setActiveFeat] = useState(0)
-  const [featured, setFeatured] = useState<NFT[]>([])
-  const client = useSuiClient()
-  const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
-  const [counter, setCounter] = useState({ nfts:0, vol:0, creators:0 })
-  const feat = FEATURES[activeFeat]
-  const allPartners = [...PARTNERS, ...PARTNERS]
+  const [featured,   setFeatured]   = useState<NFT[]>([])
+  const [counter,    setCounter]    = useState({ nfts: 0, vol: 0, creators: 0 })
+  const client   = useSuiClient()
+  const feat     = FEATURES[activeFeat]
+  const allPart  = [...PARTNERS, ...PARTNERS]
 
+  // Load real featured listings
   useEffect(() => {
-    // Fetch real recent listings for featured section
     client.queryEvents({
       query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` },
       limit: 4,
     }).then(async (events) => {
       const items: NFT[] = []
-      for (const e of events.data.slice(0,4)) {
+      for (const e of events.data.slice(0, 4)) {
         try {
           const p = (e as any).parsedJson ?? {}
-          const nftObj = await client.getObject({
-            id: p.nft_id,
-            options: { showContent:true, showDisplay:true },
-          })
+          const nftObj = await client.getObject({ id: p.nft_id, options: { showContent: true, showDisplay: true } })
           const f = (nftObj.data?.content as any)?.fields ?? {}
           const d = (nftObj.data?.display as any)?.data   ?? {}
           items.push({
-            id:       p.listing_id || p.nft_id,
-            name:     f.name || d.name || `NFT #${(p.nft_id||'').slice(2,8)}`,
-            image:    f.media_url || d.image_url || '',
-            price:    p.price ? (Number(p.price)/1e9).toFixed(2) : '0',
-            currency: 'SUI',
-            creator:  (f.creator||p.seller||'').slice(0,10)+'…',
-            listed:   true,
-            blobId:   f.blob_id || '',
+            id: p.listing_id || p.nft_id,
+            name: f.name || d.name || `NFT #${(p.nft_id || '').slice(2, 8)}`,
+            image: f.media_url || d.image_url || '',
+            price: p.price ? (Number(p.price) / 1e9).toFixed(2) : '0',
+            currency: 'SUI', creator: (f.creator || p.seller || '').slice(0, 10) + '…',
+            listed: true, blobId: f.blob_id || '',
           })
         } catch {}
       }
@@ -165,8 +279,9 @@ export default function Home() {
     }).catch(() => {})
   }, [client])
 
+  // Counter animation
   useEffect(() => {
-    const targets = { nfts:2841, vol:14200, creators:390 }
+    const targets = { nfts: 2841, vol: 14200, creators: 390 }
     const timer = setInterval(() => {
       setCounter(prev => ({
         nfts:     Math.min(prev.nfts + 112,   targets.nfts),
@@ -178,67 +293,113 @@ export default function Home() {
   }, [])
 
   return (
-    <main style={{ background:'#000', overflow:'hidden' }}>
+    <main style={{ background: '#000', overflow: 'hidden' }}>
 
-      {/* ═══ HERO ═══ */}
+      {/* ════ HERO ════ */}
       <section className={s.hero}>
-        <div className={s.aurora}>
-          <div className={s.aGlow}/><div className={s.aPurple}/>
-          <div className={s.aTealRight}/><div className={s.aDark}/>
-        </div>
-        <div className={s.stars}>
-          {STARS.map((st, i) => (
+        {/* Neural network canvas */}
+        <NeuralHero/>
+
+        {/* Emerald radial glow */}
+        <div className={s.heroGlow}/>
+        <div className={s.heroGlowRight}/>
+
+        {/* Star field */}
+        <div className={s.starField} aria-hidden>
+          {Array.from({ length: 20 }).map((_, i) => (
             <div key={i} className={s.star} style={{
-              left:st.left, top:st.top, width:st.w, height:st.w,
-              filter:`blur(${Math.max(0.5,st.w*0.4)}px)`,
-              '--d':`${st.dur}s`,'--del':`${st.del}s`,'--op':st.op,
-            } as React.CSSProperties}/>
+              left:  `${Math.random() * 100}%`,
+              top:   `${Math.random() * 80}%`,
+              width: `${Math.random() * 2 + 1}px`,
+              height:`${Math.random() * 2 + 1}px`,
+              animationDelay: `${Math.random() * 4}s`,
+              animationDuration: `${Math.random() * 4 + 3}s`,
+            }}/>
           ))}
         </div>
 
-        <div className={s.heroText}>
-          <h1 className={s.heroTitle}>NFTs for data<br/>that matters.</h1>
+        <div className={s.heroInner}>
+          {/* Signal label */}
+          <div className={s.heroSignal}>
+            <div className={s.signalDot}/>
+            <span>AI-powered NFT intelligence</span>
+            <span className={s.signalSep}>·</span>
+            <span>Built on Sui + Walrus</span>
+          </div>
+
+          {/* Headline */}
+          <h1 className={s.heroTitle}>
+            Discover what<br/>
+            <span className={s.heroTitleAccent}>others miss.</span>
+          </h1>
+
           <p className={s.heroDesc}>
-            The first marketplace where every NFT is <strong>provable</strong>,{' '}
-            <strong>permanent</strong>, and <strong>always yours</strong>,
-            without compromising speed.
+            AI-powered intelligence for NFTs, creators, communities,
+            and emerging opportunities — with media permanently stored on Walrus
+            and ownership enforced by Sui Move.
           </p>
+
           <div className={s.heroCta}>
-            <Link to="/marketplace" className={`btn btn-outline btn-lg ${s.ctaBtn}`}>
-              Start collecting <Arrow/>
+            <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
+              Start discovering <Arrow/>
             </Link>
-            <Link to="/mint" className="btn btn-ghost btn-lg">Mint an NFT</Link>
+            <Link to="/mint/ai" className="btn btn-ghost btn-lg">
+              AI Generator
+            </Link>
+          </div>
+
+          {/* Stats row */}
+          <div className={s.heroStats}>
+            {[
+              { n: counter.nfts.toLocaleString(), l: 'NFTs indexed' },
+              { n: `${(counter.vol / 1000).toFixed(1)}K`, l: 'SUI volume' },
+              { n: `${counter.creators}+`, l: 'Creators' },
+              { n: '100%', l: 'On Walrus' },
+            ].map(({ n, l }) => (
+              <div key={l} className={s.heroStat}>
+                <div className={s.heroStatN}>{n}</div>
+                <div className={s.heroStatL}>{l}</div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Mascot — blends into aurora, no box */}
+        {/* Mascot */}
         <div className={s.mascotWrap}>
           <img src="/mascot-stand.png" alt="Tuskr mascot" className={s.mascot} draggable={false}/>
         </div>
       </section>
 
-      {/* ═══ NO FAKE STORAGE ═══ */}
-      <section className={s.noDowntime}>
-        <div className={s.ndInner}>
-          <div className={s.ndPre}>Your NFT Marketplace</div>
-          <h2 className={s.ndTitle}>No fake storage.<br/>No broken links.<br/>No limits.</h2>
-          <p className={s.ndDesc}>For too long, NFT media has lived on servers that vanish.
-            <strong> Tuskr fixes that.</strong> Every file on Walrus. Every NFT on Sui.</p>
-          <Link to="/marketplace" className={`btn btn-outline btn-lg ${s.ctaBtn}`}>
-            Explore marketplace <Arrow/>
-          </Link>
+      {/* ════ INTELLIGENCE STATEMENT ════ */}
+      <section className={s.statement}>
+        <div className="container">
+          <div className={s.statementInner}>
+            <div className={s.statementLabel}>
+              <div className={s.signalDot}/>Intelligence finds value
+            </div>
+            <h2 className={s.statementTitle}>
+              No fake storage.<br/>No broken links.<br/>No limits.
+            </h2>
+            <p className={s.statementDesc}>
+              For too long, NFT media has lived on servers that vanish.
+              <strong> Tuskr fixes that.</strong> Every file on Walrus. Every NFT on Sui.
+            </p>
+            <Link to="/marketplace" className={`btn btn-outline btn-lg ${s.statementCta}`}>
+              Explore marketplace <Arrow/>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ═══ STATS ═══ */}
+      {/* ════ STATS BAR ════ */}
       <div className={s.statsBar}>
         <div className={s.statsGrid}>
           {([
-            [counter.nfts.toLocaleString(),'NFTs Minted'],
-            [`${(counter.vol/1000).toFixed(1)}K`,'SUI Volume'],
-            [`${counter.creators}+`,'Creators'],
-            ['100%','On Walrus'],
-          ] as [string,string][]).map(([n,l]) => (
+            [counter.nfts.toLocaleString(),          'NFTs Minted'],
+            [`${(counter.vol / 1000).toFixed(1)}K`,  'SUI Volume'],
+            [`${counter.creators}+`,                  'Creators'],
+            ['100%',                                  'On Walrus'],
+          ] as [string, string][]).map(([n, l]) => (
             <div key={l} className={s.statItem}>
               <div className={s.statNum}>{n}</div>
               <div className={s.statLabel}>{l}</div>
@@ -247,75 +408,89 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ═══ POWER TO THE COLLECTOR ═══ */}
+      {/* ════ POWER TO THE COLLECTOR ════ */}
       <section className={s.powerSection}>
         <div className="container">
+          <div className={s.powerEyebrow}>
+            <div className={s.signalDot}/>Platform Intelligence
+          </div>
           <h2 className={s.powerTitle}>Power to the<br/>collector.</h2>
+
+          {/* Tab strip */}
           <div className={s.featureTabs}>
-            {FEATURES.map((f,i) => {
+            {FEATURES.map((f, i) => {
               const isActive = i === activeFeat
               return (
                 <button
                   key={f.tab}
                   className={`${s.featureTab} ${isActive ? s.featureTabActive : ''}`}
                   onClick={() => setActiveFeat(i)}
-                  style={{
-                    '--tab-color': f.color,
-                  } as React.CSSProperties}
+                  style={{ '--tab-color': f.color } as React.CSSProperties}
                 >
-                  {/* Icon */}
                   <span className={`${s.featureTabIcon} ${isActive ? s.featureTabIconActive : ''}`}>
-                    <FeatureIconSmall type={f.icon} color={isActive ? '#000' : f.color}/>
+                    <FeatureIcon type={f.icon} size={15} color={isActive ? '#000' : f.color}/>
                   </span>
-                  {/* Label */}
                   <span className={s.featureTabLabel}>{f.tab}</span>
-                  {/* Active dot indicator */}
-                  {isActive && <span className={s.featureTabDot} style={{ background: '#000', opacity: 0.4 }}/>}
                 </button>
               )
             })}
           </div>
         </div>
+
+        {/* Feature carousel */}
         <div className={s.featureCarousel}>
-          <div className={s.featureCardSide} onClick={() => setActiveFeat((activeFeat+3)%4)}>
-            <div className={s.featureSideIcon}><FeatureIconSmall type={FEATURES[(activeFeat+3)%4].icon} color={FEATURES[(activeFeat+3)%4].color}/></div>
-            <div className={s.featureSideTitle}>{FEATURES[(activeFeat+3)%4].tab}</div>
+          <div className={s.featureCardSide} onClick={() => setActiveFeat((activeFeat + 3) % 4)}>
+            <div className={s.featureSideIcon}><FeatureIcon type={FEATURES[(activeFeat + 3) % 4].icon} size={26} color={FEATURES[(activeFeat + 3) % 4].color}/></div>
+            <div className={s.featureSideTitle}>{FEATURES[(activeFeat + 3) % 4].tab}</div>
             <div className={s.featureSideDesc}>Click to view</div>
           </div>
+
           <AnimatePresence mode="wait">
             <motion.div key={activeFeat} className={s.featureCardMain}
-              initial={{opacity:0,y:10}} animate={{opacity:1,y:0}}
-              exit={{opacity:0,y:-8}} transition={{duration:0.22}}>
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }}>
               <div className={s.featureGlow} style={{ background: `radial-gradient(circle, ${feat.color}22 0%, transparent 65%)` }}/>
               <div className={s.featureIcon}><FeatureIcon type={feat.icon} size={52} color={feat.color}/></div>
-              <div className={s.featureTag}><div className={s.featureTagDot} style={{ background:feat.color, boxShadow:`0 0 8px ${feat.color}` }}/>{feat.tag}</div>
-              <h3 className={s.featureTitle} style={{whiteSpace:'pre-line'}}>{feat.title}</h3>
+              <div className={s.featureTag}>
+                <div className={s.featureTagDot} style={{ background: feat.color, boxShadow: `0 0 8px ${feat.color}` }}/>
+                {feat.tag}
+              </div>
+              <h3 className={s.featureTitle} style={{ whiteSpace: 'pre-line' }}>{feat.title}</h3>
               <p className={s.featureDesc}>{feat.desc}</p>
               <div className={s.featurePoints}>
                 {feat.points.map(p => (
-                  <div key={p} className={s.featurePoint}><div className={s.fpDot}/><span>{p}</span></div>
+                  <div key={p} className={s.featurePoint}>
+                    <div className={s.fpDot} style={{ background: feat.color }}/>
+                    <span>{p}</span>
+                  </div>
                 ))}
               </div>
-              <Link to="/marketplace" className="btn btn-ghost btn-sm" style={{width:'fit-content'}}>See it in action →</Link>
+              <Link to="/marketplace" className="btn btn-ghost btn-sm" style={{ width: 'fit-content' }}>
+                See it in action →
+              </Link>
             </motion.div>
           </AnimatePresence>
-          <div className={s.featureCardSide} onClick={() => setActiveFeat((activeFeat+1)%4)}>
-            <div className={s.featureSideIcon}><FeatureIconSmall type={FEATURES[(activeFeat+1)%4].icon} color={FEATURES[(activeFeat+1)%4].color}/></div>
-            <div className={s.featureSideTitle}>{FEATURES[(activeFeat+1)%4].tab}</div>
+
+          <div className={s.featureCardSide} onClick={() => setActiveFeat((activeFeat + 1) % 4)}>
+            <div className={s.featureSideIcon}><FeatureIcon type={FEATURES[(activeFeat + 1) % 4].icon} size={26} color={FEATURES[(activeFeat + 1) % 4].color}/></div>
+            <div className={s.featureSideTitle}>{FEATURES[(activeFeat + 1) % 4].tab}</div>
             <div className={s.featureSideDesc}>Click to view</div>
           </div>
         </div>
+
         <div className={s.powerCta}>
-          <Link to="/marketplace" className={`btn btn-outline btn-lg ${s.ctaBtn}`}>Explore marketplace <Arrow/></Link>
+          <Link to="/marketplace" className={`btn btn-outline btn-lg`}>
+            Explore marketplace <Arrow/>
+          </Link>
         </div>
       </section>
 
-      {/* ═══ PARTNER MARQUEE ═══ */}
+      {/* ════ PARTNER MARQUEE ════ */}
       <section className={s.partnerSection}>
         <p className={s.partnerPre}>Ecosystem Partners</p>
         <div className={s.marqueeOuter}>
           <div className={s.marqueeTrack}>
-            {allPartners.map((name,i) => (
+            {allPart.map((name, i) => (
               <div key={i} className={s.partnerPill}>
                 <span className={s.partnerName}>{name}</span>
               </div>
@@ -324,58 +499,67 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ USE CASES ═══ */}
+      {/* ════ USE CASES ════ */}
       <section className={s.usecaseSection}>
-        <div className={s.usecaseHead}>
-          <div className={s.usecasePre}>What you can do</div>
-          <h2 className={s.usecaseTitle}>Built for<br/>what's next.</h2>
-        </div>
-        <div className={s.usecaseCarousel}>
-          {[
-            { icon:'trade',   color:'#00d4aa', pre:'Trade',  title:'NFTs at scale.',        desc:'Bulk-buy dozens of NFTs in one PTB. Move-enforced royalties on every transfer. Earn XP for every trade.', tags:['SUI PTB','WALRUS BLOB','MOVE'],        to:'/marketplace' },
-            { icon:'create',  color:'#a78bfa', pre:'Create', title:'AI-powered minting.',    desc:'Groq AI generates the concept. You upload the art. Minted on Sui, stored permanently on Walrus. Earn XP for every mint.', tags:['GROQ AI','WALRUS BLOB','SUI MINT'], to:'/mint/ai' },
-            { icon:'encrypt', color:'#f59e0b', pre:'Gate',   title:'Encrypted content.',     desc:'Lock full-resolution files behind Walrus Seal. Only verified NFT holders can decrypt. Preview is public; the original is yours.', tags:['SEAL','AES-256','THRESHOLD'], to:'/mint' },
-          ].map((u,i) => (
-            <div key={i} className={s.ucCard} style={{ '--uc-color': u.color } as React.CSSProperties}>
-              <div className={s.ucIcon}><UCIcon type={u.icon} color={u.color}/></div>
-              <div className={s.ucPre}>{u.pre}</div>
-              <div className={s.ucTitle}>{u.title}</div>
-              <p className={s.ucDesc}>{u.desc}</p>
-              <div className={s.ucTags}>{u.tags.map(t => <span key={t} className={s.ucTag}>{t}</span>)}</div>
-              <Link to={u.to} className={s.ucLink} onClick={e => e.stopPropagation()}>Get started →</Link>
-            </div>
-          ))}
+        <div className="container">
+          <div className={s.usecaseHead}>
+            <div className={s.usecasePre}>What you can do</div>
+            <h2 className={s.usecaseTitle}>Built for<br/>what's next.</h2>
+          </div>
+          <div className={s.usecaseCarousel}>
+            {USE_CASES.map((u, i) => (
+              <div key={i} className={s.ucCard} style={{ '--uc-color': u.color } as React.CSSProperties}>
+                <div className={s.ucIcon}><FeatureIcon type={u.icon} size={28} color={u.color}/></div>
+                <div className={s.ucPre}>{u.pre}</div>
+                <div className={s.ucTitle}>{u.title}</div>
+                <p className={s.ucDesc}>{u.desc}</p>
+                <div className={s.ucTags}>{u.tags.map(t => <span key={t} className={s.ucTag}>{t}</span>)}</div>
+                <Link to={u.to} className={s.ucLink}>{u.cta}</Link>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ═══ FEATURED NFTS ═══ */}
+      {/* ════ FEATURED NFTS ════ */}
       <section className={s.nftSection}>
         <div className="container">
           <div className={s.secHead}>
-            <div><p className={s.secPre}>On the block</p><h2 className={s.secTitle}>Featured NFTs</h2></div>
+            <div>
+              <p className={s.secPre}>On the block</p>
+              <h2 className={s.secTitle}>Live listings</h2>
+            </div>
             <Link to="/marketplace" className="btn btn-ghost">View all →</Link>
           </div>
           <div className={s.nftGrid}>
             {featured.length > 0
-              ? featured.map((nft,i) => <NFTCard key={nft.id} nft={nft} delay={i*0.07}/>)
-              : Array.from({length:4}).map((_,i) => (
-                  <div key={i} className="skeleton" style={{aspectRatio:'1',borderRadius:20}}/>
-                ))
+              ? featured.map((nft, i) => <NFTCard key={nft.id} nft={nft} delay={i * 0.07}/>)
+              : Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="skeleton" style={{ aspectRatio: '1', borderRadius: 20 }}/>
+              ))
             }
           </div>
         </div>
       </section>
 
-      {/* ═══ CTA ═══ */}
+      {/* ════ CTA ════ */}
       <section className={s.ctaSection}>
-        <div className={s.ctaCard}>
-          <div className={s.ctaGlow}/>
-          <h2 className={s.ctaTitle}>Your media.<br/>Forever on Walrus.</h2>
-          <p className={s.ctaSub}>No middlemen. No centralized servers. Your NFT, your ownership, secured by Sui.</p>
-          <div className={s.ctaButtons}>
-            <Link to="/mint" className="btn btn-primary btn-lg">Start minting</Link>
-            <Link to="/mint/ai" className="btn btn-ghost btn-lg">✦ AI Generator</Link>
-            <Link to="/leaderboard" className="btn btn-ghost btn-lg">🏆 Leaderboard</Link>
+        <div className="container">
+          <div className={s.ctaCard}>
+            <div className={s.ctaGlow}/>
+            <div className={s.ctaSignal}>
+              <div className={s.signalDot}/>Intelligence finds value
+            </div>
+            <h2 className={s.ctaTitle}>Your media.<br/>Forever on Walrus.</h2>
+            <p className={s.ctaSub}>
+              No middlemen. No centralized servers. Your NFT, your ownership,
+              secured by Sui and stored on Walrus.
+            </p>
+            <div className={s.ctaButtons}>
+              <Link to="/mint"        className="btn btn-primary btn-lg">Start minting</Link>
+              <Link to="/mint/ai"     className="btn btn-ghost btn-lg">✦ AI Generator</Link>
+              <Link to="/leaderboard" className="btn btn-ghost btn-lg">⬡ Leaderboard</Link>
+            </div>
           </div>
         </div>
       </section>
