@@ -4,54 +4,60 @@
 ═══════════════════════════════════════════════════ */
 
 /* ════════════════════════════════════════════════════════════
-   HERO — Walrus layout: text top, mascot HUGE below, bleeds all edges
+   HERO — CLEAN REBUILD matching Walrus screenshots exactly
    
-   From screenshots:
-   - Aurora atmospheric bg (teal bottom-left, purple top-right)
-   - Headline + button centered in top ~40% of viewport
-   - Mascot fills bottom ~60% — full width, no borders, cropped at edges
-   - Character appears to emerge FROM BELOW the text
-   - Next section slides up over the mascot with rounded top corners
+   Walrus structure observed:
+   - Background: deep atmospheric dark with teal left, purple right
+   - Text: centered, top portion of viewport
+   - Mascot: fills full width, lower ~50-55% of viewport
+   - Character crops at sides and bottom — NO visible edges
+   - Next section: rounded dark panel overlaps mascot bottom
 ════════════════════════════════════════════════════════════ */
 
 .hero {
   position: relative;
   min-height: 100vh;
-  background: #000000;
-  /* overflow:hidden clips mascot edges — no visible image border */
+  background: #050608;
   overflow: hidden;
 }
 
-/* Aurora atmosphere behind everything — matches Walrus bg exactly:
-   Deep dark with teal glow bottom-left, purple top-right, green right */
+/* ── AURORA ATMOSPHERE ─────────────────────────────────────
+   From Walrus screenshots: strong teal glow bottom-center/left,
+   deep purple top-right, very dark everywhere else.
+   This IS visible — not subtle. It creates the atmospheric depth.
+─────────────────────────────────────────────────────────── */
 .aurora {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background:
-    radial-gradient(ellipse 60% 55% at 5% 85%,
-      rgba(0,160,140,0.55) 0%,
-      rgba(0,120,100,0.25) 35%,
-      transparent 65%),
-    radial-gradient(ellipse 50% 50% at 95% 10%,
-      rgba(100,20,200,0.50) 0%,
-      rgba(60,10,140,0.20) 40%,
-      transparent 65%),
-    radial-gradient(ellipse 40% 45% at 92% 65%,
-      rgba(0,100,80,0.35) 0%,
-      transparent 55%),
-    radial-gradient(ellipse 70% 40% at 50% 100%,
-      rgba(0,140,160,0.30) 0%,
-      transparent 60%);
   pointer-events: none;
+  background:
+    /* Teal glow behind mascot — lower center/left */
+    radial-gradient(ellipse 70% 50% at 30% 90%,
+      rgba(0,180,160,0.60) 0%,
+      rgba(0,140,120,0.30) 30%,
+      transparent 60%),
+    /* Purple glow top-right */
+    radial-gradient(ellipse 55% 55% at 95% 5%,
+      rgba(90,20,180,0.65) 0%,
+      rgba(60,10,130,0.30) 35%,
+      transparent 60%),
+    /* Teal right edge accent */
+    radial-gradient(ellipse 35% 40% at 100% 70%,
+      rgba(0,120,100,0.40) 0%,
+      transparent 55%),
+    /* Center glow — where mascot sits */
+    radial-gradient(ellipse 80% 45% at 50% 85%,
+      rgba(0,160,180,0.25) 0%,
+      transparent 60%);
 }
 
-/* Legacy class aliases — hidden */
+/* Legacy aliases */
 .glow1, .glow2, .glow3,
 .lightCyan, .lightEmerald, .lightWhite,
 .starField, .star, .neuralCanvas { display: none; }
 
-/* Single centered column */
+/* ── HERO CONTENT COLUMN ─────────────────────────────────── */
 .heroContent {
   position: relative;
   z-index: 1;
@@ -60,7 +66,7 @@
   align-items: center;
 }
 
-/* Text block: centered, top portion of hero */
+/* ── TEXT BLOCK ──────────────────────────────────────────── */
 .heroInner {
   position: relative;
   z-index: 2;
@@ -68,95 +74,91 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 860px;
   width: 100%;
+  max-width: 860px;
   margin: 0 auto;
-  padding: clamp(100px, 13vw, 140px) 24px clamp(32px, 4vw, 56px);
+  padding: clamp(100px, 13vw, 140px) 24px clamp(28px, 4vw, 48px);
 }
 
-/* ── MASCOT ─────────────────────────────────────────────────
-   From screenshot: fills full width, bottom 55-60% of viewport.
-   Character fills edge to edge — no visible rectangle.
-   overflow:hidden on .hero clips left/right/bottom.
-   mix-blend-mode:screen removes JPEG near-black background.
-   object-position: center 20% shows head/face (top of character).
-   
-   CRITICAL: NO z-index, NO transform on wrapper.
-   These trap mix-blend-mode inside a stacking context
-   and make the black bg visible again.
+/* ── MASCOT ──────────────────────────────────────────────────
+   Strategy: radial-gradient CSS mask to dissolve ALL 4 edges
+   of the JPEG into the dark background.
+   No mix-blend-mode (was making mascot invisible on desktop).
+   Image is wider than viewport — overflow:hidden clips sides.
+   Character sits at center of image — mask keeps that opaque.
 ─────────────────────────────────────────────────────────── */
 .mascotWrap {
   position: relative;
+  z-index: 2;
   width: 100%;
-  /* No z-index, no transform, no isolation — blend mode reaches page */
+  /* Clip the sides of the oversized image */
+  overflow: hidden;
+  /* Pull up slightly so mascot feels connected to text */
+  margin-top: -16px;
 }
 
 .mascot {
   display: block;
-  /* Full viewport width — clips at hero overflow:hidden edges */
-  width: 100vw;
-  /* Fixed viewport height — dominates bottom of hero */
-  height: 62vh;
-  /* Cover: fills the box, clips overflow.
-     object-position: shows the CHARACTER's face/upper body */
-  object-fit: cover;
-  object-position: center 18%;
+  /* Oversized: bleeds past container edges on both sides */
+  width: 140%;
+  max-width: 1200px;
+  height: auto;
+  /* Center the oversized image */
+  margin-left: 50%;
+  transform: translateX(-50%);
   
-  /* Removes JPEG black rectangle — near-black → transparent */
-  mix-blend-mode: screen;
-
-  /* Mask: only fade very top edge (empty black above head).
-     All other edges: overflow:hidden on .hero clips them.
-     Screen blend makes JPEG edges invisible anyway. */
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.6) 5%,
-    black 14%,
-    black 100%
+  /* Radial mask: character (center 50%) stays opaque.
+     All 4 edges fade to transparent — no visible black rectangle. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 52% 58% at 50% 44%,
+    black 0%,
+    black 30%,
+    rgba(0,0,0,0.95) 42%,
+    rgba(0,0,0,0.75) 52%,
+    rgba(0,0,0,0.35) 63%,
+    rgba(0,0,0,0.05) 72%,
+    transparent 80%
   );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0,0,0,0.6) 5%,
-    black 14%,
-    black 100%
+  mask-image: radial-gradient(
+    ellipse 52% 58% at 50% 44%,
+    black 0%,
+    black 30%,
+    rgba(0,0,0,0.95) 42%,
+    rgba(0,0,0,0.75) 52%,
+    rgba(0,0,0,0.35) 63%,
+    rgba(0,0,0,0.05) 72%,
+    transparent 80%
   );
 }
 
-/* ── STATEMENT SECTION — slides up over mascot ──────────────
-   From screenshot 2:
-   - Mascot body visible at TOP of this section (above the panel)
-   - Dark rounded panel overlaps mascot by ~30% of mascot height
-   - Rounded top corners (large radius)
-   - NO blur/glass effect — just dark section with rounded corners
-   - Content: label, big headline, description, CTA button (centered)
-   This is NOT a glass card. It's the next full section pulling up.
+/* ── STATEMENT SECTION OVERLAP ──────────────────────────────
+   From screenshots: dark rounded panel overlaps mascot's lower body.
+   Negative margin-top pulls it up over the mascot.
+   Rounded top corners. Solid dark background. No glass/blur.
 ─────────────────────────────────────────────────────────── */
 
 /* ── INTELLIGENCE STATEMENT ── */
 .statement {
-  /* From screenshot 2: dark section slides UP over mascot body.
-     Rounded top corners. No glass/blur — just dark with rounded top. */
   position: relative;
   z-index: 10;
-  background: #000000;
+  background: #050608;
+  /* Large rounded top corners — matches Walrus exactly */
   border-radius: 36px 36px 0 0;
-  margin-top: -22%;
-  padding: clamp(60px, 9vw, 120px) 0 clamp(60px, 8vw, 100px);
+  /* Pull up over mascot bottom — Walrus uses -22% mobile */
+  margin-top: -18%;
+  padding: clamp(56px, 8vw, 100px) 0 clamp(60px, 8vw, 100px);
 }
 
 @media (min-width: 640px) {
   .statement {
     border-radius: 48px 48px 0 0;
-    margin-top: -7rem;
+    margin-top: -8rem;
   }
 }
-@media (min-width: 768px) {
-  .statement { margin-top: -9rem; }
-}
 @media (min-width: 1024px) {
-  .statement { margin-top: -14rem; }
+  .statement {
+    margin-top: -12rem;
+  }
 }
 
 .statement .container {

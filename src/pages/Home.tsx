@@ -304,15 +304,8 @@ export default function Home() {
         {/* Single centered column — matches Walrus layout exactly */}
         <div className={s.heroContent}>
 
-          {/* Text block */}
+          {/* Text block — matches Walrus: headline, desc, single CTA */}
           <div className={s.heroInner}>
-            <div className={s.heroSignal}>
-              <div className={s.signalDot}/>
-              <span>AI-powered NFT intelligence</span>
-              <span className={s.signalSep}>·</span>
-              <span>Built on Sui + Walrus</span>
-            </div>
-
             <h1 className={s.heroTitle}>
               Discover what<br/>
               <span className={s.heroTitleAccent}>others miss.</span>
@@ -324,14 +317,9 @@ export default function Home() {
               and ownership enforced by Sui Move.
             </p>
 
-            <div className={s.heroCta}>
-              <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
-                Start discovering <Arrow/>
-              </Link>
-              <Link to="/mint/ai" className="btn btn-ghost btn-lg">
-                AI Generator
-              </Link>
-            </div>
+            <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
+              Start discovering <Arrow/>
+            </Link>
           </div>
 
           {/* Mascot BELOW text — exactly like Walrus */}
