@@ -17,7 +17,7 @@
 .hero {
   position: relative;
   background: #000000;
-  overflow: hidden;
+  /* No overflow:hidden — let mascot extend freely below */
 }
 
 /* Aurora substitute — radial glow atmosphere behind everything.
@@ -60,7 +60,6 @@
 /* Text block: centered, top of hero */
 .heroInner {
   position: relative;
-  /* z-index only needs to be above aurora, not above mascot */
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -69,107 +68,138 @@
   max-width: 800px;
   width: 100%;
   margin: 0 auto;
-  padding: clamp(100px, 14vw, 140px) 24px 40px;
+  /* Walrus: mt-10 md:mt-20 from top, then directly into mascot */
+  padding: clamp(100px, 14vw, 140px) 24px clamp(24px, 3vw, 40px);
 }
 
-/* Mascot — matches Walrus layout: centered below text, max-width 860px.
-   
-   JPEG black bg fix: mix-blend-mode:screen makes near-black pixels
-   transparent against the #000000 page. Screen formula:
-     result = 1 - (1-src)(1-dst)
-   When src ≈ 0 (JPEG black #020304): result ≈ dst = page black = invisible.
-   Character colours stay vibrant. Cyan glow stays bright.
-   
-   CRITICAL: mascotWrap must have NO z-index, NO transform, NO isolation.
-   These create a stacking context that traps the blend mode inside it,
-   making the black bg visible again. */
 .mascotWrap {
+  /* No stacking context — blend mode must bleed to page bg */
   position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
-  /* No z-index — blend mode must reach the page background directly */
-  /* No overflow:hidden — clip if needed at hero level */
-  /* No transform — creates isolated stacking context */
+  /* Mobile: clip overflow so mascot fills screen edge to edge */
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .mascotWrap {
+    overflow: visible;
+  }
 }
 
 .mascot {
   display: block;
+  /* Walrus mascot: sm:max-w-[53.75rem] = 860px, centered, mx-auto */
+  /* Tuskr: we go bigger — 2x presence, fills the hero */
   width: 100%;
-  max-width: 860px;
+  max-width: 960px;
   height: auto;
-  /* mix-blend-mode:screen removes the JPEG black rectangle.
-     Works because mascotWrap has no stacking context.
-     No animation = no shaking. Static element + blend mode = clean. */
+  margin: 0 auto;
+  
+  /* mix-blend-mode:screen: JPEG near-black (#020304) → transparent.
+     Only works if NO ancestor has z-index/transform/isolation.
+     mascotWrap has none. heroContent has none. hero has none. */
   mix-blend-mode: screen;
-  /* Subtle mask to soften top edge of image only.
-     Left/right/bottom: image already has black which blends away.
-     Top: large empty black area above character head — fade it. */
+
+  /* Mask: fade top 10% only (removes empty black space above character).
+     Screen blend handles all other edges (left/right/bottom) naturally. */
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    black 12%,
+    black 10%,
     black 100%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0%,
-    black 12%,
+    black 10%,
     black 100%
   );
 }
 
 /* Bottom fade — merges hero into next section */
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 18%;
-  background: linear-gradient(to bottom, transparent 0%, #000000 100%);
-  z-index: 3;
-  pointer-events: none;
-}
+/* No hero::after vignette — the next section's frost strip does this */
 
 /* ── HERO TYPOGRAPHY ── */
 
 /* ── INTELLIGENCE STATEMENT ── */
 .statement {
-  /* Pulls UP into the hero by negative margin
-     Creates the floating glass card overlap */
-  background: transparent;
-  border-top: none;
-  padding: 0 0 clamp(60px,8vw,100px);
-  margin-top: -160px;
+  /*
+   * WALRUS-EXACT OVERLAP:
+   * This section pulls UP over the mascot's bottom.
+   * -mt-[22%] mobile | sm:-mt-[7rem] | md:-mt-[9rem] | lg:-mt-[12rem]
+   * Rounded top corners: 36px mobile, 48px desktop.
+   * Inside: a frost strip (backdrop-blur + dark gradient) at the very top
+   * that overlaps the mascot — mascot is hazily visible through the blur.
+   * Below the frost strip: solid black (continuation of page).
+   */
   position: relative;
   z-index: 10;
+  background: #000000;
+  border-radius: 36px 36px 0 0;
+  /* Overlap the mascot */
+  margin-top: -22%;
+  overflow: hidden;
+  padding: 0 0 clamp(60px, 8vw, 100px);
 }
+
+@media (min-width: 640px) {
+  .statement {
+    border-radius: 48px 48px 0 0;
+    margin-top: -7rem;
+  }
+}
+@media (min-width: 768px) {
+  .statement {
+    margin-top: -9rem;
+  }
+}
+@media (min-width: 1024px) {
+  .statement {
+    margin-top: -12rem;
+  }
+}
+
+/* Frost strip — sits at the very top of the section, overlapping mascot */
+.statement::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 12rem;
+  /* backdrop-blur makes the mascot hazily visible through this strip */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* Gradient darkens from rgba toward solid black — matching Walrus exactly */
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.60) 0%,
+    #000000 80%
+  );
+  border-radius: 48px 48px 0 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Content sits above the frost strip */
 .statement .container {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  /* Push content below the frost strip */
+  padding-top: clamp(48px, 8vw, 96px);
 }
+
 .statementInner {
   max-width: 700px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: clamp(40px,6vw,72px) clamp(28px,5vw,64px);
-  border-radius: 40px;
-
-  /* Glass card — the hero cyan/emerald glow shines through this */
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.10);
-  backdrop-filter: blur(56px) saturate(160%);
-  -webkit-backdrop-filter: blur(56px) saturate(160%);
-
-  /* Inner catch-light — subtle top highlight from the glow below */
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.06) inset,
-    0 1px 0 rgba(0,229,255,0.12) inset,
-    0 40px 120px rgba(0,0,0,0.6),
-    0 0 80px rgba(0,229,255,0.04);
+  padding: 0 clamp(20px, 4vw, 40px);
 }
 .statementLabel {
   display: flex; align-items: center; gap: 8px;
