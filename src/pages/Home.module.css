@@ -13,6 +13,7 @@
   justify-content: center;
   overflow: hidden;
   padding-bottom: 0;
+  /* OLED black — zero compromises */
   background: #000000;
 }
 
@@ -27,65 +28,70 @@
 }
 
 /* Emerald radial glow — left */
-.heroGlow {
-  /*
-   * Single precision bloom — sits directly behind the mascot center.
-   * Cyan (#00E5FF) + Teal (#00FFC8) bloom.
-   * 5-8% opacity max. Fades to pure black in 50% of its radius.
-   * Black remains dominant: this is a glow on a focal object,
-   * not a background color.
-   */
+/* ════════════════════════════════════════════════════════════
+   HERO LIGHTING SYSTEM — Three blurred light sources
+   
+   Key technique: solid colored div + filter:blur()
+   This simulates real light. radial-gradient cannot match this.
+   
+   All three sit at z-index:1 (BEHIND mascot at z-index:2).
+   Centered at the mascot's body center (bottom 30% of hero).
+   Overflow:hidden on .hero clips the spill naturally.
+   The blur extends beyond each div's bounds — this is intentional.
+   That spill is what illuminates surrounding text and glass.
+════════════════════════════════════════════════════════════ */
+
+/* Light 1 — Cyan #00E5FF
+   Largest source. Fills ~40% of hero.
+   Positioned at mascot's torso center. */
+.lightCyan {
   position: absolute;
-  bottom: 0;
+  bottom: 2%;
   left: 50%;
   transform: translateX(-50%);
-  width: 780px;
-  height: 520px;
+  width: 1100px;
+  height: 1100px;
+  border-radius: 50%;
+  background: #00E5FF;
+  opacity: 0.35;
+  filter: blur(300px);
   pointer-events: none;
   z-index: 1;
-  background: radial-gradient(
-    ellipse 60% 55% at 50% 62%,
-    rgba(0,255,200,0.07) 0%,
-    rgba(0,229,255,0.05) 18%,
-    rgba(0,200,220,0.02) 36%,
-    transparent 52%
-  );
-  /* No animation — static, calm, premium */
 }
 
-/* White core highlight — very small, directly behind mascot head */
-.heroGlowRight {
+/* Light 2 — Emerald #00FFB2
+   Slightly offset right, overlaps cyan to create blend. */
+.lightEmerald {
   position: absolute;
-  bottom: 22%;
-  left: 50%;
+  bottom: 5%;
+  left: calc(50% + 60px);
   transform: translateX(-50%);
-  width: 280px;
-  height: 280px;
+  width: 850px;
+  height: 850px;
+  border-radius: 50%;
+  background: #00FFB2;
+  opacity: 0.20;
+  filter: blur(260px);
   pointer-events: none;
   z-index: 1;
-  background: radial-gradient(
-    ellipse at 50% 50%,
-    rgba(255,255,255,0.04) 0%,
-    rgba(0,229,255,0.03) 30%,
-    transparent 60%
-  );
 }
 
-/* Electric blue accent — barely visible, bottom edge */
-.heroPurple {
+/* Light 3 — White
+   Small tight core. Creates the sense of an intense bright center.
+   Sits slightly higher — at mascot head/chest level. */
+.lightWhite {
   position: absolute;
-  bottom: -20px;
+  bottom: 20%;
   left: 50%;
   transform: translateX(-50%);
-  width: 1000px;
-  height: 200px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: #ffffff;
+  opacity: 0.12;
+  filter: blur(200px);
   pointer-events: none;
   z-index: 1;
-  background: radial-gradient(
-    ellipse 70% 100% at 50% 100%,
-    rgba(0,150,255,0.04) 0%,
-    transparent 70%
-  );
 }
 @keyframes gPulse {
   from { opacity:0.7; transform:scale(1); }
@@ -102,7 +108,7 @@
 
 /* Hero content */
 .heroInner {
-  position: relative; z-index: 2;
+  position: relative; z-index: 3;
   display: flex; flex-direction: column; align-items: center;
   text-align: center;
   padding: clamp(100px,14vw,140px) 24px 40px;
@@ -162,7 +168,23 @@
   flex-wrap: wrap; justify-content: center;
   margin-bottom: 48px;
 }
-.ctaPrimary { box-shadow: 0 0 24px rgba(0,212,170,0.35); }
+.ctaPrimary {
+  /* High contrast on OLED black — white button, black text */
+  background: #ffffff !important;
+  color: #000000 !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.15) inset,
+    0 4px 24px rgba(0,229,255,0.25),
+    0 0 60px rgba(0,229,255,0.08);
+}
+.ctaPrimary:hover {
+  background: #f0fffe !important;
+  box-shadow:
+    0 0 0 1px rgba(0,229,255,0.3) inset,
+    0 6px 32px rgba(0,229,255,0.35),
+    0 0 80px rgba(0,229,255,0.12);
+  transform: translateY(-2px);
+}
 
 /* Stats */
 .heroStats {
@@ -184,7 +206,7 @@
 
 /* Mascot */
 .mascotWrap {
-  position: relative; z-index: 1;
+  position: relative; z-index: 2;
   width: 100%; display: flex; justify-content: center;
   margin-top: 20px;
 }
@@ -206,17 +228,23 @@
     rgba(0,0,0,0.62) 52%, rgba(0,0,0,0.28) 66%, transparent 80%);
 }
 .hero::after {
-  content:''; position:absolute; bottom:0; left:0; right:0; height:30%;
-  background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,0.65) 52%,#000000 100%);
+  content:''; position:absolute; bottom:0; left:0; right:0; height:28%;
+  /* Fade to black at very bottom — glass card sits above this */
+  background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,0.5) 60%,rgba(0,0,0,0.85) 100%);
   z-index:2; pointer-events:none;
 }
 @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 
 /* ── INTELLIGENCE STATEMENT ── */
 .statement {
-  background: #000;
-  border-top: 1px solid rgba(255,255,255,0.06);
-  padding: clamp(60px,10vw,120px) 0;
+  /* Pulls UP into the hero by negative margin
+     Creates the floating glass card overlap */
+  background: transparent;
+  border-top: none;
+  padding: 0 0 clamp(60px,8vw,100px);
+  margin-top: -160px;
+  position: relative;
+  z-index: 10;
 }
 .statement .container {
   display: flex;
@@ -225,11 +253,26 @@
   text-align: center;
 }
 .statementInner {
-  max-width: 640px;
+  max-width: 700px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding: clamp(40px,6vw,72px) clamp(28px,5vw,64px);
+  border-radius: 40px;
+
+  /* Glass card — the hero cyan/emerald glow shines through this */
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(56px) saturate(160%);
+  -webkit-backdrop-filter: blur(56px) saturate(160%);
+
+  /* Inner catch-light — subtle top highlight from the glow below */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 1px 0 rgba(0,229,255,0.12) inset,
+    0 40px 120px rgba(0,0,0,0.6),
+    0 0 80px rgba(0,229,255,0.04);
 }
 .statementLabel {
   display: flex; align-items: center; gap: 8px;

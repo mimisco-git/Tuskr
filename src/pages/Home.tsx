@@ -298,10 +298,17 @@ export default function Home() {
       {/* ════ HERO ════ */}
       <section className={s.hero}>
 
-        {/* Atmospheric glow — teal center, purple top-left */}
-        <div className={s.heroGlow}/>
-        <div className={s.heroGlowRight}/>
-        <div className={s.heroPurple}/>
+        {/* ═══ THREE GIANT BLURRED LIGHT SOURCES ═══
+             Technique: solid colored div + filter:blur()
+             NOT radial-gradient — actual light simulation
+             All sit behind mascot via z-index
+        */}
+        {/* Light 1: Cyan #00E5FF — 1100px, blur 300px, 35% */}
+        <div className={s.lightCyan}/>
+        {/* Light 2: Emerald #00FFB2 — 850px, blur 270px, 20% */}
+        <div className={s.lightEmerald}/>
+        {/* Light 3: White — 500px, blur 220px, 12% */}
+        <div className={s.lightWhite}/>
 
         {/* Star field */}
         <div className={s.starField} aria-hidden>
