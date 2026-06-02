@@ -298,65 +298,53 @@ export default function Home() {
       {/* ════ HERO ════ */}
       <section className={s.hero}>
 
-        {/* ── Three blurred light sources behind mascot ── */}
-        <div className={s.glow1} aria-hidden/>
-        <div className={s.glow2} aria-hidden/>
-        <div className={s.glow3} aria-hidden/>
+        {/* Aurora atmosphere — CSS glow since we have no aurora image */}
+        <div className={s.aurora} aria-hidden/>
 
-        {/* ── Left column: text content ── */}
-        <div className={s.heroInner}>
-          <div className={s.heroSignal}>
-            <div className={s.signalDot}/>
-            <span>AI-powered NFT intelligence</span>
-            <span className={s.signalSep}>·</span>
-            <span>Built on Sui + Walrus</span>
+        {/* Single centered column — matches Walrus layout exactly */}
+        <div className={s.heroContent}>
+
+          {/* Text block */}
+          <div className={s.heroInner}>
+            <div className={s.heroSignal}>
+              <div className={s.signalDot}/>
+              <span>AI-powered NFT intelligence</span>
+              <span className={s.signalSep}>·</span>
+              <span>Built on Sui + Walrus</span>
+            </div>
+
+            <h1 className={s.heroTitle}>
+              Discover what<br/>
+              <span className={s.heroTitleAccent}>others miss.</span>
+            </h1>
+
+            <p className={s.heroDesc}>
+              AI-powered intelligence for NFTs, creators, communities,
+              and emerging opportunities, with media permanently stored on Walrus
+              and ownership enforced by Sui Move.
+            </p>
+
+            <div className={s.heroCta}>
+              <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
+                Start discovering <Arrow/>
+              </Link>
+              <Link to="/mint/ai" className="btn btn-ghost btn-lg">
+                AI Generator
+              </Link>
+            </div>
           </div>
 
-          <h1 className={s.heroTitle}>
-            Discover what<br/>
-            <span className={s.heroTitleAccent}>others miss.</span>
-          </h1>
-
-          <p className={s.heroDesc}>
-            AI-powered intelligence for NFTs, creators, communities,
-            and emerging opportunities, with media permanently stored on Walrus
-            and ownership enforced by Sui Move.
-          </p>
-
-          <div className={s.heroCta}>
-            <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
-              Start discovering <Arrow/>
-            </Link>
-            <Link to="/mint/ai" className="btn btn-ghost btn-lg">
-              AI Generator
-            </Link>
+          {/* Mascot BELOW text — exactly like Walrus */}
+          <div className={s.mascotWrap}>
+            <img
+              src="/mascot-stand.jpg"
+              alt="Tuskr mascot"
+              className={s.mascot}
+              draggable={false}
+            />
           </div>
 
-          <div className={s.heroStats}>
-            {[
-              { n: counter.nfts.toLocaleString(), l: 'NFTs indexed' },
-              { n: `${(counter.vol / 1000).toFixed(1)}K`, l: 'SUI volume' },
-              { n: `${counter.creators}+`, l: 'Creators' },
-              { n: '100%', l: 'On Walrus' },
-            ].map(({ n, l }) => (
-              <div key={l} className={s.heroStat}>
-                <div className={s.heroStatN}>{n}</div>
-                <div className={s.heroStatL}>{l}</div>
-              </div>
-            ))}
-          </div>
         </div>
-
-        {/* ── Right column: mascot absolutely positioned, bleeds right edge ── */}
-        <div className={s.mascotWrap}>
-          <img
-            src="/mascot-stand.jpg"
-            alt="Tuskr mascot"
-            className={s.mascot}
-            draggable={false}
-          />
-        </div>
-
       </section>
 
       {/* ════ INTELLIGENCE STATEMENT ════ */}
