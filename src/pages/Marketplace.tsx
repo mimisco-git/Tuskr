@@ -259,7 +259,7 @@ export default function Marketplace() {
         {/* Bulk buy tip */}
         {selected.size === 0 && listings.length > 1 && (
           <div className={s.bulkTip}>
-            Tip: click multiple NFTs to bulk-buy in one Sui PTB transaction
+            Tap any NFT card to select it · Select multiple to bulk-buy in one transaction
           </div>
         )}
 
@@ -293,6 +293,9 @@ export default function Marketplace() {
                 className={`${s.cardWrap} ${selected.has(listing.listingId) ? s.cardSelected : ''}`}
                 onClick={() => toggleSelect(listing.listingId)}
               >
+                <div className={s.selectCheck}>
+                  {selected.has(listing.listingId) ? '✓' : ''}
+                </div>
                 <NFTCard
                   nft={asNFT(listing)}
                   delay={i * 0.05}

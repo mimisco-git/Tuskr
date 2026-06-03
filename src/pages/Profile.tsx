@@ -145,7 +145,9 @@ export default function Profile() {
     </div></main>
   )
 
-  const displayName = googleUser?.name ?? 'Wallet User'
+  // Display: Google name > SuiNS (future) > shortened address
+  const walletDisplay = account ? `${account.address.slice(0,6)}…${account.address.slice(-4)}` : ''
+  const displayName = googleUser?.name ?? walletDisplay
   const initials    = displayName.slice(0,2).toUpperCase()
 
   return (
