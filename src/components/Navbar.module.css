@@ -355,3 +355,146 @@
     padding: 7px 9px;
   }
 }
+
+/* ── GOOGLE PROFILE PILL ─────────────────────────── */
+.googlePill { position: relative; }
+
+.googlePillBtn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px 5px 5px;
+  border-radius: 999px; border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  cursor: pointer; transition: background 0.18s;
+}
+.googlePillBtn:hover { background: rgba(255,255,255,0.10); }
+
+.googleAvatar {
+  width: 26px; height: 26px; border-radius: 50%; object-fit: cover;
+}
+.googleInitials {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #00d4aa; color: #000;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.googlePillName {
+  font-size: 14px; font-weight: 500; color: #f5f5f7;
+  max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.googlePillChevron { color: rgba(245,245,247,0.5); transition: transform 0.18s; }
+.googlePillChevronOpen { transform: rotate(180deg); }
+
+/* Dropdown */
+.googleDropdown {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 280px; border-radius: 16px;
+  background: rgba(18,18,20,0.95);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+  padding: 8px; z-index: 200;
+  animation: dropIn 0.16s ease;
+}
+@keyframes dropIn {
+  from { opacity:0; transform: translateY(-6px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.googleDropHeader {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  margin-bottom: 6px;
+}
+.googleDropAvatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
+.googleDropInitials {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #00d4aa; color: #000;
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.googleDropName { font-size: 14px; font-weight: 600; color: #f5f5f7; }
+.googleDropEmail { font-size: 12px; color: rgba(245,245,247,0.45); margin-top: 1px; }
+
+.googleDropAddr {
+  padding: 8px 10px; border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  margin: 0 2px 6px;
+}
+.googleDropAddrLabel {
+  display: block; font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(245,245,247,0.35); margin-bottom: 3px;
+}
+.googleDropAddrVal {
+  font-family: 'Space Mono', monospace; font-size: 12px; color: #00d4aa;
+}
+
+.googleDropWallet {
+  padding: 8px 10px; border-radius: 8px;
+  background: rgba(0,212,170,0.05);
+  border: 1px solid rgba(0,212,170,0.12);
+  margin: 0 2px 6px;
+}
+.googleDropWalletLabel { font-size: 13px; font-weight: 500; color: #f5f5f7; }
+.googleDropWalletSub {
+  display: block; font-size: 11px; color: rgba(245,245,247,0.35); margin-top: 1px;
+}
+.googleDropConnectBtn { margin-top: 8px; }
+.googleDropConnectBtn :global(button) {
+  width: 100% !important; justify-content: center !important;
+  font-size: 13px !important; padding: 8px 14px !important;
+}
+
+.googleDropDivider {
+  height: 1px; background: rgba(255,255,255,0.07); margin: 4px 0;
+}
+.googleDropAction {
+  display: block; width: 100%; text-align: left;
+  padding: 9px 12px; border-radius: 8px;
+  font-size: 14px; color: rgba(245,245,247,0.75);
+  background: transparent; border: none; cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.googleDropAction:hover { background: rgba(255,255,255,0.07); color: #f5f5f7; }
+
+/* ── MOBILE USER SECTION ────────────────────────── */
+.mobileUserSection {
+  padding: 16px; margin-bottom: 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+}
+.mobileUserHeader { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.mobileUserAvatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.mobileUserInitials {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #00d4aa; color: #000;
+  font-size: 15px; font-weight: 700; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.mobileUserName { font-size: 15px; font-weight: 600; color: #f5f5f7; }
+.mobileUserEmail { font-size: 13px; color: rgba(245,245,247,0.45); }
+.mobileUserAddr {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  color: #00d4aa; margin-bottom: 12px; word-break: break-all;
+}
+.mobileWalletRow {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.mobileWalletLabel { font-size: 13px; color: rgba(245,245,247,0.5); flex-shrink: 0; }
+.mobileSignOut {
+  width: 100%; padding: 9px; border-radius: 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(245,245,247,0.65); font-size: 14px; cursor: pointer;
+  transition: background 0.15s;
+}
+.mobileSignOut:hover { background: rgba(255,255,255,0.1); }
+
+.mobileGoogleBtn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 12px; margin-bottom: 16px; border-radius: 12px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  color: #f5f5f7; font-size: 15px; font-weight: 500; text-decoration: none;
+  transition: background 0.15s;
+}
+.mobileGoogleBtn:hover { background: rgba(255,255,255,0.10); }
