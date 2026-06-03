@@ -30,7 +30,8 @@
 .inner {
   display: flex; align-items: center;
   height: 100%; max-width: 1400px;
-  margin: 0 auto; padding: 0 32px; gap: 40px;
+  margin: 0 auto; padding: 0 32px;
+  position: relative; /* needed for absolute-centered nav */
 }
 
 /* Logo */
@@ -39,11 +40,15 @@
   letter-spacing: -0.06em; text-decoration: none;
   color: #ffffff;
   flex-shrink: 0;
+  /* Take up same width as right side for true centering */
+  flex: 1;
 }
 
 /* ── DESKTOP NAV ── */
 .desktopNav {
-  display: flex; align-items: center; gap: 2px; flex: 1;
+  display: flex; align-items: center; gap: 4px;
+  /* True center — not flex:1 which pushes left */
+  position: absolute; left: 50%; transform: translateX(-50%);
 }
 .navItem { position: relative; }
 .navTrigger {
@@ -94,7 +99,10 @@
 .megaLink svg { opacity: 0.4; flex-shrink: 0; }
 
 /* ── DESKTOP RIGHT ── */
-.desktopRight { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
+.desktopRight {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; justify-content: flex-end; /* mirror the logo's flex:1 */
+}
 .authBtns { display: flex; align-items: center; gap: 8px; }
 .googleBtn {
   display: flex; align-items: center; gap: 7px;
