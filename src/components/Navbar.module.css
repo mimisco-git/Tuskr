@@ -342,4 +342,16 @@
 }
 .zkBtn:hover { background: rgba(255,255,255,0.09); color: #f5f5f7; border-color: rgba(255,255,255,0.2); }
 .zkBtnLabel { display: inline; }
-@media(max-width:880px) { .zkBtn { display: none; } }
+/* Sign-in button on mobile: show icon only to save space */
+@media(max-width:880px) {
+  .zkBtn {
+    padding: 8px 10px;
+    gap: 0;
+  }
+  .zkBtn span { display: none; }  /* hide text, keep Google icon */
+}
+@media(max-width:480px) {
+  .zkBtn {
+    padding: 7px 9px;
+  }
+}
