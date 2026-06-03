@@ -1,36 +1,36 @@
 /* ═══════════════════════════════════════════════════
-   TUSKR Home — Emerald Intelligence
+   TUSKR — Hero. Single implementation. No duplicates.
+   Mascot: landscape PNG 1402x1122, transparent bg.
+   Layout: text → mascot in flow → glass section overlap.
 ═══════════════════════════════════════════════════ */
 
-/* ── WALRUS-STYLE HERO ─────────────────────────────── */
+/* ── BASE RESET ─── Remove any legacy classes ── */
+.aurora, .glow1, .glow2, .glow3,
+.lightCyan, .lightEmerald, .lightWhite,
+.starField, .star, .neuralCanvas { display: none; }
 
+/* ── HERO ────────────────────────────────────────── */
 .hero {
   position: relative;
-  min-height: 100vh;
-  background: #000;
+  background: #000000;
   overflow: hidden;
 }
 
-/* Aurora div hidden — light comes from hero::before instead */
-.aurora {
-  display: none;
-}
-
-/* Point light behind mascot — cyan/teal bloom, Walrus style */
+/* Cyan point-light behind mascot — the ONLY light source */
 .hero::before {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -120px;
+  bottom: -100px;
   transform: translateX(-50%);
-  width: 1200px;
+  width: 1400px;
   height: 900px;
   border-radius: 50%;
   background: radial-gradient(
     ellipse,
     rgba(0,225,255,0.22) 0%,
-    rgba(0,255,180,0.12) 35%,
-    rgba(255,255,255,0.05) 55%,
+    rgba(0,255,180,0.10) 35%,
+    rgba(255,255,255,0.04) 55%,
     transparent 75%
   );
   filter: blur(140px);
@@ -38,92 +38,84 @@
   z-index: 1;
 }
 
-/* Text column — above aurora and mascot */
+/* ── TEXT ─────────────────────────────────────────── */
 .heroContent {
   position: relative;
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .heroInner {
-  position: relative;
-  z-index: 5;
-  max-width: 980px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: clamp(90px, 10vh, 130px) 24px clamp(120px, 16vh, 180px);
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(96px, 12vh, 130px) 24px 40px;
+  gap: 20px;
 }
 
-/* Mascot — absolute, anchors to .hero, full bleed */
+/* ── MASCOT ───────────────────────────────────────────
+   Landscape PNG 1402×1122. In normal flow — no gaps.
+   Desktop: constrained height to show face/upper body.
+   Mobile: natural width, bleeds edges for immersion.
+──────────────────────────────────────────────────── */
 .mascotWrap {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  width: min(1400px, 115vw);
-  height: 78vh;
-  overflow: visible;
+  position: relative;
   z-index: 2;
+  width: 100%;
+  overflow: hidden;
 }
 
 .mascot {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
+  max-width: 1400px;
+  height: 70vh;
+  object-fit: cover;
+  /* Show head and upper body — character fills top of image */
+  object-position: center 8%;
+  margin: 0 auto;
 }
 
-/* Legacy glow class aliases */
-.glow1,.glow2,.glow3,.lightCyan,.lightEmerald,.lightWhite,
-.starField,.star,.neuralCanvas { display: none; }
-
-/* Mobile — tight spacing, mascot immersive, glass overlap */
+/* ── MOBILE ──────────────────────────────────────────
+   Tight spacing. Mascot bleeds edges. Glass overlaps.
+──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .hero {
-    min-height: auto;
-    padding-top: 90px;
-  }
+  .hero { min-height: auto; }
 
   .heroInner {
-    padding: 40px 20px 20px;
+    padding: clamp(96px, 12vh, 120px) 20px 24px;
     gap: 12px;
   }
 
-  .heroTitle {
-    max-width: 100%;
-  }
-
   .mascotWrap {
-    position: relative;
-    left: auto;
-    bottom: auto;
-    transform: none;
-    /* 135% width bleeds off screen edges for immersive feel */
-    width: 135%;
-    margin-left: -17.5%;
-    height: auto;
-    /* Overlap the button area slightly */
-    margin-top: -20px;
+    /* Wider than viewport — bleeds both edges */
+    width: 140%;
+    margin-left: -20%;
     overflow: visible;
   }
 
   .mascot {
-    width: 100%;
+    /* Natural ratio on mobile — landscape image is naturally shorter */
     height: auto;
+    max-width: none;
     object-fit: unset;
     object-position: unset;
+    /* Pull up into the button area slightly */
+    margin-top: -16px;
   }
+}
 
-  .statement {
-    /* Glass panel rises up dramatically over mascot */
-    margin-top: -80px;
-    background: rgba(5, 6, 8, 0.55);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border-radius: 28px 28px 0 0;
+/* ── DESKTOP ─────────────────────────────────────────── */
+@media (min-width: 769px) {
+  .mascot {
+    height: 72vh;
+    max-height: 780px;
   }
 }
 
