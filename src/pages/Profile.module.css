@@ -1,101 +1,212 @@
-.page { padding:80px 0 60px; min-height:70vh; }
+/* ── PAGE ── */
+.page { padding: 80px 0 80px; min-height: 80vh; }
 
+/* Cover gradient behind header */
+.coverBg {
+  position: fixed; top: 0; left: 0; right: 0; height: 340px;
+  background: linear-gradient(180deg, rgba(0,212,170,0.06) 0%, transparent 100%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── GATE (not signed in) ── */
+.gateWrap { text-align: center; padding: 100px 20px; max-width: 480px; margin: 0 auto; }
+.gateIcon { font-size: 56px; margin-bottom: 20px; }
+.gateTitle { font-size: clamp(24px,4vw,36px); font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.03em; }
+.gateDesc { font-size: 16px; color: rgba(245,245,247,0.45); margin-bottom: 32px; line-height: 1.6; }
+.gateActions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ── HEADER ── */
 .header {
-  display:flex; align-items:center; gap:20px;
-  margin-bottom:48px; flex-wrap:wrap;
+  display: flex; align-items: flex-start; gap: 24px;
+  padding: 40px 0 36px; flex-wrap: wrap;
+  position: relative; z-index: 1;
 }
-.avatar {
-  width:60px; height:60px; border-radius:16px;
-  background:rgba(0,212,170,0.1); border:1.5px solid rgba(0,212,170,0.3);
-  color:var(--a); font-family:'Inter',-apple-system,sans-serif;
-  font-size:22px; font-weight:700;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-}
-.eyebrow {
-  display:flex; align-items:center; gap:7px;
-  font-family:'Space Mono',monospace; font-size:10px;
-  color:var(--a); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:6px;
-}
-.eyebrowDot {
-  width:6px; height:6px; border-radius:50%;
-  background:var(--a); box-shadow:0 0 8px var(--a);
-  animation:pulse 2s infinite;
-}
-@keyframes pulse{50%{opacity:0.3;}}
-.title {
-  font-family:'Inter',-apple-system,sans-serif;
-  font-size:clamp(28px,4vw,44px); font-weight:700;
-  letter-spacing:-0.03em; color:#fff; line-height:1; margin-bottom:4px;
-}
-.address { font-family:'Space Mono',monospace; font-size:12px; color:rgba(250,248,245,0.35); }
 
-/* Grid */
-.grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+/* Avatar */
+.avatarWrap { position: relative; flex-shrink: 0; }
+.avatar { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; display: block; border: 2px solid rgba(0,212,170,0.3); }
+.avatarFallback {
+  width: 80px; height: 80px; border-radius: 20px;
+  background: linear-gradient(135deg, rgba(0,212,170,0.2), rgba(100,40,220,0.2));
+  border: 2px solid rgba(0,212,170,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 700; color: var(--a);
+}
+.linkedBadge {
+  position: absolute; bottom: -4px; right: -4px;
+  width: 20px; height: 20px; border-radius: 6px;
+  background: #00d4aa; color: #000; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid #000;
+}
 
-/* Card */
-.card {
-  display:block; text-decoration:none;
-  background:rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:20px; overflow:hidden;
-  transition:all 0.22s; cursor:pointer;
+/* Header info */
+.headerInfo { flex: 1; min-width: 0; }
+.name {
+  font-size: clamp(22px, 3.5vw, 36px); font-weight: 700;
+  color: #fff; letter-spacing: -0.03em; margin-bottom: 16px; line-height: 1;
 }
-.card:hover {
-  border-color:rgba(255,255,255,0.18);
-  transform:translateY(-4px);
-  box-shadow:0 16px 48px rgba(0,0,0,0.4);
+
+/* Account list */
+.accountList { display: flex; flex-direction: column; gap: 10px; }
+.accountRow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: border-color 0.18s;
 }
-.imgWrap {
-  position:relative; aspect-ratio:1;
-  background:rgba(255,255,255,0.03); overflow:hidden;
+.accountRow:hover { border-color: rgba(255,255,255,0.14); }
+.accountRowDimmed { opacity: 0.6; }
+.accountIcon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  color: rgba(245,245,247,0.6);
 }
-.img { width:100%; height:100%; object-fit:cover; display:block; }
-.imgPlaceholder {
-  width:100%; height:100%;
-  display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg,rgba(0,212,170,0.08),rgba(100,40,220,0.08));
+.accountDetail { flex: 1; min-width: 0; }
+.accountType {
+  display: block; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(245,245,247,0.35); margin-bottom: 2px;
 }
-.imgPlaceholder span {
-  font-family:'Inter',-apple-system,sans-serif; font-size:32px; font-weight:700;
-  color:rgba(250,248,245,0.2);
+.accountVal {
+  font-family: 'Space Mono', monospace; font-size: 13px; color: #f5f5f7;
+}
+.connectedDot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #00d4aa; box-shadow: 0 0 8px rgba(0,212,170,0.6); flex-shrink: 0;
+}
+.addrBtn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; border: none; cursor: pointer; padding: 0;
+}
+.copyHint {
+  font-size: 11px; color: rgba(245,245,247,0.3);
+  transition: color 0.15s;
+}
+.addrBtn:hover .copyHint { color: var(--a); }
+.linkBtn {
+  font-size: 13px; color: var(--a); text-decoration: none; font-weight: 500;
+}
+.linkBtn:hover { text-decoration: underline; }
+.linkWalletInline { margin-top: 4px; }
+.linkWalletInline :global(button) {
+  font-size: 13px !important; padding: 6px 14px !important; min-height: unset !important;
+}
+
+/* zkLogin sui address */
+.suiAddrRow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; border-radius: 10px;
+  background: rgba(0,212,170,0.05); border: 1px solid rgba(0,212,170,0.12);
+}
+.suiAddrLabel {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(0,212,170,0.6); flex-shrink: 0;
+}
+.suiAddrVal { font-family: 'Space Mono', monospace; font-size: 12px; color: #00d4aa; }
+
+/* Header actions */
+.headerActions { display: flex; flex-direction: column; gap: 8px; margin-left: auto; }
+
+/* ── STATS ── */
+.statsRow {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  margin-bottom: 40px;
+}
+.statCard {
+  padding: 20px; border-radius: 14px; text-align: center;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+}
+.statNum {
+  display: block; font-size: clamp(24px, 3vw, 36px); font-weight: 700;
+  color: #fff; letter-spacing: -0.03em; line-height: 1; margin-bottom: 4px;
+}
+.statLabel {
+  font-family: 'Space Mono', monospace; font-size: 10px;
+  color: rgba(245,245,247,0.3); text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* ── TABS ── */
+.tabBar {
+  display: flex; gap: 4px; margin-bottom: 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 0;
+}
+.tabBtn {
+  padding: 10px 20px; font-size: 14px; font-weight: 500;
+  color: rgba(245,245,247,0.45); background: transparent; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.18s, border-color 0.18s;
+}
+.tabBtn:hover { color: rgba(245,245,247,0.75); }
+.tabBtnActive { color: #fff; border-bottom-color: var(--a); }
+
+/* ── NFT GRID ── */
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.skelCard {
+  aspect-ratio: 1; border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  animation: shimmer 1.5s ease infinite;
+}
+@keyframes shimmer { 50% { opacity: 0.4; } }
+
+.nftCard {
+  display: block; text-decoration: none;
+  background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px; overflow: hidden; transition: all 0.2s;
+}
+.nftCard:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+.nftImg { position: relative; aspect-ratio: 1; background: rgba(255,255,255,0.03); overflow: hidden; }
+.nftImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nftImgFallback {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 32px; font-weight: 700; color: rgba(245,245,247,0.15);
+  background: linear-gradient(135deg, rgba(0,212,170,0.07), rgba(100,40,220,0.07));
+}
+.nftBadge {
+  position: absolute; top: 8px; left: 8px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+  color: #000; background: var(--a); padding: 3px 8px; border-radius: 99px;
 }
 .walrusBadge {
-  position:absolute; top:10px; right:10px;
-  font-family:'Space Mono',monospace; font-size:8px; font-weight:700;
-  color:var(--a); background:rgba(0,0,0,0.75); border:1px solid rgba(0,212,170,0.3);
-  padding:3px 8px; border-radius:99px; letter-spacing:0.1em;
-  backdrop-filter:blur(8px);
+  position: absolute; top: 8px; right: 8px;
+  font-family: 'Space Mono', monospace; font-size: 8px; font-weight: 700;
+  color: var(--a); background: rgba(0,0,0,0.75); border: 1px solid rgba(0,212,170,0.3);
+  padding: 3px 7px; border-radius: 99px; backdrop-filter: blur(8px);
 }
-.cardBody { padding:14px 16px; }
-.cardName {
-  font-family:'Inter',-apple-system,sans-serif; font-size:15px; font-weight:600;
-  color:#fff; margin-bottom:4px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.cardDesc { font-size:12px; color:rgba(250,248,245,0.4); line-height:1.5; margin-bottom:8px; }
-.cardMeta { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-.cardCreator { font-family:'Space Mono',monospace; font-size:10px; color:rgba(250,248,245,0.3); }
-.cardRoyalty {
-  font-family:'Space Mono',monospace; font-size:10px;
-  color:var(--a); background:rgba(0,212,170,0.08); border:1px solid rgba(0,212,170,0.2);
-  padding:2px 6px; border-radius:4px;
-}
+.nftBody { padding: 12px 14px; }
+.nftName { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nftRoyalty { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--a); background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.18); padding: 2px 6px; border-radius: 4px; }
 
-/* Empty */
-.empty { text-align:center; padding:80px 20px; }
-.emptyIcon { font-size:48px; margin-bottom:16px; }
-.emptyTitle {
-  font-family:'Inter',-apple-system,sans-serif; font-size:22px; font-weight:700;
-  color:rgba(250,248,245,0.5); margin-bottom:8px;
+/* ── ACTIVITY LIST (sold) ── */
+.activityList { display: flex; flex-direction: column; gap: 8px; }
+.activityRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 12px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
 }
-.emptyDesc { font-size:15px; color:rgba(250,248,245,0.3); margin-bottom:28px; }
+.activityDot { width: 8px; height: 8px; border-radius: 50%; background: var(--a); flex-shrink: 0; }
+.activityText { font-size: 14px; color: rgba(245,245,247,0.65); flex: 1; }
+.activityPrice { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--a); font-weight: 600; }
 
-@media(max-width:960px){.grid{grid-template-columns:repeat(3,1fr);}}
-@media(max-width:768px){
-  .page{padding:56px 0 40px;}
-  .header{flex-direction:column;align-items:flex-start;gap:12px;}
-  .header>div:last-child{margin-left:0!important;}
-  .grid{grid-template-columns:repeat(2,1fr);gap:10px;}
-  .title{font-size:28px;}
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 80px 20px; }
+.emptyIcon { font-size: 48px; margin-bottom: 16px; }
+.emptyMsg { font-size: 16px; color: rgba(245,245,247,0.35); margin-bottom: 24px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) {
+  .page { padding: 60px 0 60px; }
+  .header { flex-direction: column; gap: 16px; }
+  .headerActions { margin-left: 0; flex-direction: row; }
+  .statsRow { grid-template-columns: repeat(2, 1fr); }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .name { font-size: 24px; }
 }
-@media(max-width:480px){.grid{grid-template-columns:1fr;}}
+@media (max-width: 480px) {
+  .statsRow { grid-template-columns: repeat(2, 1fr); }
+  .grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tabBtn { padding: 10px 12px; font-size: 13px; }
+}
