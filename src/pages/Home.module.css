@@ -1,30 +1,32 @@
 /* ═══════════════════════════════════════════════════
-   TUSKR — Hero. Single implementation. No duplicates.
-   Mascot: landscape PNG 1402x1122, transparent bg.
-   Layout: text → mascot in flow → glass section overlap.
+   TUSKR — Hero. Device-agnostic. Single implementation.
+   Uses svh, clamp, min/max — no fixed px heights.
+   Breakpoints: 480 (small phone) · 768 (tablet) · 1024 (desktop)
 ═══════════════════════════════════════════════════ */
 
-/* ── BASE RESET ─── Remove any legacy classes ── */
+/* ── RESET LEGACY ── */
 .aurora, .glow1, .glow2, .glow3,
 .lightCyan, .lightEmerald, .lightWhite,
 .starField, .star, .neuralCanvas { display: none; }
 
-/* ── HERO ────────────────────────────────────────── */
+/* ── HERO ── */
 .hero {
   position: relative;
   background: #000000;
   overflow: hidden;
+  /* 100svh = viewport minus browser chrome on iOS/Android */
+  min-height: 100svh;
 }
 
-/* Cyan point-light behind mascot — the ONLY light source */
+/* Point-light: scales with viewport */
 .hero::before {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -100px;
+  bottom: -8%;
   transform: translateX(-50%);
-  width: 1400px;
-  height: 900px;
+  width: min(1400px, 120vw);
+  height: min(900px, 70vw);
   border-radius: 50%;
   background: radial-gradient(
     ellipse,
@@ -33,12 +35,12 @@
     rgba(255,255,255,0.04) 55%,
     transparent 75%
   );
-  filter: blur(140px);
+  filter: blur(clamp(80px, 10vw, 140px));
   pointer-events: none;
   z-index: 1;
 }
 
-/* ── TEXT ─────────────────────────────────────────── */
+/* ── TEXT ── */
 .heroContent {
   position: relative;
   z-index: 5;
@@ -55,34 +57,32 @@
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
-  padding: clamp(96px, 12vh, 130px) 24px 40px;
-  gap: 20px;
+  /* Top clears navbar. Bottom tight — mascot follows immediately. */
+  padding: clamp(88px, 12svh, 130px) clamp(20px, 5vw, 40px) clamp(24px, 3svh, 40px);
+  gap: clamp(14px, 2vh, 22px);
 }
 
-/* Hero CTA button — explicitly visible on pure black background */
+/* ── CTA BUTTON ── */
 .ctaPrimary {
   background: #00d4aa !important;
   color: #000000 !important;
   border: none !important;
   border-radius: 999px !important;
-  padding: 14px 32px !important;
-  font-size: 16px !important;
+  padding: clamp(12px, 1.5vh, 16px) clamp(24px, 3vw, 36px) !important;
+  font-size: clamp(14px, 1.6vw, 17px) !important;
   font-weight: 700 !important;
   letter-spacing: -0.01em !important;
-  box-shadow: 0 0 32px rgba(0,212,170,0.35) !important;
+  box-shadow: 0 0 clamp(20px, 3vw, 36px) rgba(0,212,170,0.35) !important;
   transition: all 0.18s ease !important;
+  white-space: nowrap !important;
 }
 .ctaPrimary:hover {
   background: #00efc0 !important;
-  box-shadow: 0 0 48px rgba(0,212,170,0.55) !important;
+  box-shadow: 0 0 52px rgba(0,212,170,0.55) !important;
   transform: translateY(-2px) !important;
 }
 
-/* ── MASCOT ───────────────────────────────────────────
-   Landscape PNG 1402×1122. In normal flow — no gaps.
-   Desktop: constrained height to show face/upper body.
-   Mobile: natural width, bleeds edges for immersion.
-──────────────────────────────────────────────────── */
+/* ── MASCOT ── */
 .mascotWrap {
   position: relative;
   z-index: 2;
@@ -94,68 +94,115 @@
   display: block;
   width: 100%;
   max-width: 1400px;
-  height: 70vh;
+  /* clamp prevents runaway sizes on ultrawide / very tall screens */
+  height: clamp(380px, 70svh, 800px);
   object-fit: cover;
-  /* Show head and upper body — character fills top of image */
   object-position: center 8%;
   margin: 0 auto;
 }
 
-/* ── MOBILE ──────────────────────────────────────────
-   Tight spacing. Mascot bleeds edges. Glass overlaps.
-──────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+/* ═══════════════════════════════════════════════
+   SMALL PHONES  ≤ 480px
+   Very tight. Mascot wide. Statement aggressive.
+═══════════════════════════════════════════════ */
+@media (max-width: 480px) {
   .hero { min-height: auto; }
 
   .heroInner {
-    padding: clamp(96px, 12vh, 120px) 20px 24px;
-    gap: 12px;
+    padding: clamp(80px, 11svh, 96px) 18px 18px;
+    gap: 10px;
   }
 
   .mascotWrap {
-    /* Wider than viewport — bleeds both edges */
-    width: 140%;
-    margin-left: -20%;
+    width: 148%;
+    margin-left: -24%;
     overflow: visible;
+    margin-top: -10px;
   }
 
   .mascot {
-    /* Natural ratio on mobile — landscape image is naturally shorter */
     height: auto;
     max-width: none;
     object-fit: unset;
     object-position: unset;
-    /* Pull up into the button area slightly */
-    margin-top: -16px;
   }
 }
 
-/* ── DESKTOP ─────────────────────────────────────────── */
-@media (min-width: 769px) {
+/* ═══════════════════════════════════════════════
+   PHONES  481px–768px
+   Slightly more breathing room.
+═══════════════════════════════════════════════ */
+@media (min-width: 481px) and (max-width: 768px) {
+  .hero { min-height: auto; }
+
+  .heroInner {
+    padding: clamp(88px, 12svh, 104px) 24px 20px;
+    gap: 14px;
+  }
+
+  .mascotWrap {
+    width: 135%;
+    margin-left: -17.5%;
+    overflow: visible;
+    margin-top: -14px;
+  }
+
   .mascot {
-    height: 72vh;
-    max-height: 780px;
+    height: auto;
+    max-width: none;
+    object-fit: unset;
+    object-position: unset;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   TABLET  769px–1023px
+═══════════════════════════════════════════════ */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .mascot {
+    height: clamp(360px, 65svh, 600px);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   DESKTOP  ≥ 1024px
+═══════════════════════════════════════════════ */
+@media (min-width: 1024px) {
+  .mascot {
+    height: clamp(480px, 72svh, 820px);
   }
 }
 
 /* ── INTELLIGENCE STATEMENT ── */
 .statement {
   position: relative;
-  z-index: 10;
-  background: #050608;
-  border-radius: 36px 36px 0 0;
-  /* Mobile: small overlap over mascot bottom */
-  margin-top: -48px;
+  z-index: 20;
+  /* Glass on ALL screen sizes */
+  background: rgba(5, 6, 8, 0.55);
+  backdrop-filter: blur(48px);
+  -webkit-backdrop-filter: blur(48px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-radius: 28px 28px 0 0;
+  /* Mobile: ~100px overlap */
+  margin-top: clamp(-110px, -14vw, -80px);
   padding: clamp(56px, 8vw, 100px) 0 clamp(60px, 8vw, 100px);
 }
-@media (min-width: 768px) {
+@media (min-width: 481px) and (max-width: 768px) {
+  .statement {
+    border-radius: 36px 36px 0 0;
+    margin-top: -120px;
+  }
+}
+@media (min-width: 769px) {
   .statement {
     border-radius: 48px 48px 0 0;
-    margin-top: -9rem;
+    margin-top: clamp(-180px, -18vw, -220px);
   }
 }
 @media (min-width: 1024px) {
-  .statement { margin-top: -12rem; }
+  .statement {
+    margin-top: clamp(-240px, -20vw, -300px);
+  }
 }
 
 .statement .container {
