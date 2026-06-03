@@ -160,51 +160,47 @@ function AccountDropdown({ auth, onClose }: {
       </div>
 
       {/* Google account row */}
-      {effectiveGoogle ? (
-        <div className={s.dropRow}>
-          <span className={s.dropRowIcon}><GoogleIcon/></span>
-          <div className={s.dropRowInfo}>
-            <span className={s.dropRowLabel}>Google · zkLogin</span>
-            <span className={s.dropRowVal}>{effectiveGoogle.email}</span>
-          </div>
-          <span className={s.dropRowDot}/>
+      {/* Google row: show email if known, show sign-in if not actively signed in */}
+      <div className={`${s.dropRow} ${!auth.google && !effectiveGoogle ? s.dropRowAction : ''}`}
+        onClick={!auth.google && !effectiveGoogle ? () => { navigate('/zklogin'); onClose() } : undefined}>
+        <span className={s.dropRowIcon}><GoogleIcon/></span>
+        <div className={s.dropRowInfo}>
+          <span className={s.dropRowLabel}>
+            {effectiveGoogle ? 'Google · zkLogin' : 'Google · not connected'}
+          </span>
+          {effectiveGoogle
+            ? <span className={s.dropRowVal}>{effectiveGoogle.email}</span>
+            : <span className={s.dropRowLink}>Sign in with Google →</span>
+          }
         </div>
-      ) : (
-        <div className={`${s.dropRow} ${s.dropRowAction}`} onClick={() => { navigate('/zklogin'); onClose() }}>
-          <span className={s.dropRowIcon}><GoogleIcon/></span>
-          <div className={s.dropRowInfo}>
-            <span className={s.dropRowLabel}>Google · not linked</span>
-            <span className={s.dropRowLink}>Sign in with Google →</span>
-          </div>
-        </div>
-      )}
+        {effectiveGoogle && <span className={s.dropRowDot}/>}
+      </div>
 
       {/* Wallet row */}
-      {effectiveWallet ? (
-        <div className={s.dropRow}>
-          <span className={s.dropRowIcon}><WalletIcon/></span>
-          <div className={s.dropRowInfo}>
-            <span className={s.dropRowLabel}>
-              Sui Wallet{isLinked ? ' · linked' : ''}
-            </span>
+      {/* Wallet row: show address if known, ALWAYS show ConnectButton if not actively connected */}
+      <div className={s.dropRow}>
+        <span className={s.dropRowIcon}><WalletIcon/></span>
+        <div className={s.dropRowInfo}>
+          <span className={s.dropRowLabel}>
+            {effectiveWallet
+              ? `Sui Wallet${isLinked ? ' · linked to Google' : ''}`
+              : 'Sui Wallet · not connected'}
+          </span>
+          {effectiveWallet && (
             <button className={s.addrBtn} onClick={() => copy(effectiveWallet)}>
               <span className={s.dropRowVal}>
                 {effectiveWallet.slice(0,8)}…{effectiveWallet.slice(-6)}
               </span>
               <span className={s.copyHint}>{copied ? '✓' : 'Copy'}</span>
             </button>
-          </div>
-          <span className={s.dropRowDot}/>
-        </div>
-      ) : (
-        <div className={s.dropRow}>
-          <span className={s.dropRowIcon}><WalletIcon/></span>
-          <div className={s.dropRowInfo}>
-            <span className={s.dropRowLabel}>Wallet · not linked</span>
+          )}
+          {/* Always show ConnectButton when wallet not actively connected */}
+          {!auth.wallet && (
             <div className={s.dropConnectWrap}><ConnectButton/></div>
-          </div>
+          )}
         </div>
-      )}
+        {effectiveWallet && <span className={s.dropRowDot}/>}
+      </div>
 
       <div className={s.dropDivider}/>
 
