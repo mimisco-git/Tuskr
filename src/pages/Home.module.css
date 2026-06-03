@@ -14,8 +14,14 @@
   position: relative;
   background: #000000;
   overflow: hidden;
-  /* 100svh = viewport minus browser chrome on iOS/Android */
+  /* Mobile only gets svh — desktop height is set by content */
   min-height: 100svh;
+}
+@media (min-width: 769px) {
+  .hero {
+    /* Let content determine height on desktop — no artificial gaps */
+    min-height: auto;
+  }
 }
 
 /* Point-light: scales with viewport */
@@ -196,12 +202,13 @@
 @media (min-width: 769px) {
   .statement {
     border-radius: 48px 48px 0 0;
-    margin-top: clamp(-180px, -18vw, -220px);
+    /* Pull up 280px into the mascot — no gap on any desktop */
+    margin-top: -280px;
   }
 }
-@media (min-width: 1024px) {
+@media (min-width: 1280px) {
   .statement {
-    margin-top: clamp(-240px, -20vw, -300px);
+    margin-top: -320px;
   }
 }
 
