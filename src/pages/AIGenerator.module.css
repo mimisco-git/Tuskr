@@ -235,3 +235,45 @@
   .stepLine { width: 20px; margin: 0 6px; }
   .stepLabel { display: none; }
 }
+
+/* ── Generate button — big, unmissable ── */
+.generateBtn {
+  width: 100% !important;
+  justify-content: center !important;
+  font-size: 17px !important;
+  padding: 16px 32px !important;
+  margin-top: 8px !important;
+  border-radius: 14px !important;
+  background: #00d4aa !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 40px rgba(0,212,170,0.3) !important;
+  transition: all 0.18s !important;
+}
+.generateBtn:hover:not(:disabled) {
+  background: #00efc0 !important;
+  box-shadow: 0 0 56px rgba(0,212,170,0.5) !important;
+  transform: translateY(-2px) !important;
+}
+.generateBtn:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+/* ── Mobile fixes ── */
+@media (max-width: 768px) {
+  .page { padding: 64px 0 60px; }
+  .inner { padding: 0 16px; }
+  .card { padding: 20px 16px; }
+  .styleGrid { grid-template-columns: repeat(2, 1fr); }
+  .reviewLayout { grid-template-columns: 1fr; }
+  .steps { gap: 0; overflow-x: auto; padding-bottom: 8px; }
+  .stepLabel { font-size: 10px; }
+  .title { font-size: clamp(28px, 8vw, 48px); }
+}
+@media (max-width: 480px) {
+  .styleGrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .styleCard { padding: 12px 8px; }
+  .generateBtn { font-size: 16px !important; padding: 14px 24px !important; }
+}
