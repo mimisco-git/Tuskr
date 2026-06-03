@@ -301,10 +301,8 @@ export default function Home() {
         {/* Aurora atmospheric background */}
         <div className={s.aurora} aria-hidden/>
 
-        {/* Single centered column — Walrus layout */}
+        {/* Text — sits in upper portion of hero */}
         <div className={s.heroContent}>
-
-          {/* Text */}
           <div className={s.heroInner}>
             <h1 className={s.heroTitle}>
               Discover what<br/>
@@ -319,18 +317,18 @@ export default function Home() {
               Start discovering <Arrow/>
             </Link>
           </div>
-
-          {/* Transparent mascot — no hacks, no tricks, just like Walrus */}
-          <div className={s.mascotWrap}>
-            <img
-              src="/mascot.png"
-              alt="Tuskr mascot"
-              className={s.mascot}
-              draggable={false}
-            />
-          </div>
-
         </div>
+
+        {/* Mascot — sibling of heroContent, anchors to .hero directly */}
+        <div className={s.mascotWrap}>
+          <img
+            src="/mascot.png"
+            alt="Tuskr mascot"
+            className={s.mascot}
+            draggable={false}
+          />
+        </div>
+
       </section>
 
       {/* ════ INTELLIGENCE STATEMENT ════ */}
