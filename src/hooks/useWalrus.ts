@@ -1,34 +1,53 @@
+/**
+ * useWalrus — uploads blobs via our Vercel proxy which handles CORS.
+ * The proxy calls the Walrus publisher server-side, so no CORS error.
+ */
 import { useState } from 'react'
 
-const WALRUS_PUBLISHER_URL = 'https://publisher.walrus.space'
-const WALRUS_AGGREGATOR_URL = 'https://aggregator.walrus.space'
-
 export interface WalrusUploadResult {
-  blobId: string
-  blobUrl: string
+  blobId:   string
+  blobUrl:  string
   mediaUrl: string
+}
+
+const AGGREGATOR: Record<string, string> = {
+  mainnet: 'https://aggregator.walrus.space',
+  testnet: 'https://aggregator.walrus-testnet.walrus.space',
+}
+
+function getNetwork(): string {
+  try {
+    const saved = localStorage.getItem('tuskr_network')
+    if (saved === 'testnet' || saved === 'mainnet') return saved
+  } catch {}
+  return import.meta.env.VITE_NETWORK === 'testnet' ? 'testnet' : 'mainnet'
 }
 
 export function useWalrus() {
   const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error,     setError]     = useState<string | null>(null)
 
   const uploadBlob = async (file: File): Promise<WalrusUploadResult | null> => {
     setUploading(true)
     setError(null)
 
+    const network = getNetwork()
+    const agg     = AGGREGATOR[network] ?? AGGREGATOR.mainnet
+
     try {
-      const epochs = 5
+      // Call our Vercel proxy — avoids CORS entirely
       const response = await fetch(
-        `${WALRUS_PUBLISHER_URL}/v1/blobs?epochs=${epochs}`,
+        `/api/walrus-upload?network=${network}&epochs=5`,
         {
-          method: 'PUT',
-          body: file,
+          method:  'PUT',
+          body:    file,
+          headers: { 'Content-Type': file.type || 'application/octet-stream' },
         }
       )
 
       if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`)
+        const errBody = await response.text().catch(() => '')
+        throw new Error(`Upload failed (${response.status}): ${errBody.slice(0, 120)}`)
       }
 
       const result = await response.json()
@@ -38,25 +57,27 @@ export function useWalrus() {
         result.alreadyCertified?.blobId
 
       if (!blobId) {
-        throw new Error('No blob ID returned from Walrus')
+        throw new Error(`No blob ID returned. Response: ${JSON.stringify(result).slice(0, 120)}`)
       }
 
-      return {
-        blobId,
-        blobUrl: `${WALRUS_AGGREGATOR_URL}/v1/blobs/${blobId}`,
-        mediaUrl: `${WALRUS_AGGREGATOR_URL}/v1/blobs/${blobId}`,
-      }
+      const mediaUrl = `${agg}/v1/blobs/${blobId}`
+      return { blobId, blobUrl: mediaUrl, mediaUrl }
+
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Upload failed'
-      setError(message)
+      const msg = err instanceof Error ? err.message : 'Walrus upload failed'
+      setError(msg)
+      console.error('[useWalrus] upload error:', err)
       return null
     } finally {
       setUploading(false)
     }
   }
 
-  const getMediaUrl = (blobId: string) =>
-    `${WALRUS_AGGREGATOR_URL}/v1/blobs/${blobId}`
+  const getMediaUrl = (blobId: string) => {
+    const network = getNetwork()
+    const agg = AGGREGATOR[network] ?? AGGREGATOR.mainnet
+    return `${agg}/v1/blobs/${blobId}`
+  }
 
   return { uploadBlob, getMediaUrl, uploading, error }
 }
