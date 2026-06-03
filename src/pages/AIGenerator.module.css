@@ -281,3 +281,74 @@
   .styleCard { padding: 12px 8px; }
   .generateBtn { font-size: 16px !important; padding: 14px 24px !important; }
 }
+
+/* ── Mint action button — always visible, teal ── */
+.mintActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 14px;
+  background: #00d4aa;
+  color: #000000;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 32px rgba(0,212,170,0.25);
+  transition: background 0.18s, box-shadow 0.18s, transform 0.15s;
+  margin-top: 12px;
+}
+.mintActionBtn:hover:not(:disabled) {
+  background: #00efc0;
+  box-shadow: 0 0 48px rgba(0,212,170,0.40);
+  transform: translateY(-1px);
+}
+.mintActionBtn:disabled {
+  background: rgba(0,212,170,0.25);
+  color: rgba(0,0,0,0.5);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Spinner inside button */
+.btnSpinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: #000;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Network mismatch warning */
+.networkWarning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(245,158,11,0.10);
+  border: 1px solid rgba(245,158,11,0.30);
+  font-size: 13px;
+  color: #f59e0b;
+  margin-bottom: 10px;
+}
+
+.networkNote {
+  font-size: 12px;
+  color: rgba(245,245,247,0.35);
+  text-align: center;
+  padding: 8px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+.networkNote strong {
+  color: rgba(245,245,247,0.6);
+}

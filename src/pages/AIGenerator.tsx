@@ -5,6 +5,7 @@ import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useCurrentAccount } from '@mysten/dapp-kit'
 import { useToast } from '../components/Toast'
 import { Link } from 'react-router-dom'
+import { useNetwork } from '../hooks/useNetwork'
 import s from './AIGenerator.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -27,6 +28,7 @@ const AI_TOOLS = [
 export default function AIGenerator() {
   usePageTitle('AI Generator')
   const account = useCurrentAccount()
+  const { network } = useNetwork()
   const { toast, success, error: toastError } = useToast()
   const { uploadBlob, uploading } = useWalrus()
   const { mintNFT } = useNFTMarketplace()
@@ -39,6 +41,7 @@ export default function AIGenerator() {
   const [imageFile,     setImageFile]     = useState<File|null>(null)
   const [imagePreview,  setImagePreview]  = useState<string|null>(null)
   const [txDigest,      setTxDigest]      = useState<string|null>(null)
+  const [isMinting,     setIsMinting]     = useState(false)
   const [promptCopied,  setPromptCopied]  = useState(false)
 
   const generate = async () => {
@@ -68,32 +71,44 @@ export default function AIGenerator() {
 
   const mintGenerated = async () => {
     if (!imageFile || !concept || !account) return
+    setIsMinting(true)
     setStep('mint')
-    toast('Uploading to Walrus...', 'loading')
+
+    // Upload to Walrus
+    toast('Uploading image to Walrus...', 'loading')
     const uploaded = await uploadBlob(imageFile)
-    if (!uploaded) { toastError('Walrus upload failed'); setStep('review'); return }
-    toast('Minting on Sui...', 'loading')
+    if (!uploaded) {
+      toastError('Walrus upload failed — check your network connection')
+      setStep('review')
+      return
+    }
+
+    // Mint on Sui
+    toast('Minting on Sui — confirm in your wallet...', 'loading')
     try {
       const result = await mintNFT({
-        name:        concept.name,
-        description: concept.description,
+        name:        concept.name || 'Tuskr NFT',
+        description: concept.description || '',
         blobId:      uploaded.blobId,
         mediaUrl:    uploaded.mediaUrl,
         royaltyBps:  500,
       })
       setTxDigest(result.digest)
-      success('NFT minted!', result.digest)
+      success('NFT minted successfully!')
       setStep('done')
-    } catch {
-      toastError('Mint failed')
+    } catch (err: any) {
+      const msg = err?.message || 'Mint failed'
+      toastError(msg)
       setStep('review')
+    } finally {
+      setIsMinting(false)
     }
   }
 
   const reset = () => {
     setStep('prompt'); setConcept(null)
     setImageFile(null); setImagePreview(null)
-    setUserPrompt(''); setTxDigest(null)
+    setUserPrompt(''); setTxDigest(null); setIsMinting(false)
   }
 
   return (
@@ -274,17 +289,30 @@ export default function AIGenerator() {
               )}
 
               <button
-                className={`btn btn-primary btn-lg ${s.mintBtn}`}
+                className={s.mintActionBtn}
                 onClick={mintGenerated}
-                disabled={!imageFile || !account || uploading}
+                disabled={!imageFile || !account || uploading || isMinting}
               >
-                {uploading ? 'Uploading to Walrus…' : 'Mint on Sui →'}
+                {uploading
+                  ? <><span className={s.btnSpinner}/> Uploading to Walrus...</>
+                  : isMinting
+                    ? <><span className={s.btnSpinner}/> Minting on Sui...</>
+                    : !account
+                      ? 'Connect wallet to mint'
+                      : !imageFile
+                        ? 'Upload your artwork above first'
+                        : 'Mint on Sui →'
+                }
               </button>
 
               <div className={s.mintInfo}>
                 <div className={s.mintInfoItem}><span className={s.mintDot}/> Media stored on Walrus</div>
-                <div className={s.mintInfoItem}><span className={s.mintDot}/> Ownership on Sui</div>
+                <div className={s.mintInfoItem}><span className={s.mintDot}/> Ownership on Sui {network.name}</div>
                 <div className={s.mintInfoItem}><span className={s.mintDot}/> 5% royalty set</div>
+              </div>
+              <div className={s.networkNote}>
+                Your wallet must be on <strong>{network.name}</strong> to mint.
+                Switch in your wallet extension if needed.
               </div>
             </div>
           </div>
@@ -320,7 +348,7 @@ export default function AIGenerator() {
             <div className={s.doneActions}>
               {txDigest && (
                 <a
-                  href={`https://suiexplorer.com/txblock/${txDigest}?network=testnet`}
+                  href={`https://suivision.xyz/txblock/${txDigest}${network.name === "testnet" ? "?network=testnet" : ""}`}
                   target="_blank" rel="noreferrer"
                   className="btn btn-ghost"
                 >
