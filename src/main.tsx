@@ -6,6 +6,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit'
+import { NetworkProvider } from './hooks/useNetwork'
 import { getFullnodeUrl } from '@mysten/sui/client'
 import '@mysten/dapp-kit/dist/index.css'
 import App from './App'
@@ -21,6 +22,7 @@ const networks = {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
+      <NetworkProvider>
       <SuiClientProvider networks={networks} defaultNetwork="mainnet">
         <WalletProvider autoConnect>
           <BrowserRouter>
@@ -28,6 +30,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           </BrowserRouter>
         </WalletProvider>
       </SuiClientProvider>
+    </NetworkProvider>
     </QueryClientProvider>
   </React.StrictMode>
 )
