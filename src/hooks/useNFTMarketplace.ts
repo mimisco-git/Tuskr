@@ -103,5 +103,27 @@ export function useNFTMarketplace() {
     return objects.data.map((o) => o.data).filter(Boolean) as SuiObjectData[]
   }
 
-  return { mintNFT, listNFT, buyNFT, bulkBuyNFTs, delistNFT, fetchOwnedNFTs }
+
+  /* Fetch NFTs this address has listed on the marketplace via events */
+  const fetchListedByUser = async (address: string) => {
+    try {
+      const events = await client.queryEvents({
+        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::Listed` },
+        limit: 100,
+      })
+      return events.data.filter(e => (e.sender === address || (e.parsedJson as any)?.seller === address))
+    } catch { return [] }
+  }
+
+  /* Fetch sold NFTs — events where this address was the seller */
+  const fetchSoldByUser = async (address: string) => {
+    try {
+      const events = await client.queryEvents({
+        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::Sold` },
+        limit: 100,
+      })
+      return events.data.filter(e => (e.sender === address || (e.parsedJson as any)?.seller === address))
+    } catch { return [] }
+  }
+  return { mintNFT, listNFT, buyNFT, bulkBuyNFTs, delistNFT, fetchOwnedNFTs, fetchListedByUser, fetchSoldByUser }
 }
