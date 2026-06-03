@@ -301,7 +301,7 @@ export default function Home() {
         {/* Aurora atmospheric background */}
         <div className={s.aurora} aria-hidden/>
 
-        {/* Text — sits in upper portion of hero */}
+        {/* Content column */}
         <div className={s.heroContent}>
           <div className={s.heroInner}>
             <h1 className={s.heroTitle}>
@@ -317,16 +317,16 @@ export default function Home() {
               Start discovering <Arrow/>
             </Link>
           </div>
-        </div>
 
-        {/* Mascot — sibling of heroContent, anchors to .hero directly */}
-        <div className={s.mascotWrap}>
-          <img
-            src="/mascot.png"
-            alt="Tuskr mascot"
-            className={s.mascot}
-            draggable={false}
-          />
+          {/* Mascot — in flow on mobile, absolute on desktop via CSS */}
+          <div className={s.mascotWrap}>
+            <img
+              src="/mascot.png"
+              alt="Tuskr mascot"
+              className={s.mascot}
+              draggable={false}
+            />
+          </div>
         </div>
 
       </section>
