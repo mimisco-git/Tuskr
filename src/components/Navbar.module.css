@@ -498,3 +498,15 @@
   transition: background 0.15s;
 }
 .mobileGoogleBtn:hover { background: rgba(255,255,255,0.10); }
+
+.mobileConnectBtn :global(button) {
+  font-size: 13px !important;
+  padding: 7px 14px !important;
+}
+
+/* When Google user is signed in, wallet button gets a subtle label */
+.walletLinkLabel {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: rgba(245,245,247,0.3);
+  display: block; text-align: center; margin-bottom: 2px;
+}

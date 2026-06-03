@@ -188,17 +188,6 @@ function GooglePill({ user, signOut }: { user: GoogleUser; signOut: () => void }
             </span>
           </div>
 
-          {/* Wallet linking section */}
-          <div className={s.googleDropWallet}>
-            <div className={s.googleDropWalletLabel}>
-              <span>Link a Sui wallet</span>
-              <span className={s.googleDropWalletSub}>optional — for advanced features</span>
-            </div>
-            <div className={s.googleDropConnectBtn}>
-              <ConnectButton/>
-            </div>
-          </div>
-
           <div className={s.googleDropDivider}/>
 
           {/* Actions */}
@@ -303,13 +292,10 @@ export default function Navbar() {
                 </Link>
               )
             }
-            {/* Only show ConnectButton standalone when not signed in via Google
-                (when signed in via Google, wallet connect is inside the dropdown) */}
-            {!user && (
-              <div className={s.walletWrap}>
-                <ConnectButton/>
-              </div>
-            )}
+            {/* ConnectButton always in normal flow — never inside a positioned overlay */}
+            <div className={s.walletWrap}>
+              <ConnectButton/>
+            </div>
             <button
               className={`${s.menuBtn} ${mobile ? s.menuBtnOpen : ''}`}
               onClick={() => setMobile(v => !v)}
@@ -348,8 +334,8 @@ export default function Navbar() {
                     {user.address.slice(0, 12)}…{user.address.slice(-6)}
                   </div>
                   <div className={s.mobileWalletRow}>
-                    <span className={s.mobileWalletLabel}>Link wallet:</span>
-                    <ConnectButton/>
+                    <span className={s.mobileWalletLabel}>Link Sui wallet:</span>
+                    <div className={s.mobileConnectBtn}><ConnectButton/></div>
                   </div>
                   <button className={s.mobileSignOut} onClick={() => { signOut(); setMobile(false) }}>
                     Sign out
