@@ -298,39 +298,39 @@ export default function Home() {
       {/* ════ HERO ════ */}
       <section className={s.hero}>
 
-        {/* Aurora atmosphere */}
+        {/* Aurora atmospheric background */}
         <div className={s.aurora} aria-hidden/>
 
-        {/* Text — centered in upper hero */}
+        {/* Single centered column — Walrus layout */}
         <div className={s.heroContent}>
+
+          {/* Text */}
           <div className={s.heroInner}>
             <h1 className={s.heroTitle}>
               Discover what<br/>
               <span className={s.heroTitleAccent}>others miss.</span>
             </h1>
-
             <p className={s.heroDesc}>
               AI-powered intelligence for NFTs, creators, communities,
               and emerging opportunities, with media permanently stored on Walrus
               and ownership enforced by Sui Move.
             </p>
-
             <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
               Start discovering <Arrow/>
             </Link>
           </div>
-        </div>
 
-        {/* Mascot — direct child of hero so absolute bottom:0 anchors to hero */}
-        <div className={s.mascotWrap}>
-          <img
-            src="/mascot-stand.jpg"
-            alt="Tuskr mascot"
-            className={s.mascot}
-            draggable={false}
-          />
-        </div>
+          {/* Transparent mascot — no hacks, no tricks, just like Walrus */}
+          <div className={s.mascotWrap}>
+            <img
+              src="/mascot.png"
+              alt="Tuskr mascot"
+              className={s.mascot}
+              draggable={false}
+            />
+          </div>
 
+        </div>
       </section>
 
       {/* ════ INTELLIGENCE STATEMENT ════ */}
