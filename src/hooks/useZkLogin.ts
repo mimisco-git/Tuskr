@@ -8,7 +8,7 @@ import { getFullnodeUrl } from '@mysten/sui/client'
 
 const PROVER_URL    = 'https://prover-dev.mystenlabs.com/v1'
 const REDIRECT_URI  = typeof window !== 'undefined' ? window.location.origin + '/zklogin-callback' : ''
-const NETWORK       = 'testnet'
+const NETWORK       = 'mainnet'
 const CLIENT_ID     = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
 
 export function useZkLogin() {

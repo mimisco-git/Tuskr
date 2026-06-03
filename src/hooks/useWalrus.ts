@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-const WALRUS_PUBLISHER_URL = 'https://publisher.walrus-testnet.walrus.space'
-const WALRUS_AGGREGATOR_URL = 'https://aggregator.walrus-testnet.walrus.space'
+const WALRUS_PUBLISHER_URL = 'https://publisher.walrus.space'
+const WALRUS_AGGREGATOR_URL = 'https://aggregator.walrus.space'
 
 export interface WalrusUploadResult {
   blobId: string

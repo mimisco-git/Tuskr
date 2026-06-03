@@ -2,8 +2,8 @@ import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
 import { Transaction } from '@mysten/sui/transactions'
 import type { SuiObjectData } from '@mysten/sui/client'
 
-const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
-const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID ?? '0xd1a40986e214e59d9882b3e47c861eea3b732367958d27c03e9fc3b1f747a3b2'
+const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0xd3a0071d104926cdc53e3e0ddb1fc9bfe3f38b5dd0a9e844707bb49b7a3c6787'
+const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID ?? '0x9524c9adde77ae46b14ef9703b62899bb823124a30d8597a1fd837157d911650'
 
 export interface MintParams {
   name: string
