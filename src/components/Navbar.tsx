@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ConnectButton } from '@mysten/dapp-kit'
+import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit'
 import s from './Navbar.module.css'
 
 /* ── Icons ── */
@@ -211,6 +211,7 @@ export default function Navbar() {
   const [scrolled,setScrolled]= useState(false)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { user, signOut } = useGoogleUser()
+  const account = useCurrentAccount()
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 10)
@@ -283,16 +284,20 @@ export default function Navbar() {
 
           {/* Right */}
           <div className={s.right}>
-            {user
-              ? <GooglePill user={user} signOut={signOut}/>
-              : (
-                <Link to="/zklogin" className={s.zkBtn} title="Sign in with Google">
-                  <GoogleIcon/>
-                  <span className={s.zkBtnLabel}>Sign in</span>
-                </Link>
-              )
-            }
-            {/* ConnectButton always in normal flow — never inside a positioned overlay */}
+            {/* Google sign-in: only show if NO wallet is connected yet */}
+            {!account && (
+              user
+                ? <GooglePill user={user} signOut={signOut}/>
+                : (
+                  <Link to="/zklogin" className={s.zkBtn} title="Sign in with Google">
+                    <GoogleIcon/>
+                    <span className={s.zkBtnLabel}>Sign in</span>
+                  </Link>
+                )
+            )}
+            {/* If wallet is connected, show GooglePill only when Google is also linked */}
+            {account && user && <GooglePill user={user} signOut={signOut}/>}
+            {/* ConnectButton always visible — wallet connect is always available */}
             <div className={s.walletWrap}>
               <ConnectButton/>
             </div>
