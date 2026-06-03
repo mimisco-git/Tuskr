@@ -5,12 +5,14 @@ import { useWalrusSeal } from '../hooks/useWalrusSeal'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useXP } from '../hooks/useXP'
 import s from './Mint.module.css'
+import { useNetwork } from '../hooks/useNetwork'
 import usePageTitle from '../hooks/usePageTitle'
 
 type Step = 'upload'|'details'|'minting'|'done'
 
 export default function Mint() {
   usePageTitle('Mint an NFT')
+  const { network } = useNetwork()
   const account = useCurrentAccount()
   const { uploadBlob, uploading, error:wErr } = useWalrus()
   const { mintNFT } = useNFTMarketplace()
@@ -108,8 +110,24 @@ export default function Mint() {
                 <span className="tag tag-a">WALRUS</span>
                 <span>Your file will be stored as a permanent, verifiable blob on Walrus decentralized storage</span>
               </div>
-              <button className="btn btn-primary btn-lg" onClick={upload} disabled={!file||uploading} style={{width:'100%',justifyContent:'center'}}>
-                {uploading?'Uploading to Walrus…':'Upload to Walrus'}
+              {file && !uploading && (
+                <div className={s.fileReady}>
+                  <span className={s.fileReadyCheck}>✓</span>
+                  <span className={s.fileReadyName}>{file.name}</span>
+                  <span className={s.fileReadySize}>{(file.size/1024/1024).toFixed(2)} MB</span>
+                </div>
+              )}
+              <button
+                className={`btn btn-primary btn-lg ${s.uploadBtn}`}
+                onClick={upload}
+                disabled={!file||uploading}
+              >
+                {uploading
+                  ? <><span className={s.spinner}/> Uploading to Walrus…</>
+                  : file
+                    ? '→ Upload & Continue'
+                    : 'Select a file first'
+                }
               </button>
             </div>
           )}
@@ -150,7 +168,7 @@ export default function Mint() {
               <div className={s.doneIcon}>✓</div>
               <p className={s.doneTitle}>NFT minted.</p>
               <p className={s.doneSub}>Your NFT is live on Sui with media permanently on Walrus.</p>
-              {txDigest && <a href={`https://suiexplorer.com/txblock/${txDigest}?network=testnet`} target="_blank" rel="noreferrer" className="btn btn-ghost">View on Sui Explorer ↗</a>}
+              {txDigest && <a href={`${network.explorerBase}/${txDigest}`} target="_blank" rel="noreferrer" className="btn btn-ghost">View on Sui Explorer ↗</a>}
               <button className="btn btn-primary" onClick={reset}>Mint another</button>
             </div>
           )}

@@ -70,3 +70,17 @@
   color: #000;
   font-size: 13px; font-weight: 700;
 }
+/* Tabs */
+.tabBar {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 0;
+}
+.tab {
+  padding: 10px 20px; font-size: 15px; font-weight: 500;
+  color: rgba(245,245,247,0.45); background: transparent;
+  border: none; cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; transition: color 0.15s, border-color 0.15s;
+  letter-spacing: -0.01em;
+}
+.tab:hover { color: rgba(245,245,247,0.75); }
+.tabActive { color: #fff !important; border-bottom-color: var(--a) !important; }

@@ -8,9 +8,7 @@ import { useSignAndExecuteTransaction } from '@mysten/dapp-kit'
 import NFTCard, { NFT } from '../components/NFTCard'
 import s from './Marketplace.module.css'
 import usePageTitle from '../hooks/usePageTitle'
-
-const PACKAGE_ID     = import.meta.env.VITE_PACKAGE_ID     ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
-const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID ?? '0xd1a40986e214e59d9882b3e47c861eea3b732367958d27c03e9fc3b1f747a3b2'
+import { useNetwork } from '../hooks/useNetwork'
 
 interface Listing {
   listingId: string
@@ -24,6 +22,9 @@ interface Listing {
 
 export default function Marketplace() {
   usePageTitle('Marketplace')
+  const { network } = useNetwork()
+  const PACKAGE_ID     = network.packageId
+  const MARKETPLACE_ID = network.marketplaceId
   const account  = useCurrentAccount()
   const client   = useSuiClient()
   const { buyNFT } = useNFTMarketplace()
@@ -32,9 +33,11 @@ export default function Marketplace() {
   const { mutate: signAndExecute } = useSignAndExecuteTransaction()
 
   const [listings,  setListings]  = useState<Listing[]>([])
+  const [allNfts,   setAllNfts]   = useState<any[]>([])
   const [loading,   setLoading]   = useState(true)
   const [search,    setSearch]    = useState('')
   const [sort,      setSort]      = useState('recent')
+  const [activeTab, setActiveTab] = useState<'listed'|'all'>('all')
   const [selected,  setSelected]  = useState<Set<string>>(new Set())
   const [buying,    setBuying]    = useState<string | null>(null)
 
@@ -130,9 +133,56 @@ export default function Marketplace() {
     }
   }, [client])
 
-  useEffect(() => { loadListings() }, [loadListings])
+  useEffect(() => { loadListings(); loadAllNfts() }, [network.name])
 
   // Filter + sort
+
+  // Load ALL minted TuskrNFTs on network — not just listed ones
+  const loadAllNfts = useCallback(async () => {
+    try {
+      // Query recent TuskrNFT mint events to find all NFTs
+      const events = await client.queryEvents({
+        query: { MoveEventType: `${PACKAGE_ID}::tuskr_nft::MintedEvent` },
+        limit: 50,
+      }).catch(() => ({ data: [] }))
+
+      if (events.data.length === 0) {
+        // Fallback: try to get objects by type directly
+        setAllNfts([])
+        return
+      }
+
+      // Fetch each NFT object
+      const ids = events.data
+        .map((e: any) => e.parsedJson?.nft_id || e.parsedJson?.id)
+        .filter(Boolean)
+
+      if (ids.length === 0) { setAllNfts([]); return }
+
+      const objs = await client.multiGetObjects({
+        ids,
+        options: { showContent: true, showDisplay: true },
+      })
+
+      const parsed = objs
+        .filter(o => o.data)
+        .map(o => {
+          const f = (o.data?.content as any)?.fields ?? {}
+          const d = (o.data?.display as any)?.data ?? {}
+          return {
+            objectId:    o.data!.objectId,
+            name:        f.name        || d.name        || 'Tuskr NFT',
+            description: f.description || d.description || '',
+            mediaUrl:    f.media_url   || d.image_url   || '',
+            blobId:      f.blob_id     || '',
+            creator:     f.creator     || '',
+            royaltyBps:  Number(f.royalty_bps ?? 0),
+          }
+        })
+      setAllNfts(parsed)
+    } catch { setAllNfts([]) }
+  }, [PACKAGE_ID, network.name])
+
   const filtered = listings
     .filter(l =>
       !search ||
