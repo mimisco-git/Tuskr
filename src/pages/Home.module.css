@@ -80,25 +80,50 @@
 .glow1,.glow2,.glow3,.lightCyan,.lightEmerald,.lightWhite,
 .starField,.star,.neuralCanvas { display: none; }
 
-/* Mobile overrides */
+/* Mobile — tight spacing, mascot immersive, glass overlap */
 @media (max-width: 768px) {
-  .heroInner {
-    padding: 90px 20px 60px;
+  .hero {
+    min-height: auto;
+    padding-top: 90px;
   }
+
+  .heroInner {
+    padding: 40px 20px 20px;
+    gap: 12px;
+  }
+
+  .heroTitle {
+    max-width: 100%;
+  }
+
   .mascotWrap {
     position: relative;
     left: auto;
     bottom: auto;
     transform: none;
-    width: 100%;
+    /* 135% width bleeds off screen edges for immersive feel */
+    width: 135%;
+    margin-left: -17.5%;
     height: auto;
-    overflow: hidden;
+    /* Overlap the button area slightly */
+    margin-top: -20px;
+    overflow: visible;
   }
+
   .mascot {
     width: 100%;
     height: auto;
     object-fit: unset;
     object-position: unset;
+  }
+
+  .statement {
+    /* Glass panel rises up dramatically over mascot */
+    margin-top: -80px;
+    background: rgba(5, 6, 8, 0.55);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-radius: 28px 28px 0 0;
   }
 }
 
