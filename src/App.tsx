@@ -19,6 +19,7 @@ import ListNFT          from './pages/ListNFT'
 import Leaderboard      from './pages/Leaderboard'
 import Auction          from './pages/Auction'
 import NotFound         from './pages/NotFound'
+import ZkLogin          from './pages/ZkLogin'
 import ScrollToTop      from './components/ScrollToTop'
 
 const variants = {
@@ -48,6 +49,7 @@ function AnimatedRoutes() {
           <Route path="/watchlist"   element={<ErrorBoundary><Watchlist /></ErrorBoundary>} />
           <Route path="/leaderboard" element={<ErrorBoundary><Leaderboard /></ErrorBoundary>} />
           <Route path="/auction"     element={<ErrorBoundary><Auction /></ErrorBoundary>} />
+          <Route path="/zklogin"     element={<ErrorBoundary><ZkLogin /></ErrorBoundary>} />
           <Route path="*"           element={<NotFound />} />
         </Routes>
         <Footer />
