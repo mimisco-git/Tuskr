@@ -287,88 +287,91 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* ═══════════════════════════════════════
-            MOBILE DRAWER
-        ═══════════════════════════════════════ */}
-        {mobile && (
-          <div className={s.drawer}>
-            <div className={s.drawerScroll}>
-
-              {/* Network */}
-              <div className={s.drawerNetRow}>
-                <NetBadge />
-              </div>
-
-              {/* Auth card */}
-              {isSignedIn ? (
-                <div className={s.idCard}>
-                  <div className={s.idRow}>
-                    {google.pic
-                      ? <img src={google.pic} className={s.idAva} alt="" />
-                      : <span className={s.idIni}>{initials}</span>}
-                    <div>
-                      <div className={s.idName}>{displayName}</div>
-                      {google.email && <div className={s.idEmail}>{google.email}</div>}
-                    </div>
-                  </div>
-                  {wallet && (
-                    <div className={s.idAddr}>{wallet.address.slice(0,14)}...{wallet.address.slice(-8)}</div>
-                  )}
-                  {!wallet && (
-                    <div className={s.idConnectWrap}><ConnectButton /></div>
-                  )}
-                  {!google.isLoggedIn && (
-                    <Link to="/zklogin" className={s.idGoogleBtn} onClick={() => setMobile(false)}>
-                      <GIcon /> Connect Google
-                    </Link>
-                  )}
-                  <div className={s.idActions}>
-                    <Link to="/profile" className={s.idBtn} onClick={() => setMobile(false)}>Profile</Link>
-                    {google.isLoggedIn && (
-                      <button className={`${s.idBtn} ${s.idBtnRed}`} onClick={() => { google.signOut(); setMobile(false) }}>Sign out</button>
-                    )}
-                    {wallet && (
-                      <button className={`${s.idBtn} ${s.idBtnRed}`} onClick={() => { disconnect(); setMobile(false) }}>Disconnect</button>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className={s.authCard}>
-                  <p className={s.authCardTitle}>Join Tuskr</p>
-                  <Link to="/zklogin" className={s.authGoogleBtn} onClick={() => setMobile(false)}>
-                    <GIcon /> Sign in with Google
-                  </Link>
-                  <div className={s.authWalletWrap}><ConnectButton /></div>
-                </div>
-              )}
-
-              {/* Quick links */}
-              <div className={s.quickRow}>
-                <Link to="/marketplace" className={`${s.quickBtn} ${s.quickPrimary}`} onClick={() => setMobile(false)}>Explore</Link>
-                <Link to="/mint/ai"     className={s.quickBtn} onClick={() => setMobile(false)}>AI Mint</Link>
-                <Link to="/mint"        className={s.quickBtn} onClick={() => setMobile(false)}>Mint</Link>
-              </div>
-
-              {/* Nav sections */}
-              {LINKS.map(section => (
-                <div key={section.label} className={s.navSection}>
-                  <div className={s.navSectionTitle}>{section.label}</div>
-                  {section.sub.map(lnk =>
-                    'href' in lnk
-                      ? <a key={lnk.label} href={lnk.href} target="_blank" rel="noopener noreferrer"
-                          className={s.navLink} onClick={() => setMobile(false)}>
-                          {lnk.label} <span>↗</span>
-                        </a>
-                      : <Link key={lnk.label} to={lnk.to!} className={s.navLink} onClick={() => setMobile(false)}>
-                          {lnk.label}
-                        </Link>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </header>
+
+      {/* ═══════════════════════════════════════
+          MOBILE DRAWER — must be OUTSIDE <header>
+          because backdrop-filter on header traps
+          position:fixed children, making them invisible.
+      ═══════════════════════════════════════ */}
+      {mobile && (
+        <div className={s.drawer}>
+          <div className={s.drawerScroll}>
+
+            {/* Network */}
+            <div className={s.drawerNetRow}>
+              <NetBadge />
+            </div>
+
+            {/* Auth card */}
+            {isSignedIn ? (
+              <div className={s.idCard}>
+                <div className={s.idRow}>
+                  {google.pic
+                    ? <img src={google.pic} className={s.idAva} alt="" />
+                    : <span className={s.idIni}>{initials}</span>}
+                  <div>
+                    <div className={s.idName}>{displayName}</div>
+                    {google.email && <div className={s.idEmail}>{google.email}</div>}
+                  </div>
+                </div>
+                {wallet && (
+                  <div className={s.idAddr}>{wallet.address.slice(0,14)}...{wallet.address.slice(-8)}</div>
+                )}
+                {!wallet && (
+                  <div className={s.idConnectWrap}><ConnectButton /></div>
+                )}
+                {!google.isLoggedIn && (
+                  <Link to="/zklogin" className={s.idGoogleBtn} onClick={() => setMobile(false)}>
+                    <GIcon /> Connect Google
+                  </Link>
+                )}
+                <div className={s.idActions}>
+                  <Link to="/profile" className={s.idBtn} onClick={() => setMobile(false)}>Profile</Link>
+                  {google.isLoggedIn && (
+                    <button className={`${s.idBtn} ${s.idBtnRed}`} onClick={() => { google.signOut(); setMobile(false) }}>Sign out</button>
+                  )}
+                  {wallet && (
+                    <button className={`${s.idBtn} ${s.idBtnRed}`} onClick={() => { disconnect(); setMobile(false) }}>Disconnect</button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={s.authCard}>
+                <p className={s.authCardTitle}>Join Tuskr</p>
+                <Link to="/zklogin" className={s.authGoogleBtn} onClick={() => setMobile(false)}>
+                  <GIcon /> Sign in with Google
+                </Link>
+                <div className={s.authWalletWrap}><ConnectButton /></div>
+              </div>
+            )}
+
+            {/* Quick links */}
+            <div className={s.quickRow}>
+              <Link to="/marketplace" className={`${s.quickBtn} ${s.quickPrimary}`} onClick={() => setMobile(false)}>Explore</Link>
+              <Link to="/mint/ai"     className={s.quickBtn} onClick={() => setMobile(false)}>AI Mint</Link>
+              <Link to="/mint"        className={s.quickBtn} onClick={() => setMobile(false)}>Mint</Link>
+            </div>
+
+            {/* Nav sections */}
+            {LINKS.map(section => (
+              <div key={section.label} className={s.navSection}>
+                <div className={s.navSectionTitle}>{section.label}</div>
+                {section.sub.map(lnk =>
+                  'href' in lnk
+                    ? <a key={lnk.label} href={lnk.href} target="_blank" rel="noopener noreferrer"
+                        className={s.navLink} onClick={() => setMobile(false)}>
+                        {lnk.label} <span>↗</span>
+                      </a>
+                    : <Link key={lnk.label} to={lnk.to!} className={s.navLink} onClick={() => setMobile(false)}>
+                        {lnk.label}
+                      </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </>
   )
 }
