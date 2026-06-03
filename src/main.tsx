@@ -19,11 +19,16 @@ const networks = {
   mainnet: { url: getFullnodeUrl('mainnet') },
 }
 
+// Read saved network — we reload on switch so this applies immediately
+const savedNetwork = localStorage.getItem('tuskr_network')
+const defaultNetwork: 'mainnet' | 'testnet' =
+  savedNetwork === 'testnet' ? 'testnet' : 'mainnet'
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <NetworkProvider>
-      <SuiClientProvider networks={networks} defaultNetwork="mainnet">
+      <SuiClientProvider networks={networks} defaultNetwork={defaultNetwork}>
         <WalletProvider autoConnect>
           <BrowserRouter>
             <App />
