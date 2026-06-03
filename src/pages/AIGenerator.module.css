@@ -238,17 +238,19 @@
 
 /* ── Generate button — big, unmissable ── */
 .generateBtn {
+  display: flex !important; align-items: center !important; justify-content: center !important;
   width: 100% !important;
-  justify-content: center !important;
   font-size: 17px !important;
   padding: 16px 32px !important;
   margin-top: 8px !important;
   border-radius: 14px !important;
   background: #00d4aa !important;
-  color: #000 !important;
+  color: #000000 !important;
   font-weight: 700 !important;
+  border: none !important;
   box-shadow: 0 0 40px rgba(0,212,170,0.3) !important;
   transition: all 0.18s !important;
+  cursor: pointer !important;
 }
 .generateBtn:hover:not(:disabled) {
   background: #00efc0 !important;
@@ -256,9 +258,11 @@
   transform: translateY(-2px) !important;
 }
 .generateBtn:disabled {
-  opacity: 0.45 !important;
+  opacity: 0.60 !important;
   cursor: not-allowed !important;
   transform: none !important;
+  background: #00d4aa !important;
+  color: #000000 !important;
 }
 
 /* ── Mobile fixes ── */
