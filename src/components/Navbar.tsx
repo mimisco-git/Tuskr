@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ConnectButton, useCurrentAccount, useDisconnectWallet } from '@mysten/dapp-kit'
 import { useAuthState } from '../hooks/useAuthState'
+import { useNetwork } from '../hooks/useNetwork'
 import s from './Navbar.module.css'
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -178,6 +179,22 @@ function AccountMenu({ onClose }: { onClose: () => void }) {
   )
 }
 
+
+/* ── Network Switcher ── */
+function NetworkSwitcher() {
+  const { network, setNetwork } = useNetwork()
+  return (
+    <button
+      className={s.netSwitch}
+      onClick={() => setNetwork(network.name === 'mainnet' ? 'testnet' : 'mainnet')}
+      title={`Switch to ${network.name === 'mainnet' ? 'testnet' : 'mainnet'}`}
+    >
+      <span className={`${s.netDot} ${network.name === 'mainnet' ? s.netDotMain : s.netDotTest}`}/>
+      <span className={s.netLabel}>{network.name === 'mainnet' ? 'Mainnet' : 'Testnet'}</span>
+    </button>
+  )
+}
+
 /* ─────────────────────────────────────────────────────────────────────
    MAIN NAVBAR
 ───────────────────────────────────────────────────────────────────── */
@@ -282,6 +299,7 @@ export default function Navbar() {
 
           {/* Desktop right */}
           <div className={s.desktopRight}>
+            <NetworkSwitcher/>
             {isSignedIn ? (
               <div ref={acctRef} className={s.acctWrap}>
                 <button className={s.acctPill} onClick={() => setOpenAcct(v => !v)}>

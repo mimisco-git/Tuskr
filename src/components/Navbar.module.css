@@ -341,3 +341,25 @@
 @media (min-width: 769px) {
   .drawer { display: none; }
 }
+
+/* ── NETWORK SWITCHER ── */
+.netSwitch {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: rgba(245,245,247,0.6);
+  transition: border-color 0.15s, color 0.15s;
+  letter-spacing: 0.02em;
+}
+.netSwitch:hover { border-color: rgba(255,255,255,0.30); color: #f5f5f7; }
+.netDot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+.netDotMain {
+  background: #00d4aa; box-shadow: 0 0 8px rgba(0,212,170,0.6);
+}
+.netDotTest {
+  background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.6);
+}
+.netLabel { font-size: 12px; }
