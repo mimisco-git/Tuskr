@@ -325,13 +325,31 @@
    RESPONSIVE
 =================================================== */
 @media (max-width: 768px) {
-  .center { display: none; }
-  .netPill { display: none; } /* shown in drawer instead */
-  .authBtns { display: none; }
-  .acctWrap { display: none; }
-  .burger { display: flex; }
+  .center  { display: none !important; }
+  .netPill { display: none !important; }
+  .authBtns{ display: none !important; }
+  .acctWrap{ display: none !important; }
+  .burger  { display: flex !important; }
+  /* Make inner padding tighter on mobile */
+  .inner   { padding: 0 16px; }
 }
 @media (min-width: 769px) {
   .drawer { display: none !important; }
-  .burger { display: none; }
+  .burger { display: none !important; }
+  /* Ensure desktop elements show */
+  .center   { display: flex !important; }
+  .authBtns { display: flex !important; }
+}
+
+/* Force ConnectButton full width in mobile contexts */
+.mobileWalletBtn > :global(button),
+.idConnect > :global(button),
+.drawerConnectRow > :global(button),
+.authCard > div > :global(button) {
+  width: 100% !important;
+  justify-content: center !important;
+  font-size: 15px !important;
+  padding: 12px 20px !important;
+  min-height: 48px !important;
+  border-radius: 11px !important;
 }
