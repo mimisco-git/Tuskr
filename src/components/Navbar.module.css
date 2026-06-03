@@ -14,7 +14,7 @@
 /* Main bar */
 .nav {
   position: fixed; top: 2px; left: 0; right: 0; z-index: 1000;
-  height: 56px;
+  height: 64px;
   background: rgba(0,0,0,0.7);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
@@ -29,17 +29,16 @@
 
 .inner {
   display: flex; align-items: center;
-  height: 100%; max-width: 1280px;
-  margin: 0 auto; padding: 0 24px; gap: 32px;
+  height: 100%; max-width: 1400px;
+  margin: 0 auto; padding: 0 32px; gap: 40px;
 }
 
 /* Logo */
 .logo {
-  font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 800;
-  letter-spacing: -0.05em; text-decoration: none;
-  background: linear-gradient(135deg,#ffffff,rgba(255,255,255,0.8));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text; flex-shrink: 0;
+  font-family: 'Inter', sans-serif; font-size: 22px; font-weight: 800;
+  letter-spacing: -0.06em; text-decoration: none;
+  color: #ffffff;
+  flex-shrink: 0;
 }
 
 /* ── DESKTOP NAV ── */
@@ -49,14 +48,14 @@
 .navItem { position: relative; }
 .navTrigger {
   display: flex; align-items: center; gap: 5px;
-  font-size: 14px; font-weight: 500; color: rgba(245,245,247,0.65);
+  font-size: 16px; font-weight: 500; color: rgba(245,245,247,0.7);
   background: transparent; border: none; cursor: pointer;
-  padding: 7px 10px; border-radius: 8px;
-  transition: color 0.15s, background 0.15s;
+  padding: 8px 12px; border-radius: 8px;
+  transition: color 0.18s;
+  letter-spacing: -0.01em;
 }
-.navTrigger:hover, .navTriggerActive {
-  color: #f5f5f7; background: rgba(255,255,255,0.07);
-}
+.navTrigger:hover { color: #ffffff; }
+.navTriggerActive { color: #ffffff; }
 .navChevron {
   color: rgba(245,245,247,0.35); transition: transform 0.2s; display: flex; align-items: center;
 }
@@ -86,11 +85,12 @@
 }
 .megaLink {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 7px 8px; border-radius: 9px;
-  font-size: 14px; color: rgba(245,245,247,0.7); text-decoration: none;
+  padding: 8px 10px; border-radius: 9px;
+  font-size: 15px; color: rgba(245,245,247,0.65); text-decoration: none;
   transition: background 0.12s, color 0.12s;
+  letter-spacing: -0.01em;
 }
-.megaLink:hover { background: rgba(255,255,255,0.08); color: #f5f5f7; }
+.megaLink:hover { background: rgba(255,255,255,0.07); color: #f5f5f7; }
 .megaLink svg { opacity: 0.4; flex-shrink: 0; }
 
 /* ── DESKTOP RIGHT ── */
@@ -98,25 +98,26 @@
 .authBtns { display: flex; align-items: center; gap: 8px; }
 .googleBtn {
   display: flex; align-items: center; gap: 7px;
-  padding: 7px 14px; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.05);
-  font-size: 14px; font-weight: 500; color: #f5f5f7;
-  text-decoration: none; transition: background 0.15s, border-color 0.15s;
+  padding: 8px 18px; border-radius: 999px;
+  border: 1.5px solid rgba(255,255,255,0.30);
+  background: transparent;
+  font-size: 15px; font-weight: 500; color: #f5f5f7;
+  text-decoration: none; transition: border-color 0.18s, background 0.18s;
+  letter-spacing: -0.01em;
 }
-.googleBtn:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.25); }
+.googleBtn:hover { border-color: rgba(255,255,255,0.60); background: rgba(255,255,255,0.05); }
 
 /* Account pill */
 .acctWrap { position: relative; }
 .acctPill {
   display: flex; align-items: center; gap: 8px;
-  padding: 4px 12px 4px 4px; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  cursor: pointer; transition: background 0.15s;
+  padding: 5px 14px 5px 5px; border-radius: 999px;
+  border: 1.5px solid rgba(255,255,255,0.20);
+  background: transparent;
+  cursor: pointer; transition: border-color 0.18s, background 0.18s;
   color: #f5f5f7;
 }
-.acctPill:hover { background: rgba(255,255,255,0.10); }
+.acctPill:hover { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.05); }
 .pillImg { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
 .pillInitials {
   width: 28px; height: 28px; border-radius: 50%;
@@ -125,8 +126,8 @@
   display: flex; align-items: center; justify-content: center;
 }
 .pillName {
-  font-size: 14px; font-weight: 500;
-  max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 15px; font-weight: 500; letter-spacing: -0.01em;
+  max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .pillChev { color: rgba(245,245,247,0.4); display: flex; transition: transform 0.2s; }
 .pillChevOpen { transform: rotate(180deg); }
@@ -288,8 +289,8 @@
 /* Quick actions */
 .drawerQuick { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
 .drawerQuickBtn {
-  flex: 1; min-width: 80px; padding: 10px 12px; text-align: center;
-  border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 500;
+  flex: 1; min-width: 80px; padding: 12px 14px; text-align: center;
+  border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 500;
   color: rgba(245,245,247,0.7);
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
   transition: background 0.15s;
@@ -316,10 +317,10 @@
   color: rgba(245,245,247,0.2); margin-bottom: 4px; padding: 0 4px;
 }
 .drawerLink {
-  display: block; padding: 9px 4px;
-  font-size: 15px; color: rgba(245,245,247,0.65);
+  display: block; padding: 11px 4px;
+  font-size: 16px; color: rgba(245,245,247,0.65);
   text-decoration: none; border-radius: 8px;
-  transition: color 0.12s;
+  transition: color 0.12s; letter-spacing: -0.01em;
 }
 .drawerLink:hover { color: #f5f5f7; }
 
