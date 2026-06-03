@@ -225,7 +225,7 @@
 }
 
 .powerEyebrow {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px;
   font-family: 'Space Mono', monospace; font-size: 10px;
   color: #00d4aa; letter-spacing: 0.18em; text-transform: uppercase;
 }
