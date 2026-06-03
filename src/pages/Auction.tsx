@@ -74,7 +74,7 @@ export default function Auction() {
         <div className={s.pageHeader}>
           <div className={s.eyebrow}><span className={s.eyebrowDot}/>Live Auctions</div>
           <h1 className={s.title}>Timed Auctions</h1>
-          <p className={s.sub}>Bid on exclusive NFTs — highest bid wins when the clock hits zero.</p>
+          <p className={s.sub}>Bid on exclusive NFTs. Highest bid wins when the clock hits zero.</p>
         </div>
 
         {loading ? (
@@ -88,7 +88,7 @@ export default function Auction() {
             <h2 className={s.emptyTitle}>Auctions launching soon</h2>
             <p className={s.emptySub}>
               Timed auctions are coming to Tuskr on {network.name}.<br/>
-              Mint an NFT now — you'll be able to auction it when this feature goes live.
+              Mint an NFT now. You'll be able to auction it when this feature goes live.
             </p>
             <div className={s.emptyActions}>
               <Link to="/mint" className="btn btn-primary">Mint an NFT</Link>

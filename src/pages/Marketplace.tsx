@@ -41,6 +41,7 @@ export default function Marketplace() {
   const [selected,  setSelected]  = useState<Set<string>>(new Set())
   const [buying,    setBuying]    = useState<string | null>(null)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadListings = useCallback(async () => {
     setLoading(true)
     try {
@@ -133,11 +134,11 @@ export default function Marketplace() {
     }
   }, [client])
 
-  useEffect(() => { loadListings(); loadAllNfts() }, [network.name])
+  useEffect(() => { loadListings(); loadAllNfts() }, [network.name, PACKAGE_ID])
 
   // Filter + sort
 
-  // Load ALL minted TuskrNFTs on network — not just listed ones
+  // Load ALL minted TuskrNFTs on network, not just listed ones
   const loadAllNfts = useCallback(async () => {
     try {
       // Query recent TuskrNFT mint events to find all NFTs

@@ -94,16 +94,14 @@ export default function Collections() {
     <main className={s.page}>
       <div className="container">
         <div className={s.header}>
-          <div>
+          <div className={s.headerLeft}>
             <div className={s.eyebrow}><div className={s.eyebrowDot}/>Collections</div>
             <h1 className={s.title}>Collections</h1>
             <p className={s.sub}>NFT collections on Sui, media stored on Walrus.</p>
           </div>
-          {account && (
-            <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-              + Create collection
-            </button>
-          )}
+          <button className={`btn btn-primary ${s.createBtn}`} onClick={() => setShowCreate(true)}>
+            + Create Collection
+          </button>
         </div>
 
         {/* Create form */}

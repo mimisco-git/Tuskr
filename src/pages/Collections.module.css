@@ -33,3 +33,18 @@
 
 @media(max-width:768px) { .page{padding:56px 0 40px;} .grid{grid-template-columns:1fr;} .header{flex-direction:column;} }
 @media(max-width:480px) { .grid{grid-template-columns:1fr;} }
+
+/* Header layout */
+.header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 40px; flex-wrap: wrap; gap: 20px;
+}
+.headerLeft { flex: 1; }
+.createBtn {
+  font-size: 15px !important; padding: 12px 24px !important;
+  white-space: nowrap; flex-shrink: 0;
+}
+@media(max-width:600px) {
+  .header { flex-direction: column; align-items: stretch; }
+  .createBtn { width: 100%; justify-content: center; }
+}
