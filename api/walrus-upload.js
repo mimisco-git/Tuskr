@@ -1,36 +1,25 @@
-// Uses Node.js built-in https — no fetch dependency
-
-const https = require('https')
-const http  = require('http')
+import https from 'https'
+import http  from 'http'
 
 function rawRequest(url, method, headers, body) {
   return new Promise((resolve, reject) => {
-    const parsed   = new URL(url)
-    const lib      = parsed.protocol === 'https:' ? https : http
-    const options  = {
-      hostname: parsed.hostname,
-      path:     parsed.pathname + parsed.search,
-      method,
-      headers,
-    }
-
-    const req = lib.request(options, res => {
-      const chunks = []
-      res.on('data', c => chunks.push(c))
-      res.on('end', () => resolve({
-        status: res.statusCode,
-        headers: res.headers,
-        body: Buffer.concat(chunks),
-      }))
-    })
-
+    const parsed = new URL(url)
+    const lib    = parsed.protocol === 'https:' ? https : http
+    const req    = lib.request(
+      { hostname: parsed.hostname, path: parsed.pathname + parsed.search, method, headers },
+      res => {
+        const chunks = []
+        res.on('data', c => chunks.push(c))
+        res.on('end',  () => resolve({ status: res.statusCode, body: Buffer.concat(chunks) }))
+      }
+    )
     req.on('error', reject)
     if (body) req.write(body)
     req.end()
   })
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'PUT, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -42,19 +31,15 @@ module.exports = async function handler(req, res) {
 
   const network = req.query.network || 'mainnet'
   const epochs  = req.query.epochs  || '5'
+  const base    = network === 'testnet'
+    ? 'https://publisher.walrus-testnet.walrus.space'
+    : 'https://publisher.walrus.space'
 
-  const PUBLISHERS = {
-    mainnet: 'https://publisher.walrus.space',
-    testnet: 'https://publisher.walrus-testnet.walrus.space',
-  }
-  const base = PUBLISHERS[network] || PUBLISHERS.mainnet
-
-  // Collect raw body
   const chunks = []
-  await new Promise((resolve, reject) => {
-    req.on('data', c => chunks.push(c))
-    req.on('end', resolve)
-    req.on('error', reject)
+  await new Promise((ok, fail) => {
+    req.on('data',  c => chunks.push(c))
+    req.on('end',   ok)
+    req.on('error', fail)
   })
   const body = Buffer.concat(chunks)
 
@@ -68,10 +53,9 @@ module.exports = async function handler(req, res) {
       },
       body
     )
-
     res.setHeader('Content-Type', 'application/json')
     res.status(result.status).send(result.body)
   } catch (err) {
-    res.status(500).json({ error: 'Walrus proxy failed', detail: err.message })
+    res.status(500).json({ error: 'Walrus proxy failed', detail: String(err) })
   }
 }
