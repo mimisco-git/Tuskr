@@ -1,36 +1,66 @@
 /**
- * useTradeport — correct field names from official TradePort docs
- * Docs: https://www.tradeport.xyz/docs/nft-data-api/examples/collections
+ * useTradeport — TradePort / Indexer.xyz GraphQL
+ * Tries our Vercel proxy first, then falls back to direct call
  */
 
-const PROXY = '/api/tradeport'
+const PROXY   = '/api/tradeport'
+const DIRECT  = 'https://api.indexer.xyz/graphql'
+const API_KEY  = 'CVdbun0.5cda839c66e800e174ac0a5ec1dc1a2c'
+const API_USER = 'Tuskr'
 
 async function gql(query: string, variables: Record<string, unknown> = {}) {
-  const res = await fetch(PROXY, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ query, variables }),
-  })
-  if (!res.ok) throw new Error(`TradePort proxy error: ${res.status}`)
-  const json = await res.json()
-  if (json.errors?.length) throw new Error(json.errors[0].message)
+  const payload = JSON.stringify({ query, variables })
+  
+  // Try proxy first
+  let res: Response
+  try {
+    res = await fetch(PROXY, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    payload,
+    })
+  } catch {
+    // Proxy unreachable — fall back to direct
+    res = await fetch(DIRECT, {
+      method:  'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key':    API_KEY,
+        'x-api-user':   API_USER,
+      },
+      body: payload,
+    })
+  }
+
+  const text = await res.text()
+  let json: any
+  try { json = JSON.parse(text) }
+  catch { throw new Error(`Non-JSON response (${res.status}): ${text.slice(0, 200)}`) }
+
+  if (!res.ok) {
+    throw new Error(`API error ${res.status}: ${json?.error ?? text.slice(0, 200)}`)
+  }
+  if (json.errors?.length) {
+    throw new Error(`GraphQL: ${json.errors[0].message}`)
+  }
+
   return json.data
 }
 
 /* ── Types ── */
 export interface TPCollection {
-  id:           string
-  slug:         string
-  semantic_slug:string | null
-  title:        string
-  description:  string | null
-  cover_url:    string | null
-  supply:       number | null
-  verified:     boolean
-  floor:        number | null
-  volume:       number | null
-  usd_volume:   number | null
-  num_owners:   number | null
+  id:            string
+  slug:          string
+  semantic_slug: string | null
+  title:         string
+  description:   string | null
+  cover_url:     string | null
+  supply:        number | null
+  verified:      boolean
+  floor:         number | null
+  volume:        number | null
+  usd_volume:    number | null
+  num_owners:    number | null
 }
 
 export interface TPNFT {
@@ -65,7 +95,7 @@ export interface TPActivity {
   } | null
 }
 
-/* ── All Sui collections, sorted by volume ── */
+/* ── All collections sorted by volume ── */
 export async function fetchSuiCollections(limit = 50): Promise<TPCollection[]> {
   const data = await gql(`
     query SuiCollections($limit: Int!) {
@@ -83,7 +113,7 @@ export async function fetchSuiCollections(limit = 50): Promise<TPCollection[]> {
   return data?.sui?.collections ?? []
 }
 
-/* ── Single collection by slug (or semantic_slug) ── */
+/* ── Single collection ── */
 export async function fetchCollection(slug: string): Promise<TPCollection | null> {
   const data = await gql(`
     query SuiCollection($slug: String) {
@@ -104,25 +134,6 @@ export async function fetchCollection(slug: string): Promise<TPCollection | null
     }
   `, { slug })
   return data?.sui?.collections?.[0] ?? null
-}
-
-/* ── Collection stats (volume, sales) ── */
-export async function fetchCollectionStats(slug: string) {
-  const data = await gql(`
-    query SuiCollectionStats($slug: String!) {
-      sui {
-        collection_stats(slug: $slug) {
-          total_sales
-          total_volume
-          total_usd_volume
-          day_volume
-          day_sales
-          day_usd_volume
-        }
-      }
-    }
-  `, { slug })
-  return data?.sui?.collection_stats ?? null
 }
 
 /* ── NFTs in a collection ── */
@@ -148,7 +159,7 @@ export async function fetchCollectionNFTs(slug: string, limit = 32): Promise<TPN
   return data?.sui?.nfts ?? []
 }
 
-/* ── Global recent activity (sales + listings) ── */
+/* ── Global recent activity ── */
 export async function fetchRecentActivity(limit = 40): Promise<TPActivity[]> {
   const data = await gql(`
     query SuiRecentActivity($limit: Int!) {
@@ -180,12 +191,10 @@ export async function fetchCollectionActivity(slug: string, limit = 20): Promise
           where: {
             _and: [
               { type: { _in: ["sale", "listing"] } },
-              {
-                _or: [
-                  { nft: { collection: { slug: { _eq: $slug } } } },
-                  { nft: { collection: { semantic_slug: { _eq: $slug } } } }
-                ]
-              }
+              { _or: [
+                { nft: { collection: { slug: { _eq: $slug } } } },
+                { nft: { collection: { semantic_slug: { _eq: $slug } } } }
+              ]}
             ]
           }
           order_by: [{ block_time: desc }, { tx_index: desc }]
@@ -193,33 +202,13 @@ export async function fetchCollectionActivity(slug: string, limit = 20): Promise
         ) {
           id type price usd_price sender receiver
           tx_id block_time market_name bought_on_tradeport
-          nft { id name media_url media_type ranking collection { title slug } }
+          nft {
+            id name media_url media_type ranking
+            collection { title slug }
+          }
         }
       }
     }
   `, { slug, limit })
   return data?.sui?.recent_actions ?? []
-}
-
-/* ── Trending collections ── */
-export async function fetchTrendingCollections(limit = 10) {
-  const data = await gql(`
-    query SuiTrending($limit: Int!) {
-      sui {
-        collections_trending(
-          period: ONE_DAY
-          trending_by: VOLUME
-          limit: $limit
-        ) {
-          current_volume
-          current_trades_count
-          previous_volume
-          collection {
-            id slug semantic_slug title cover_url floor volume supply verified num_owners
-          }
-        }
-      }
-    }
-  `, { limit })
-  return data?.sui?.collections_trending ?? []
 }
