@@ -1,195 +1,169 @@
-import { useState, useEffect } from 'react'
-import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
-import { useToast } from '../components/Toast'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { fetchSuiCollections, type TPCollection } from '../hooks/useTradeport'
 import s from './Collections.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
-const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+const SUI_USD = 3.8 // approximate — replace with live feed later
 
-interface Collection {
-  objectId:    string
-  name:        string
-  description: string
-  creator:     string
-  nftCount:    number
-  coverBlobId: string
+function fmt(n: number | null, decimals = 2) {
+  if (n == null) return '—'
+  return n.toLocaleString('en-US', { maximumFractionDigits: decimals })
 }
 
-function parseCollection(obj: any): Collection {
-  const f = obj?.data?.content?.fields ?? {}
-  return {
-    objectId:    obj?.data?.objectId ?? '',
-    name:        f.name         ?? 'Untitled',
-    description: f.description  ?? '',
-    creator:     f.creator      ?? '',
-    nftCount:    Number(f.nft_ids?.fields?.contents?.length ?? 0),
-    coverBlobId: f.cover_blob_id ?? '',
-  }
+function fmtUSD(sui: number | null) {
+  if (sui == null) return '—'
+  const usd = sui * SUI_USD
+  if (usd >= 1_000_000) return `$${(usd / 1_000_000).toFixed(2)}M`
+  if (usd >= 1_000)     return `$${(usd / 1_000).toFixed(1)}K`
+  return `$${usd.toFixed(0)}`
 }
+
+function CollectionImg({ src, alt }: { src: string | null; alt: string }) {
+  const [err, setErr] = useState(false)
+  const initials = alt.slice(0, 2).toUpperCase()
+  if (!src || err) return (
+    <div className={s.colImgFallback}>{initials}</div>
+  )
+  return <img src={src} alt={alt} className={s.colImg} onError={() => setErr(true)}/>
+}
+
+type SortKey = 'volume' | 'floor' | 'num_owners' | 'market_cap' | 'supply'
 
 export default function Collections() {
-  usePageTitle('Collections')
-  const account = useCurrentAccount()
-  const client  = useSuiClient()
-  const { success, error: toastErr } = useToast()
+  usePageTitle('NFT Collections')
 
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [loading,     setLoading]     = useState(true)
-  const [showCreate,  setShowCreate]  = useState(false)
-  const [creating,    setCreating]    = useState(false)
-  const [form, setForm] = useState({ name:'', description:'' })
+  const [cols,    setCols]    = useState<TPCollection[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState<string | null>(null)
+  const [sortBy,  setSortBy]  = useState<SortKey>('volume')
+  const [search,  setSearch]  = useState('')
 
   useEffect(() => {
-    loadCollections()
-  }, [account?.address])
+    fetchSuiCollections(60)
+      .then(setCols)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [])
 
-  const loadCollections = async () => {
-    setLoading(true)
-    try {
-      if (!account) { setCollections([]); return }
+  const sorted = [...cols]
+    .filter(c => !search || c.title?.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      const av = (a as any)[sortBy] ?? -1
+      const bv = (b as any)[sortBy] ?? -1
+      return bv - av
+    })
 
-      // Fetch Collection objects owned by current user
-      const res = await client.getOwnedObjects({
-        owner: account.address,
-        filter: { StructType: `${PACKAGE_ID}::tuskr_collection::Collection` },
-        options: { showContent: true, showDisplay: true },
-      })
-
-      const parsed = res.data
-        .map(parseCollection)
-        .filter(c => c.objectId)
-
-      setCollections(parsed)
-    } catch (e) {
-      console.error('Collections load error:', e)
-      setCollections([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCreate = async () => {
-    if (!account || !form.name.trim()) return
-    setCreating(true)
-    try {
-      // Call the on-chain create_collection function
-      const { Transaction } = await import('@mysten/sui/transactions')
-      const { useSignAndExecuteTransaction } = await import('@mysten/dapp-kit')
-
-      toastErr('Use the Sui wallet to sign the create collection transaction')
-      // For now show a success and reload
-      success(`Collection "${form.name}" created on Sui!`)
-      setShowCreate(false)
-      setForm({ name:'', description:'' })
-      setTimeout(loadCollections, 2000)
-    } catch (e: any) {
-      toastErr(e?.message || 'Failed to create collection')
-    } finally {
-      setCreating(false)
-    }
-  }
+  const totalVol = cols.reduce((s, c) => s + (c.volume ?? 0), 0)
 
   return (
     <main className={s.page}>
       <div className="container">
-        <div className={s.header}>
-          <div className={s.headerLeft}>
-            <div className={s.eyebrow}><div className={s.eyebrowDot}/>Collections</div>
-            <h1 className={s.title}>Collections</h1>
-            <p className={s.sub}>NFT collections on Sui, media stored on Walrus.</p>
+
+        {/* Header */}
+        <div className={s.pageHead}>
+          <div className={s.eyebrow}><span className={s.eyeDot}/>NFT Collections</div>
+          <div className={s.headRow}>
+            <div>
+              <h1 className={s.title}>Sui NFT Collections</h1>
+              <p className={s.sub}>
+                {loading ? 'Loading...' : `${cols.length} collections · `}
+                <span className={s.subStat}>{fmt(totalVol, 0)} SUI</span> total volume
+              </p>
+            </div>
+            <Link to="/mint" className={s.createBtn}>+ Create Collection</Link>
           </div>
-          <button className={`btn btn-primary ${s.createBtn}`} onClick={() => setShowCreate(true)}>
-            + Create Collection
-          </button>
         </div>
 
-        {/* Create form */}
-        {showCreate && (
-          <div className={s.createCard}>
-            <h3 className={s.createTitle}>New Collection</h3>
-            <div className={s.createFields}>
-              <div className="field">
-                <label className="field-label">Collection Name *</label>
-                <input className="input" placeholder="e.g. Arctic Series"
-                  value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}/>
-              </div>
-              <div className="field">
-                <label className="field-label">Description</label>
-                <textarea className="textarea input" rows={3}
-                  placeholder="What is this collection about?"
-                  value={form.description}
-                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}/>
-              </div>
-            </div>
-            <div className={s.createActions}>
-              <button className="btn btn-ghost" onClick={() => setShowCreate(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleCreate}
-                disabled={creating || !form.name.trim()}>
-                {creating ? 'Creating…' : 'Create on Sui'}
-              </button>
-            </div>
+        {/* Search + sort */}
+        <div className={s.controls}>
+          <div className={s.searchWrap}>
+            <svg className={s.searchIcon} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input
+              className={s.searchInput}
+              placeholder="Search collections..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <div className={s.sortBtns}>
+            {([['volume','Volume'],['floor','Floor'],['num_owners','Holders'],['market_cap','Market Cap']] as [SortKey,string][]).map(([k,l]) => (
+              <button key={k} className={`${s.sortBtn} ${sortBy===k ? s.sortBtnActive : ''}`} onClick={() => setSortBy(k)}>{l}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className={s.errorBox}>
+            <strong>API Error:</strong> {error}. Check VITE_INDEXER_API_KEY in Vercel.
           </div>
         )}
 
-        {/* Grid */}
+        {/* Table */}
         {loading ? (
-          <div className={s.grid}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="skeleton" style={{ height:300, borderRadius:24 }}/>
-            ))}
-          </div>
-        ) : !account ? (
-          <div className={s.empty}>
-            <div className={s.emptyIcon}>📦</div>
-            <p className={s.emptyTitle}>Connect to see your collections</p>
-            <p className={s.emptySub}>Collections you create will appear here.</p>
-          </div>
-        ) : collections.length === 0 ? (
-          <div className={s.empty}>
-            <div className={s.emptyIcon}>📦</div>
-            <p className={s.emptyTitle}>No collections yet</p>
-            <p className={s.emptySub}>Create your first collection to group your NFTs.</p>
-            <button className="btn btn-primary" onClick={() => setShowCreate(true)}>
-              + Create collection
-            </button>
+          <div className={s.skelTable}>
+            {[...Array(8)].map((_,i) => <div key={i} className={s.skelRow}/>)}
           </div>
         ) : (
-          <div className={s.grid}>
-            {collections.map(col => (
-              <div key={col.objectId} className={s.card}>
-                <div className={s.cover}>
-                  {col.coverBlobId ? (
-                    <img src={`https://aggregator.walrus-testnet.walrus.space/v1/${col.coverBlobId}`}
-                      alt={col.name} className={s.coverImg}
-                      onError={e => { (e.target as HTMLImageElement).style.display='none' }}/>
-                  ) : (
-                    <div className={s.coverPlaceholder}>
-                      <span>{col.name.slice(0,2).toUpperCase()}</span>
-                    </div>
-                  )}
-                </div>
-                <div className={s.body}>
-                  <h3 className={s.colName}>{col.name}</h3>
-                  <p className={s.colDesc}>{col.description || 'No description.'}</p>
-                  <div className={s.stats}>
-                    <div className={s.stat}>
-                      <div className={s.statVal}>{col.nftCount}</div>
-                      <div className={s.statLabel}>Items</div>
-                    </div>
-                    <div className={s.stat}>
-                      <div className={s.statVal}>{col.creator.slice(0,8)}…</div>
-                      <div className={s.statLabel}>Creator</div>
-                    </div>
-                  </div>
-                  <a href={`https://suiexplorer.com/object/${col.objectId}?network=testnet`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="btn btn-ghost btn-sm" style={{ marginTop:12 }}>
-                    View on Explorer ↗
-                  </a>
-                </div>
-              </div>
-            ))}
+          <div className={s.tableWrap}>
+            <table className={s.table}>
+              <thead>
+                <tr>
+                  <th className={s.thRank}>#</th>
+                  <th className={s.thName}>Collection</th>
+                  <th className={s.thNum} onClick={() => setSortBy('floor')} style={{cursor:'pointer'}}>
+                    Floor {sortBy==='floor' && '▼'}
+                  </th>
+                  <th className={s.thNum} onClick={() => setSortBy('volume')} style={{cursor:'pointer'}}>
+                    Volume {sortBy==='volume' && '▼'}
+                  </th>
+                  <th className={s.thNum}>Supply</th>
+                  <th className={s.thNum} onClick={() => setSortBy('num_owners')} style={{cursor:'pointer'}}>
+                    Holders {sortBy==='num_owners' && '▼'}
+                  </th>
+                  <th className={s.thNum} onClick={() => setSortBy('market_cap')} style={{cursor:'pointer'}}>
+                    Market Cap {sortBy==='market_cap' && '▼'}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((col, idx) => (
+                  <tr key={col.id} className={s.row}>
+                    <td className={s.tdRank}>{idx + 1}</td>
+                    <td className={s.tdName}>
+                      <Link to={`/collections/${col.slug}`} className={s.colLink}>
+                        <CollectionImg src={col.cover_url || col.image} alt={col.title || '?'}/>
+                        <div className={s.colInfo}>
+                          <span className={s.colTitle}>{col.title || col.slug}</span>
+                          {col.verified && <span className={s.verifiedBadge}>✓</span>}
+                        </div>
+                      </Link>
+                    </td>
+                    <td className={s.tdNum}>
+                      {col.floor != null
+                        ? <span className={s.floor}>{fmt(col.floor, 2)} <span className={s.sui}>SUI</span></span>
+                        : <span className={s.dim}>—</span>}
+                    </td>
+                    <td className={s.tdNum}>
+                      {col.volume != null
+                        ? <span>{fmt(col.volume, 0)} <span className={s.sui}>SUI</span></span>
+                        : <span className={s.dim}>—</span>}
+                    </td>
+                    <td className={s.tdNum}><span className={s.dim}>{col.supply?.toLocaleString() ?? '—'}</span></td>
+                    <td className={s.tdNum}><span>{col.num_owners?.toLocaleString() ?? '—'}</span></td>
+                    <td className={s.tdNum}>
+                      <span className={s.mcap}>{fmtUSD(col.market_cap ?? (col.floor && col.supply ? col.floor * col.supply : null))}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {sorted.length === 0 && !loading && (
+              <div className={s.emptyTable}>No collections found{search ? ` for "${search}"` : ''}.</div>
+            )}
           </div>
         )}
       </div>

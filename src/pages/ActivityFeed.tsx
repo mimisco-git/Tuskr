@@ -1,74 +1,112 @@
-import { useActivityFeed } from '../hooks/useActivityFeed'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { fetchRecentActivity, type TPActivity } from '../hooks/useTradeport'
 import s from './ActivityFeed.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
-const TYPE_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  sold:     { label:'Sold',     icon:'💰', color:'#00d4aa' },
-  listed:   { label:'Listed',   icon:'🏷️', color:'#60a5fa' },
-  minted:   { label:'Minted',   icon:'✨', color:'#a78bfa' },
-  delisted: { label:'Delisted', icon:'↩️', color:'#f87171' },
-  bid:      { label:'Bid',      icon:'⚡', color:'#fbbf24' },
+function timeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60000)
+  if (m < 1)   return 'just now'
+  if (m < 60)  return `${m}m ago`
+  const h = Math.floor(m / 60)
+  if (h < 24)  return `${h}h ago`
+  return `${Math.floor(h/24)}d ago`
+}
+
+function fmt(n: number | null) {
+  if (n == null) return '—'
+  return n.toLocaleString('en-US', { maximumFractionDigits: 2 })
+}
+
+function ImgFallback({ src, alt }: { src: string | null; alt: string }) {
+  const [err, setErr] = useState(false)
+  if (!src || err) return (
+    <div className={s.imgFallback}>{alt.slice(0,2).toUpperCase()}</div>
+  )
+  return <img src={src} alt={alt} className={s.actImg} onError={() => setErr(true)}/>
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  sale:    'Sold',
+  listing: 'Listed',
+  offer:   'Offer',
+  transfer:'Transfer',
+}
+
+const TYPE_COLORS: Record<string, string> = {
+  sale:    'var(--a)',
+  listing: '#60a5fa',
+  offer:   '#f59e0b',
+  transfer:'rgba(245,245,247,0.35)',
 }
 
 export default function ActivityFeed() {
   usePageTitle('Activity Feed')
-  const { events, loading, refresh } = useActivityFeed()
+  const [items,   setItems]   = useState<TPActivity[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState<string|null>(null)
+
+  useEffect(() => {
+    fetchRecentActivity(40)
+      .then(setItems)
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <main className={s.page}>
       <div className="container">
-        <div className={s.header}>
-          <div>
-            <div className={s.eyebrow}><div className={s.eyebrowDot}/>Activity Feed</div>
-            <h1 className={s.title}>Live Activity</h1>
-            <p className={s.sub}>Real-time trades, mints and listings on Tuskr.</p>
-          </div>
-          <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            <div className={s.liveBadge}><div className={s.liveDot}/>LIVE</div>
-            <button className="btn btn-ghost btn-sm" onClick={refresh}>Refresh</button>
-          </div>
+        <div className={s.pageHead}>
+          <div className={s.eyebrow}><span className={s.eyeDot}/>Live Feed</div>
+          <h1 className={s.title}>Activity</h1>
+          <p className={s.sub}>Real-time trades and listings across Sui NFT collections.</p>
         </div>
 
+        {error && (
+          <div className={s.errorBox}>API Error: {error}</div>
+        )}
+
         {loading ? (
-          <div className={s.feed}>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="skeleton" style={{ height:72, borderRadius:14 }}/>
-            ))}
+          <div className={s.skelList}>
+            {[...Array(8)].map((_,i) => <div key={i} className={s.skelRow}/>)}
           </div>
-        ) : events.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className={s.empty}>
-            <p className={s.emptyIcon}>📡</p>
-            <p className={s.emptyTitle}>No activity yet</p>
-            <p className={s.emptySub}>Trades and mints will appear here in real time.</p>
+            <div className={s.emptyIcon}>📊</div>
+            <p>No recent activity found.</p>
           </div>
         ) : (
-          <div className={s.feed}>
-            {events.map(ev => {
-              const cfg = TYPE_CONFIG[ev.type] ?? { label:ev.type, icon:'◎', color:'#fff' }
-              return (
-                <div key={ev.id} className={s.event}>
-                  <div className={s.eventIcon}>{cfg.icon}</div>
-                  <div className={s.eventBody}>
-                    <div className={s.eventType} style={{ color: cfg.color }}>{cfg.label}</div>
-                    <div className={s.eventName}>{ev.nftName}</div>
-                  </div>
-                  <div className={s.eventMeta}>
-                    {parseFloat(ev.amount) > 0 && (
-                      <div className={s.eventAmount}>{ev.amount} SUI</div>
-                    )}
-                    <div className={s.eventActor}>{ev.actor}</div>
-                    <div className={s.eventTime}>{ev.time}</div>
-                  </div>
-                  <a
-                    href={`https://suiexplorer.com/txblock/${ev.txDigest}?network=testnet`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={s.eventLink}
-                    title="View on Sui Explorer"
-                  >↗</a>
+          <div className={s.list}>
+            {items.map((item, i) => (
+              <div key={item.tx_hash + i} className={s.row}>
+                <ImgFallback
+                  src={item.nft?.image ?? null}
+                  alt={item.nft?.name ?? '?'}
+                />
+                <div className={s.rowBody}>
+                  <span className={s.nftName}>{item.nft?.name ?? 'Unknown NFT'}</span>
+                  {item.collection?.slug && (
+                    <Link to={`/collections/${item.collection.slug}`} className={s.colName}>
+                      {item.collection.title}
+                    </Link>
+                  )}
                 </div>
-              )
-            })}
+                <span
+                  className={s.typePill}
+                  style={{ color: TYPE_COLORS[item.activity_type] ?? 'inherit',
+                           borderColor: TYPE_COLORS[item.activity_type] ?? 'rgba(255,255,255,0.1)' }}
+                >
+                  {TYPE_LABELS[item.activity_type] ?? item.activity_type}
+                </span>
+                {item.price != null && (
+                  <span className={s.price}>
+                    {fmt(item.price)} <span className={s.sui}>SUI</span>
+                  </span>
+                )}
+                <span className={s.time}>{timeAgo(item.created_at)}</span>
+              </div>
+            ))}
           </div>
         )}
       </div>
