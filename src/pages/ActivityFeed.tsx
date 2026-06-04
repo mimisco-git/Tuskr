@@ -50,7 +50,7 @@ export default function ActivityFeed() {
   useEffect(() => {
     fetchRecentActivity(40)
       .then(setItems)
-      .catch(e => setError(e.message))
+      .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
 

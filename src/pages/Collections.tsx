@@ -42,7 +42,7 @@ export default function Collections() {
   useEffect(() => {
     fetchSuiCollections(60)
       .then(setCols)
-      .catch(e => setError(e.message))
+      .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
 
