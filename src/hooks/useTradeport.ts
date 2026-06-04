@@ -1,17 +1,17 @@
 /**
  * useTradeport — TradePort / Indexer.xyz GraphQL
- * Tries our Vercel proxy first, then falls back to direct call
+ * Uses minimal, doc-confirmed fields only.
+ * Proxy-first with direct fallback.
  */
 
-const PROXY   = '/api/tradeport'
-const DIRECT  = 'https://api.indexer.xyz/graphql'
+const PROXY    = '/api/tradeport'
+const DIRECT   = 'https://api.indexer.xyz/graphql'
 const API_KEY  = 'CVdbun0.5cda839c66e800e174ac0a5ec1dc1a2c'
 const API_USER = 'Tuskr'
 
 async function gql(query: string, variables: Record<string, unknown> = {}) {
   const payload = JSON.stringify({ query, variables })
-  
-  // Try proxy first; fall back to direct on ANY failure (network error OR 5xx)
+
   let res: Response
   try {
     res = await fetch(PROXY, {
@@ -21,7 +21,7 @@ async function gql(query: string, variables: Record<string, unknown> = {}) {
     })
     if (!res.ok) throw new Error(`proxy-${res.status}`)
   } catch {
-    // Proxy failed — call TradePort directly from the browser
+    // Proxy failed — call TradePort directly from browser
     res = await fetch(DIRECT, {
       method:  'POST',
       headers: {
@@ -36,77 +36,80 @@ async function gql(query: string, variables: Record<string, unknown> = {}) {
   const text = await res.text()
   let json: any
   try { json = JSON.parse(text) }
-  catch { throw new Error(`Non-JSON response (${res.status}): ${text.slice(0, 200)}`) }
+  catch { throw new Error(`Non-JSON (${res.status}): ${text.slice(0, 300)}`) }
 
   if (!res.ok) {
-    throw new Error(`API error ${res.status}: ${json?.error ?? text.slice(0, 200)}`)
+    throw new Error(`HTTP ${res.status}: ${JSON.stringify(json).slice(0, 300)}`)
   }
   if (json.errors?.length) {
-    throw new Error(`GraphQL: ${json.errors[0].message}`)
+    // Show the full error object so we can debug
+    const err = json.errors[0]
+    const msg = err?.message || err?.extensions?.message || JSON.stringify(err)
+    throw new Error(`GraphQL error: ${msg}`)
+  }
+  if (!json.data) {
+    throw new Error(`No data returned: ${JSON.stringify(json).slice(0, 300)}`)
   }
 
   return json.data
 }
 
-/* ── Types ── */
+/* ── Types — only doc-confirmed fields ── */
 export interface TPCollection {
-  id:            string
-  slug:          string
-  semantic_slug: string | null
-  title:         string
-  description:   string | null
-  cover_url:     string | null
-  supply:        number | null
-  verified:      boolean
-  floor:         number | null
-  volume:        number | null
-  usd_volume:    number | null
-  num_owners:    number | null
+  id:        string
+  slug:      string
+  title:     string
+  cover_url: string | null
+  supply:    number | null
+  verified:  boolean
+  floor:     number | null
+  volume:    number | null
 }
 
 export interface TPNFT {
-  id:         string
-  token_id:   string
-  name:       string | null
-  media_url:  string | null
-  media_type: string | null
-  ranking:    number | null
-  owner:      string | null
-  price:      number | null
+  id:        string
+  token_id:  string
+  name:      string | null
+  media_url: string | null
+  ranking:   number | null
+  owner:     string | null
 }
 
 export interface TPActivity {
-  id:                  string
-  type:                string
-  price:               number | null
-  usd_price:           number | null
-  sender:              string | null
-  receiver:            string | null
-  tx_id:               string | null
-  block_time:          string
-  market_name:         string | null
-  bought_on_tradeport: boolean
+  id:         string
+  type:       string
+  price:      number | null
+  usd_price:  number | null
+  sender:     string | null
+  receiver:   string | null
+  tx_id:      string | null
+  block_time: string
   nft: {
-    id:         string
-    name:       string | null
-    media_url:  string | null
-    media_type: string | null
-    ranking:    number | null
+    id:        string
+    name:      string | null
+    media_url: string | null
     collection: { title: string | null; slug: string | null } | null
   } | null
 }
 
-/* ── All collections sorted by volume ── */
+/* ── Queries — minimal safe fields only ── */
+
 export async function fetchSuiCollections(limit = 50): Promise<TPCollection[]> {
   const data = await gql(`
-    query SuiCollections($limit: Int!) {
+    query GetCollections($limit: Int!) {
       sui {
         collections(
           order_by: { volume: desc_nulls_last }
           limit: $limit
         ) {
-          id slug semantic_slug title description
-          cover_url supply verified floor volume usd_volume num_owners
+          id
+          slug
+          title
+          cover_url
+          supply
+          verified
+          floor
+          volume
         }
       }
     }
@@ -114,22 +117,22 @@ export async function fetchSuiCollections(limit = 50): Promise<TPCollection[]> {
   return data?.sui?.collections ?? []
 }
 
-/* ── Single collection ── */
 export async function fetchCollection(slug: string): Promise<TPCollection | null> {
   const data = await gql(`
-    query SuiCollection($slug: String) {
+    query GetCollection($slug: String!) {
       sui {
         collections(
-          where: {
-            _or: [
-              { slug: { _eq: $slug } },
-              { semantic_slug: { _eq: $slug } }
-            ]
-          }
+          where: { slug: { _eq: $slug } }
           limit: 1
         ) {
-          id slug semantic_slug title description
-          cover_url supply verified floor volume usd_volume num_owners
+          id
+          slug
+          title
+          cover_url
+          supply
+          verified
+          floor
+          volume
         }
       }
     }
@@ -137,22 +140,20 @@ export async function fetchCollection(slug: string): Promise<TPCollection | null
   return data?.sui?.collections?.[0] ?? null
 }
 
-/* ── NFTs in a collection ── */
 export async function fetchCollectionNFTs(slug: string, limit = 32): Promise<TPNFT[]> {
   const data = await gql(`
-    query SuiCollectionNFTs($slug: String!, $limit: Int!) {
+    query GetNFTs($slug: String!, $limit: Int!) {
       sui {
         nfts(
-          where: {
-            _or: [
-              { collection: { slug: { _eq: $slug } } },
-              { collection: { semantic_slug: { _eq: $slug } } }
-            ]
-          }
-          order_by: { price: asc_nulls_last }
+          where: { collection: { slug: { _eq: $slug } } }
           limit: $limit
         ) {
-          id token_id name media_url media_type ranking owner price
+          id
+          token_id
+          name
+          media_url
+          ranking
+          owner
         }
       }
     }
@@ -160,21 +161,30 @@ export async function fetchCollectionNFTs(slug: string, limit = 32): Promise<TPN
   return data?.sui?.nfts ?? []
 }
 
-/* ── Global recent activity ── */
-export async function fetchRecentActivity(limit = 40): Promise<TPActivity[]> {
+export async function fetchRecentActivity(limit = 30): Promise<TPActivity[]> {
   const data = await gql(`
-    query SuiRecentActivity($limit: Int!) {
+    query GetActivity($limit: Int!) {
       sui {
         recent_actions(
-          where: { type: { _in: ["sale", "listing"] } }
-          order_by: [{ block_time: desc }, { tx_index: desc }]
+          order_by: [{ block_time: desc }]
           limit: $limit
         ) {
-          id type price usd_price sender receiver
-          tx_id block_time market_name bought_on_tradeport
+          id
+          type
+          price
+          usd_price
+          sender
+          receiver
+          tx_id
+          block_time
           nft {
-            id name media_url media_type ranking
-            collection { title slug }
+            id
+            name
+            media_url
+            collection {
+              title
+              slug
+            }
           }
         }
       }
@@ -183,29 +193,31 @@ export async function fetchRecentActivity(limit = 40): Promise<TPActivity[]> {
   return data?.sui?.recent_actions ?? []
 }
 
-/* ── Collection activity ── */
 export async function fetchCollectionActivity(slug: string, limit = 20): Promise<TPActivity[]> {
   const data = await gql(`
-    query SuiCollectionActivity($slug: String!, $limit: Int!) {
+    query GetCollectionActivity($slug: String!, $limit: Int!) {
       sui {
         recent_actions(
-          where: {
-            _and: [
-              { type: { _in: ["sale", "listing"] } },
-              { _or: [
-                { nft: { collection: { slug: { _eq: $slug } } } },
-                { nft: { collection: { semantic_slug: { _eq: $slug } } } }
-              ]}
-            ]
-          }
-          order_by: [{ block_time: desc }, { tx_index: desc }]
+          where: { nft: { collection: { slug: { _eq: $slug } } } }
+          order_by: [{ block_time: desc }]
           limit: $limit
         ) {
-          id type price usd_price sender receiver
-          tx_id block_time market_name bought_on_tradeport
+          id
+          type
+          price
+          usd_price
+          sender
+          receiver
+          tx_id
+          block_time
           nft {
-            id name media_url media_type ranking
-            collection { title slug }
+            id
+            name
+            media_url
+            collection {
+              title
+              slug
+            }
           }
         }
       }
