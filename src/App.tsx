@@ -12,6 +12,7 @@ import Profile          from './pages/Profile'
 import AIGenerator      from './pages/AIGenerator'
 import ActivityFeed     from './pages/ActivityFeed'
 import Collections      from './pages/Collections'
+import CollectionDetail from './pages/CollectionDetail'
 import CreatorDashboard from './pages/CreatorDashboard'
 import Watchlist        from './pages/Watchlist'
 import BatchMint        from './pages/BatchMint'
@@ -46,6 +47,7 @@ function AnimatedRoutes() {
           <Route path="/dashboard"   element={<ErrorBoundary><CreatorDashboard /></ErrorBoundary>} />
           <Route path="/activity"    element={<ErrorBoundary><ActivityFeed /></ErrorBoundary>} />
           <Route path="/collections" element={<ErrorBoundary><Collections /></ErrorBoundary>} />
+          <Route path="/collections/:slug" element={<ErrorBoundary><CollectionDetail /></ErrorBoundary>} />
           <Route path="/watchlist"   element={<ErrorBoundary><Watchlist /></ErrorBoundary>} />
           <Route path="/leaderboard" element={<ErrorBoundary><Leaderboard /></ErrorBoundary>} />
           <Route path="/auction"     element={<ErrorBoundary><Auction /></ErrorBoundary>} />
