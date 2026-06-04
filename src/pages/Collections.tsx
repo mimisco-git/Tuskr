@@ -28,7 +28,7 @@ function CollectionImg({ src, alt }: { src: string | null; alt: string }) {
   return <img src={src} alt={alt} className={s.colImg} onError={() => setErr(true)}/>
 }
 
-type SortKey = 'volume' | 'floor' | 'num_owners' | 'market_cap' | 'supply'
+type SortKey = 'volume' | 'floor' | 'num_owners' | 'supply'
 
 export default function Collections() {
   usePageTitle('NFT Collections')
@@ -89,7 +89,7 @@ export default function Collections() {
             />
           </div>
           <div className={s.sortBtns}>
-            {([['volume','Volume'],['floor','Floor'],['num_owners','Holders'],['market_cap','Market Cap']] as [SortKey,string][]).map(([k,l]) => (
+            {([['volume','Volume'],['floor','Floor'],['num_owners','Holders']] as [SortKey,string][]).map(([k,l]) => (
               <button key={k} className={`${s.sortBtn} ${sortBy===k ? s.sortBtnActive : ''}`} onClick={() => setSortBy(k)}>{l}</button>
             ))}
           </div>
@@ -124,9 +124,7 @@ export default function Collections() {
                   <th className={s.thNum} onClick={() => setSortBy('num_owners')} style={{cursor:'pointer'}}>
                     Holders {sortBy==='num_owners' && '▼'}
                   </th>
-                  <th className={s.thNum} onClick={() => setSortBy('market_cap')} style={{cursor:'pointer'}}>
-                    Market Cap {sortBy==='market_cap' && '▼'}
-                  </th>
+                  <th className={s.thNum}>Market Cap</th>
                 </tr>
               </thead>
               <tbody>
@@ -135,7 +133,7 @@ export default function Collections() {
                     <td className={s.tdRank}>{idx + 1}</td>
                     <td className={s.tdName}>
                       <Link to={`/collections/${col.slug}`} className={s.colLink}>
-                        <CollectionImg src={col.cover_url || col.image} alt={col.title || '?'}/>
+                        <CollectionImg src={col.cover_url} alt={col.title || '?'}/>
                         <div className={s.colInfo}>
                           <span className={s.colTitle}>{col.title || col.slug}</span>
                           {col.verified && <span className={s.verifiedBadge}>✓</span>}
@@ -155,7 +153,7 @@ export default function Collections() {
                     <td className={s.tdNum}><span className={s.dim}>{col.supply?.toLocaleString() ?? '—'}</span></td>
                     <td className={s.tdNum}><span>{col.num_owners?.toLocaleString() ?? '—'}</span></td>
                     <td className={s.tdNum}>
-                      <span className={s.mcap}>{fmtUSD(col.market_cap ?? (col.floor && col.supply ? col.floor * col.supply : null))}</span>
+                      <span className={s.mcap}>{fmtUSD(col.floor && col.supply ? col.floor * col.supply : null)}</span>
                     </td>
                   </tr>
                 ))}

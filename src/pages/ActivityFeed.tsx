@@ -32,6 +32,7 @@ const TYPE_LABELS: Record<string, string> = {
   listing: 'Listed',
   offer:   'Offer',
   transfer:'Transfer',
+  mint:    'Minted',
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -79,32 +80,32 @@ export default function ActivityFeed() {
         ) : (
           <div className={s.list}>
             {items.map((item, i) => (
-              <div key={item.tx_hash + i} className={s.row}>
+              <div key={(item.id ?? '') + i} className={s.row}>
                 <ImgFallback
-                  src={item.nft?.image ?? null}
+                  src={item.nft?.media_url ?? null}
                   alt={item.nft?.name ?? '?'}
                 />
                 <div className={s.rowBody}>
                   <span className={s.nftName}>{item.nft?.name ?? 'Unknown NFT'}</span>
-                  {item.collection?.slug && (
-                    <Link to={`/collections/${item.collection.slug}`} className={s.colName}>
-                      {item.collection.title}
+                  {item.nft?.collection?.slug && (
+                    <Link to={`/collections/${item.nft.collection.slug}`} className={s.colName}>
+                      {item.nft.collection.title}
                     </Link>
                   )}
                 </div>
                 <span
                   className={s.typePill}
-                  style={{ color: TYPE_COLORS[item.activity_type] ?? 'inherit',
-                           borderColor: TYPE_COLORS[item.activity_type] ?? 'rgba(255,255,255,0.1)' }}
+                  style={{ color: TYPE_COLORS[item.type] ?? 'inherit',
+                           borderColor: TYPE_COLORS[item.type] ?? 'rgba(255,255,255,0.1)' }}
                 >
-                  {TYPE_LABELS[item.activity_type] ?? item.activity_type}
+                  {TYPE_LABELS[item.type] ?? item.type}
                 </span>
                 {item.price != null && (
                   <span className={s.price}>
                     {fmt(item.price)} <span className={s.sui}>SUI</span>
                   </span>
                 )}
-                <span className={s.time}>{timeAgo(item.created_at)}</span>
+                <span className={s.time}>{timeAgo(item.block_time)}</span>
               </div>
             ))}
           </div>

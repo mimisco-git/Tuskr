@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { fetchCollection, fetchCollectionNFTs, type TPCollection, type TPNFT } from '../hooks/useTradeport'
+import { fetchCollection, fetchCollectionNFTs, fetchCollectionActivity, type TPCollection, type TPNFT, type TPActivity } from '../hooks/useTradeport'
 import s from './CollectionDetail.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -17,10 +17,11 @@ function ImgWithFallback({ src, alt, className }: { src: string | null; alt: str
 
 export default function CollectionDetail() {
   const { slug } = useParams<{ slug: string }>()
-  const [col,     setCol]     = useState<TPCollection | null>(null)
-  const [nfts,    setNfts]    = useState<TPNFT[]>([])
-  const [loading, setLoading] = useState(true)
-  const [tab,     setTab]     = useState<'nfts'|'activity'>('nfts')
+  const [col,      setCol]      = useState<TPCollection | null>(null)
+  const [nfts,     setNfts]     = useState<TPNFT[]>([])
+  const [activity, setActivity] = useState<TPActivity[]>([])
+  const [loading,  setLoading]  = useState(true)
+  const [tab,      setTab]      = useState<'nfts'|'activity'>('nfts')
 
   usePageTitle(col?.title ?? 'Collection')
 
@@ -30,8 +31,11 @@ export default function CollectionDetail() {
     Promise.all([
       fetchCollection(slug),
       fetchCollectionNFTs(slug, 32),
-    ]).then(([c, n]) => {
-      setCol(c); setNfts(n)
+      fetchCollectionActivity(slug, 20),
+    ]).then(([c, n, a]) => {
+      setCol(c as TPCollection | null)
+      setNfts(n as TPNFT[])
+      setActivity(a as TPActivity[])
     }).finally(() => setLoading(false))
   }, [slug])
 
@@ -58,15 +62,15 @@ export default function CollectionDetail() {
     </main>
   )
 
-  const listedNfts = nfts.filter(n => n.list_price != null)
-  const floorNfts  = [...nfts].sort((a,b) => (a.list_price??Infinity) - (b.list_price??Infinity))
+  const listedNfts = nfts.filter(n => n.price != null)
+  const floorNfts  = [...nfts].sort((a,b) => (a.price??Infinity) - (b.price??Infinity))
 
   return (
     <main className={s.page}>
       {/* Banner */}
       <div className={s.banner}>
-        {(col.cover_url || col.image) && (
-          <img src={col.cover_url || col.image || ''} alt={col.title || ''} className={s.bannerImg}/>
+        {(col.cover_url) && (
+          <img src={col.cover_url || ''} alt={col.title || ''} className={s.bannerImg}/>
         )}
         <div className={s.bannerOverlay}/>
       </div>
@@ -75,7 +79,7 @@ export default function CollectionDetail() {
         {/* Identity */}
         <div className={s.identity}>
           <div className={s.avatarWrap}>
-            <ImgWithFallback src={col.cover_url || col.image} alt={col.title || '?'} className={s.avatar}/>
+            <ImgWithFallback src={col.cover_url} alt={col.title || '?'} className={s.avatar}/>
           </div>
           <div className={s.identityInfo}>
             <div className={s.identityTop}>
@@ -147,22 +151,22 @@ export default function CollectionDetail() {
                 <div key={nft.token_id} className={s.card}>
                   <div className={s.cardImg}>
                     <ImgWithFallback
-                      src={nft.image}
+                      src={nft.media_url}
                       alt={nft.name || '#'+nft.token_id}
                       className={s.nftImg}
                     />
-                    {nft.list_price != null && (
+                    {nft.price != null && (
                       <div className={s.listedBadge}>FOR SALE</div>
                     )}
-                    {nft.rarity_rank && (
-                      <div className={s.rarityBadge}>✧ {nft.rarity_rank.toLocaleString()}</div>
+                    {nft.ranking && (
+                      <div className={s.rarityBadge}>✧ {nft.ranking.toLocaleString()}</div>
                     )}
                   </div>
                   <div className={s.cardBody}>
                     <p className={s.nftName}>{nft.name || `#${nft.token_id.slice(0,8)}`}</p>
-                    {nft.list_price != null ? (
+                    {nft.price != null ? (
                       <div className={s.priceRow}>
-                        <span className={s.price}>{fmt(nft.list_price, 2)}</span>
+                        <span className={s.price}>{fmt(nft.price, 2)}</span>
                         <span className={s.priceSui}>SUI</span>
                         <a
                           href={`https://tradeport.xyz/sui/nft/${nft.token_id}`}
@@ -183,12 +187,25 @@ export default function CollectionDetail() {
         )}
 
         {tab === 'activity' && (
-          <div className={s.activityPlaceholder}>
-            <p>Activity data coming soon.</p>
-            <a href={`https://tradeport.xyz/sui/collection/${slug}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-              View activity on TradePort ↗
-            </a>
-          </div>
+          activity.length === 0 ? (
+            <div className={s.activityPlaceholder}>
+              <p>No recent activity found.</p>
+            </div>
+          ) : (
+            <div className={s.activityList}>
+              {activity.map((a, i) => (
+                <div key={a.id ?? i} className={s.activityRow}>
+                  {a.nft?.media_url && <img src={a.nft.media_url} alt="" className={s.activityImg}/>}
+                  <div className={s.activityBody}>
+                    <span className={s.activityName}>{a.nft?.name ?? 'Unknown NFT'}</span>
+                    <span className={s.activityType}>{a.type === 'sale' ? 'Sold' : 'Listed'}</span>
+                  </div>
+                  {a.price && <span className={s.activityPrice}>{a.price.toFixed(2)} <span className={s.activitySui}>SUI</span></span>}
+                  <span className={s.activityTime}>{new Date(a.block_time).toLocaleDateString()}</span>
+                </div>
+              ))}
+            </div>
+          )
         )}
       </div>
     </main>

@@ -132,3 +132,20 @@
   .backBtn { margin-left: 0; margin-top: 8px; }
 }
 @media (max-width: 480px) { .grid { grid-template-columns: 1fr 1fr; gap: 8px; } }
+
+/* Activity list in collection detail */
+.activityList { display: flex; flex-direction: column; gap: 6px; }
+.activityRow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border-radius: 12px;
+  background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+  transition: background 0.12s;
+}
+.activityRow:hover { background: rgba(255,255,255,0.04); }
+.activityImg { width: 40px; height: 40px; border-radius: 9px; object-fit: cover; flex-shrink: 0; }
+.activityBody { flex: 1; min-width: 0; }
+.activityName { display: block; font-size: 14px; font-weight: 600; color: #f5f5f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.activityType { font-size: 11px; color: rgba(245,245,247,0.35); }
+.activityPrice { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; }
+.activitySui { font-size: 11px; color: rgba(245,245,247,0.35); }
+.activityTime { font-size: 11px; color: rgba(245,245,247,0.25); white-space: nowrap; flex-shrink: 0; }
