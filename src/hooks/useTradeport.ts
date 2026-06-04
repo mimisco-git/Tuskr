@@ -11,7 +11,7 @@ const API_USER = 'Tuskr'
 async function gql(query: string, variables: Record<string, unknown> = {}) {
   const payload = JSON.stringify({ query, variables })
   
-  // Try proxy first
+  // Try proxy first; fall back to direct on ANY failure (network error OR 5xx)
   let res: Response
   try {
     res = await fetch(PROXY, {
@@ -19,8 +19,9 @@ async function gql(query: string, variables: Record<string, unknown> = {}) {
       headers: { 'Content-Type': 'application/json' },
       body:    payload,
     })
+    if (!res.ok) throw new Error(`proxy-${res.status}`)
   } catch {
-    // Proxy unreachable — fall back to direct
+    // Proxy failed — call TradePort directly from the browser
     res = await fetch(DIRECT, {
       method:  'POST',
       headers: {
