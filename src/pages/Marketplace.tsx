@@ -1,23 +1,42 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
+import { Link } from 'react-router-dom'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
-import { useXP } from '../hooks/useXP'
 import { useToast } from '../components/Toast'
 import { Transaction } from '@mysten/sui/transactions'
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit'
-import NFTCard, { NFT } from '../components/NFTCard'
+import { useNetwork } from '../hooks/useNetwork'
+import { fetchSuiCollections, type TPCollection } from '../hooks/useTradeport'
 import s from './Marketplace.module.css'
 import usePageTitle from '../hooks/usePageTitle'
-import { useNetwork } from '../hooks/useNetwork'
 
-interface Listing {
-  listingId: string
-  nftId:     string
-  price:     string
-  seller:    string
-  name:      string
-  image:     string
-  blobId:    string
+type Tab = 'explore' | 'tuskr' | 'listed'
+
+/* ── TradePort collection card ── */
+function CollectionCard({ col }: { col: TPCollection }) {
+  const [imgErr, setImgErr] = useState(false)
+  return (
+    <Link to={`/collections/${col.slug}`} className={s.colCard}>
+      <div className={s.colCardImg}>
+        {col.cover_url && !imgErr
+          ? <img src={col.cover_url} alt={col.title} onError={() => setImgErr(true)}/>
+          : <div className={s.colCardFallback}>{col.title.slice(0,2).toUpperCase()}</div>
+        }
+        {col.verified && <span className={s.verifiedBadge}>✓</span>}
+      </div>
+      <div className={s.colCardBody}>
+        <p className={s.colCardName}>{col.title}</p>
+        <div className={s.colCardStats}>
+          {col.floor != null && (
+            <span className={s.colFloor}>{col.floor.toFixed(2)} <span className={s.sui}>SUI</span></span>
+          )}
+          {col.supply != null && (
+            <span className={s.colSupply}>{col.supply.toLocaleString()} items</span>
+          )}
+        </div>
+      </div>
+    </Link>
+  )
 }
 
 export default function Marketplace() {
@@ -28,337 +47,188 @@ export default function Marketplace() {
   const account  = useCurrentAccount()
   const client   = useSuiClient()
   const { buyNFT } = useNFTMarketplace()
-  const { awardXP } = useXP(account?.address)
-  const { success, error: toastErr, info } = useToast()
+  const { success, error: toastErr } = useToast()
   const { mutate: signAndExecute } = useSignAndExecuteTransaction()
 
-  const [listings,  setListings]  = useState<Listing[]>([])
-  const [allNfts,   setAllNfts]   = useState<any[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [search,    setSearch]    = useState('')
-  const [sort,      setSort]      = useState('recent')
-  const [activeTab, setActiveTab] = useState<'listed'|'all'>('all')
-  const [selected,  setSelected]  = useState<Set<string>>(new Set())
-  const [buying,    setBuying]    = useState<string | null>(null)
+  const [tab,          setTab]        = useState<Tab>('explore')
+  const [collections,  setCollections] = useState<TPCollection[]>([])
+  const [tuskrNfts,    setTuskrNfts]   = useState<any[]>([])
+  const [listings,     setListings]    = useState<any[]>([])
+  const [loadingCols,  setLoadingCols] = useState(true)
+  const [loadingTuskr, setLoadingTuskr]= useState(false)
+  const [search,       setSearch]      = useState('')
+  const [buying,       setBuying]      = useState<string|null>(null)
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const loadListings = useCallback(async () => {
-    setLoading(true)
+  /* Load TradePort collections — public, no wallet needed */
+  useEffect(() => {
+    fetchSuiCollections(40)
+      .then(setCollections)
+      .catch(console.error)
+      .finally(() => setLoadingCols(false))
+  }, [])
+
+  /* Load Tuskr-native minted NFTs from chain */
+  const loadTuskrNfts = useCallback(async () => {
+    setLoadingTuskr(true)
     try {
-      // Query ListedEvents to get all listing IDs
-      const events = await client.queryEvents({
-        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` },
-        limit: 50,
-      }).catch(() => ({ data: [] }))
-
-      // Also query DelistedEvents and SoldEvents to exclude them
-      const delistedEvents = await client.queryEvents({
-        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::DelistedEvent` },
-        limit: 50,
-      }).catch(() => ({ data: [] }))
-
-      const soldEvents = await client.queryEvents({
-        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::SoldEvent` },
-        limit: 50,
-      }).catch(() => ({ data: [] }))
-
-      // Build sets of inactive listing IDs
-      const delistedIds = new Set(
-        delistedEvents.data.map((e: any) => e.parsedJson?.listing_id).filter(Boolean)
-      )
-      const soldIds = new Set(
-        soldEvents.data.map((e: any) => e.parsedJson?.listing_id).filter(Boolean)
-      )
-
-      // Active listings = listed but not delisted or sold
-      const activeEvents = events.data.filter((e: any) => {
-        const lid = e.parsedJson?.listing_id
-        return lid && !delistedIds.has(lid) && !soldIds.has(lid)
-      })
-
-      if (activeEvents.length === 0) {
-        setListings([])
-        return
-      }
-
-      // Fetch each listing object to get full details
-      const listingObjects = await Promise.allSettled(
-        activeEvents.map((e: any) =>
-          client.getObject({
-            id: e.parsedJson.listing_id,
-            options: { showContent: true },
-          })
-        )
-      )
-
-      const parsed: Listing[] = []
-      for (let i = 0; i < listingObjects.length; i++) {
-        const res = listingObjects[i]
-        if (res.status !== 'fulfilled') continue
-        const obj = res.value?.data
-        if (!obj) continue
-        const f = (obj.content as any)?.fields ?? {}
-        const ev = (activeEvents[i] as any).parsedJson ?? {}
-
-        // Fetch the NFT's display data for image
-        let image = ''
-        let blobId = ''
-        try {
-          const nftObj = await client.getObject({
-            id: f.nft_id || ev.nft_id,
-            options: { showContent: true, showDisplay: true },
-          })
-          const nftFields  = (nftObj.data?.content as any)?.fields ?? {}
-          const nftDisplay = (nftObj.data?.display as any)?.data  ?? {}
-          image  = nftFields.media_url  || nftDisplay.image_url || ''
-          blobId = nftFields.blob_id    || ''
-        } catch {}
-
-        parsed.push({
-          listingId: obj.objectId,
-          nftId:     f.nft_id     || ev.nft_id     || '',
-          price:     f.price      ? (Number(f.price) / 1e9).toFixed(2) : (ev.price ? (Number(ev.price) / 1e9).toFixed(2) : '0'),
-          seller:    f.seller     || ev.seller     || '',
-          name:      f.name       || `NFT #${(f.nft_id || '').slice(2,8)}`,
-          image,
-          blobId,
-        })
-      }
-
-      setListings(parsed)
-    } catch (e) {
-      console.error('Marketplace load error:', e)
-      setListings([])
-    } finally {
-      setLoading(false)
-    }
-  }, [client])
-
-  useEffect(() => { loadListings(); loadAllNfts() }, [network.name, PACKAGE_ID])
-
-  // Filter + sort
-
-  // Load ALL minted TuskrNFTs on network, not just listed ones
-  const loadAllNfts = useCallback(async () => {
-    try {
-      // Query recent TuskrNFT mint events to find all NFTs
       const events = await client.queryEvents({
         query: { MoveEventType: `${PACKAGE_ID}::tuskr_nft::MintedEvent` },
         limit: 50,
       }).catch(() => ({ data: [] }))
 
-      if (events.data.length === 0) {
-        // Fallback: try to get objects by type directly
-        setAllNfts([])
-        return
-      }
+      if (!events.data.length) { setTuskrNfts([]); return }
 
-      // Fetch each NFT object
       const ids = events.data
         .map((e: any) => e.parsedJson?.nft_id || e.parsedJson?.id)
         .filter(Boolean)
 
-      if (ids.length === 0) { setAllNfts([]); return }
+      if (!ids.length) { setTuskrNfts([]); return }
 
-      const objs = await client.multiGetObjects({
-        ids,
-        options: { showContent: true, showDisplay: true },
-      })
-
-      const parsed = objs
-        .filter(o => o.data)
-        .map(o => {
-          const f = (o.data?.content as any)?.fields ?? {}
-          const d = (o.data?.display as any)?.data ?? {}
-          return {
-            objectId:    o.data!.objectId,
-            name:        f.name        || d.name        || 'Tuskr NFT',
-            description: f.description || d.description || '',
-            mediaUrl:    f.media_url   || d.image_url   || '',
-            blobId:      f.blob_id     || '',
-            creator:     f.creator     || '',
-            royaltyBps:  Number(f.royalty_bps ?? 0),
-          }
-        })
-      setAllNfts(parsed)
-    } catch { setAllNfts([]) }
-  }, [PACKAGE_ID, network.name])
-
-  const filtered = listings
-    .filter(l =>
-      !search ||
-      l.name.toLowerCase().includes(search.toLowerCase()) ||
-      l.seller.toLowerCase().includes(search.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sort === 'price_asc')  return parseFloat(a.price) - parseFloat(b.price)
-      if (sort === 'price_desc') return parseFloat(b.price) - parseFloat(a.price)
-      return 0
-    })
-
-  const asNFT = (l: Listing): NFT => ({
-    id:       l.listingId,
-    name:     l.name,
-    image:    l.image,
-    price:    l.price,
-    currency: 'SUI',
-    creator:  l.seller.slice(0,8) + '…',
-    listed:   true,
-    blobId:   l.blobId,
-  })
-
-  const handleBuy = async (listing: Listing) => {
-    if (!account) return toastErr('Connect your wallet first')
-    setBuying(listing.listingId)
-    try {
-      await buyNFT(listing.listingId, BigInt(Math.floor(parseFloat(listing.price) * 1e9)))
-      success(`Bought ${listing.name}!`)
-      if (account) awardXP(account.address, 'buy', `Bought: ${listing.name}`)
-      loadListings()
-    } catch (e: any) {
-      toastErr(e?.message || 'Purchase failed')
-    } finally {
-      setBuying(null)
-    }
-  }
-
-  const handleBulkBuy = async () => {
-    if (!account || selected.size === 0) return
-    info(`Buying ${selected.size} NFTs in one transaction…`)
-    const toBuy = listings.filter(l => selected.has(l.listingId))
-    try {
-      const tx = new Transaction()
-      for (const l of toBuy) {
-        const priceInMist = BigInt(Math.floor(parseFloat(l.price) * 1e9))
-        const [coin] = tx.splitCoins(tx.gas, [priceInMist])
-        tx.moveCall({
-          target: `${PACKAGE_ID}::tuskr_marketplace::buy`,
-          arguments: [
-            tx.object(MARKETPLACE_ID),
-            tx.object(l.listingId),
-            coin,
-          ],
-        })
-      }
-      signAndExecute(
-        { transaction: tx },
-        {
-          onSuccess: () => {
-            success(`Bought ${selected.size} NFTs!`)
-            setSelected(new Set())
-            loadListings()
-            if (account) awardXP(account.address, 'buy', `Bulk buy: ${selected.size} NFTs`)
-          },
-          onError: (e) => toastErr(e?.message || 'Bulk buy failed'),
+      const objs = await client.multiGetObjects({ ids, options: { showContent: true, showDisplay: true } })
+      const parsed = objs.filter(o => o.data).map(o => {
+        const f = (o.data?.content as any)?.fields ?? {}
+        const d = (o.data?.display as any)?.data   ?? {}
+        return {
+          objectId: o.data!.objectId,
+          name:     f.name       || d.name      || 'Tuskr NFT',
+          mediaUrl: f.media_url  || d.image_url || '',
+          blobId:   f.blob_id    || '',
+          creator:  f.creator    || '',
         }
-      )
-    } catch (e: any) {
-      toastErr(e?.message || 'Bulk buy failed')
-    }
-  }
+      })
+      setTuskrNfts(parsed)
+    } catch { setTuskrNfts([]) }
+    finally   { setLoadingTuskr(false) }
+  }, [PACKAGE_ID])
 
-  const toggleSelect = (id: string) => {
-    setSelected(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
-  }
+  /* Load listed NFTs from chain */
+  const loadListings = useCallback(async () => {
+    try {
+      const events = await client.queryEvents({
+        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` },
+        limit: 50,
+      }).catch(() => ({ data: [] }))
+      setListings(events.data)
+    } catch { setListings([]) }
+  }, [PACKAGE_ID])
 
-  const selectedTotal = listings
-    .filter(l => selected.has(l.listingId))
-    .reduce((acc, l) => acc + parseFloat(l.price), 0)
+  /* Load chain data when on Tuskr tabs */
+  useEffect(() => {
+    if (tab === 'tuskr')  loadTuskrNfts()
+    if (tab === 'listed') loadListings()
+  }, [tab, network.name])
+
+  const filteredCols = collections.filter(c =>
+    !search || c.title.toLowerCase().includes(search.toLowerCase())
+  )
+  const filteredTuskr = tuskrNfts.filter(n =>
+    !search || n.name.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
     <main className={s.page}>
       <div className="container">
+
+        {/* Header */}
         <div className={s.header}>
           <div className={s.eyebrow}><div className={s.eyebrowDot}/>NFT Marketplace</div>
-          <h1 className={s.title}>Marketplace</h1>
-          <p className={s.sub}>{filtered.length} NFT{filtered.length !== 1 ? 's' : ''} · Media stored on Walrus</p>
+          <h1 className={s.title}>Explore NFTs</h1>
+          <p className={s.sub}>Browse real Sui NFT collections, or mint your own on Tuskr.</p>
         </div>
 
-        {/* Controls */}
+        {/* Search */}
         <div className={s.controls}>
-          <input
-            className={`input ${s.search}`}
-            placeholder="Search by name or seller address..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <select className="input" value={sort} onChange={e => setSort(e.target.value)} style={{ width:'auto' }}>
-            <option value="recent">Recently listed</option>
-            <option value="price_asc">Price: low to high</option>
-            <option value="price_desc">Price: high to low</option>
-          </select>
-          <button className="btn btn-ghost btn-sm" onClick={loadListings}>↻ Refresh</button>
+          <div className={s.searchWrap}>
+            <svg className={s.searchIcon} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input className={s.searchInput} placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)}/>
+          </div>
+          <Link to="/mint" className={s.mintBtn}>+ Mint NFT</Link>
         </div>
 
-        {/* Bulk buy banner */}
-        {selected.size > 0 && (
-          <div className={s.bulkBanner}>
-            <span>{selected.size} NFT{selected.size > 1 ? 's' : ''} selected · {selectedTotal.toFixed(2)} SUI total</span>
-            <div style={{ display:'flex', gap:8 }}>
-              <button className="btn btn-ghost btn-sm" onClick={() => setSelected(new Set())}>Clear</button>
-              <button className="btn btn-primary" onClick={handleBulkBuy}>
-                Buy all in one transaction
-              </button>
+        {/* Tabs */}
+        <div className={s.tabBar}>
+          <button className={`${s.tab} ${tab==='explore' ? s.tabActive : ''}`} onClick={() => setTab('explore')}>
+            Explore Sui ({collections.length})
+          </button>
+          <button className={`${s.tab} ${tab==='tuskr' ? s.tabActive : ''}`} onClick={() => setTab('tuskr')}>
+            Tuskr Minted ({tuskrNfts.length})
+          </button>
+          <button className={`${s.tab} ${tab==='listed' ? s.tabActive : ''}`} onClick={() => setTab('listed')}>
+            Listed for Sale ({listings.length})
+          </button>
+        </div>
+
+        {/* ── TAB: Explore (TradePort collections) ── */}
+        {tab === 'explore' && (
+          loadingCols ? (
+            <div className={s.grid}>
+              {[...Array(8)].map((_,i) => <div key={i} className={s.skelCard}/>)}
             </div>
-          </div>
+          ) : filteredCols.length === 0 ? (
+            <div className={s.empty}>
+              <p className={s.emptyTitle}>No collections found</p>
+              {search && <p className={s.emptySub}>Try a different search term.</p>}
+            </div>
+          ) : (
+            <div className={s.colGrid}>
+              {filteredCols.map(col => <CollectionCard key={col.id} col={col}/>)}
+            </div>
+          )
         )}
 
-        {/* Bulk buy tip */}
-        {selected.size === 0 && listings.length > 1 && (
-          <div className={s.bulkTip}>
-            Tap any NFT card to select it · Select multiple to bulk-buy in one transaction
-          </div>
+        {/* ── TAB: Tuskr native NFTs ── */}
+        {tab === 'tuskr' && (
+          loadingTuskr ? (
+            <div className={s.grid}>{[...Array(8)].map((_,i) => <div key={i} className={s.skelCard}/>)}</div>
+          ) : filteredTuskr.length === 0 ? (
+            <div className={s.empty}>
+              <p className={s.emptyIcon}>🎨</p>
+              <p className={s.emptyTitle}>No Tuskr NFTs minted yet on {network.name}</p>
+              <p className={s.emptySub}>Be the first to mint an NFT on Tuskr.</p>
+              <Link to="/mint" className="btn btn-primary">Mint an NFT</Link>
+            </div>
+          ) : (
+            <div className={s.grid}>
+              {filteredTuskr.map(nft => (
+                <Link key={nft.objectId} to={`/nft/${nft.objectId}`} className={s.nftCard}>
+                  <div className={s.nftImg}>
+                    {nft.mediaUrl
+                      ? <img src={nft.mediaUrl} alt={nft.name}/>
+                      : <div className={s.nftImgFallback}>{nft.name.slice(0,2).toUpperCase()}</div>
+                    }
+                    {nft.blobId && <span className={s.walrusBadge}>WALRUS</span>}
+                  </div>
+                  <div className={s.nftBody}>
+                    <p className={s.nftName}>{nft.name}</p>
+                    {nft.creator && <p className={s.nftCreator}>{nft.creator.slice(0,10)}...</p>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )
         )}
 
-        {/* Grid */}
-        {loading ? (
-          <div className={s.grid}>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="skeleton" style={{ aspectRatio:'1', borderRadius:20 }}/>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
+        {/* ── TAB: Listed for Sale ── */}
+        {tab === 'listed' && (
           <div className={s.empty}>
             <p className={s.emptyIcon}>🏪</p>
             <p className={s.emptyTitle}>
-              {listings.length === 0 ? 'No listings yet' : 'No results found'}
+              {listings.length === 0
+                ? `No listings on ${network.name} yet`
+                : `${listings.length} listings found`}
             </p>
             <p className={s.emptySub}>
-              {listings.length === 0
-                ? 'Mint an NFT and list it for sale to be the first.'
-                : 'Try a different search term.'}
+              Mint an NFT and list it for sale to create the first listing on {network.name}.
             </p>
-            {listings.length === 0 && (
-              <a href="/mint" className="btn btn-primary">Mint an NFT</a>
+            {!account && (
+              <p className={s.walletNote}>Connect your wallet to buy listed NFTs.</p>
             )}
-          </div>
-        ) : (
-          <div className={s.grid}>
-            {filtered.map((listing, i) => (
-              <div
-                key={listing.listingId}
-                className={`${s.cardWrap} ${selected.has(listing.listingId) ? s.cardSelected : ''}`}
-                onClick={() => toggleSelect(listing.listingId)}
-              >
-                <div className={s.selectCheck}>
-                  {selected.has(listing.listingId) ? '✓' : ''}
-                </div>
-                <NFTCard
-                  nft={asNFT(listing)}
-                  delay={i * 0.05}
-                  onBuy={() => handleBuy(listing)}
-                />
-                {buying === listing.listingId && (
-                  <div className={s.buyingOverlay}>Buying…</div>
-                )}
-              </div>
-            ))}
+            <Link to="/mint" className="btn btn-primary">Mint an NFT</Link>
           </div>
         )}
+
       </div>
     </main>
   )
