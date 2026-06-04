@@ -28,7 +28,7 @@ function CollectionImg({ src, alt }: { src: string | null; alt: string }) {
   return <img src={src} alt={alt} className={s.colImg} onError={() => setErr(true)}/>
 }
 
-type SortKey = 'volume' | 'floor' | 'num_owners' | 'supply'
+type SortKey = 'volume' | 'floor' | 'supply'
 
 export default function Collections() {
   usePageTitle('NFT Collections')
@@ -89,7 +89,7 @@ export default function Collections() {
             />
           </div>
           <div className={s.sortBtns}>
-            {([['volume','Volume'],['floor','Floor'],['num_owners','Holders']] as [SortKey,string][]).map(([k,l]) => (
+            {([['volume','Volume'],['floor','Floor']] as [SortKey,string][]).map(([k,l]) => (
               <button key={k} className={`${s.sortBtn} ${sortBy===k ? s.sortBtnActive : ''}`} onClick={() => setSortBy(k)}>{l}</button>
             ))}
           </div>
@@ -121,9 +121,7 @@ export default function Collections() {
                     Volume {sortBy==='volume' && '▼'}
                   </th>
                   <th className={s.thNum}>Supply</th>
-                  <th className={s.thNum} onClick={() => setSortBy('num_owners')} style={{cursor:'pointer'}}>
-                    Holders {sortBy==='num_owners' && '▼'}
-                  </th>
+<th className={s.thNum}>Holders</th>
                   <th className={s.thNum}>Market Cap</th>
                 </tr>
               </thead>
@@ -151,7 +149,7 @@ export default function Collections() {
                         : <span className={s.dim}>—</span>}
                     </td>
                     <td className={s.tdNum}><span className={s.dim}>{col.supply?.toLocaleString() ?? '—'}</span></td>
-                    <td className={s.tdNum}><span>{col.num_owners?.toLocaleString() ?? '—'}</span></td>
+                    <td className={s.tdNum}><span className={s.dim}>—</span></td>
                     <td className={s.tdNum}>
                       <span className={s.mcap}>{fmtUSD(col.floor && col.supply ? col.floor * col.supply : null)}</span>
                     </td>

@@ -62,8 +62,8 @@ export default function CollectionDetail() {
     </main>
   )
 
-  const listedNfts = nfts.filter(n => n.price != null)
-  const floorNfts  = [...nfts].sort((a,b) => (a.price??Infinity) - (b.price??Infinity))
+  const listedNfts: TPNFT[] = []
+  const floorNfts  = [...nfts]
 
   return (
     <main className={s.page}>
@@ -86,7 +86,7 @@ export default function CollectionDetail() {
               <h1 className={s.colTitle}>{col.title}</h1>
               {col.verified && <span className={s.verified}>✓ Verified</span>}
             </div>
-            {col.description && <p className={s.description}>{col.description}</p>}
+            
           </div>
           <Link to="/marketplace" className={s.backBtn}>← All collections</Link>
         </div>
@@ -107,11 +107,7 @@ export default function CollectionDetail() {
             <span className={s.statNum}>{listedNfts.length}</span>
             <span className={s.statLabel}>Listed</span>
           </div>
-          <div className={s.statDivider}/>
-          <div className={s.stat}>
-            <span className={s.statNum}>{col.num_owners?.toLocaleString() ?? '—'}</span>
-            <span className={s.statLabel}>Holders</span>
-          </div>
+
           <div className={s.statDivider}/>
           <div className={s.stat}>
             <span className={s.statNum}>{col.supply?.toLocaleString() ?? '—'}</span>
@@ -155,30 +151,20 @@ export default function CollectionDetail() {
                       alt={nft.name || '#'+nft.token_id}
                       className={s.nftImg}
                     />
-                    {nft.price != null && (
-                      <div className={s.listedBadge}>FOR SALE</div>
-                    )}
+        
                     {nft.ranking && (
                       <div className={s.rarityBadge}>✧ {nft.ranking.toLocaleString()}</div>
                     )}
                   </div>
                   <div className={s.cardBody}>
                     <p className={s.nftName}>{nft.name || `#${nft.token_id.slice(0,8)}`}</p>
-                    {nft.price != null ? (
-                      <div className={s.priceRow}>
-                        <span className={s.price}>{fmt(nft.price, 2)}</span>
-                        <span className={s.priceSui}>SUI</span>
-                        <a
-                          href={`https://tradeport.xyz/sui/nft/${nft.token_id}`}
-                          target="_blank" rel="noopener noreferrer"
-                          className={s.buyBtn}
-                        >
-                          Buy
-                        </a>
-                      </div>
-                    ) : (
-                      <p className={s.unlisted}>Not listed</p>
-                    )}
+                    <a
+                      href={`https://tradeport.xyz/sui/nft/${nft.token_id}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className={s.buyBtn}
+                    >
+                      View on TradePort
+                    </a>
                   </div>
                 </div>
               ))}
