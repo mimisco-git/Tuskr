@@ -1,130 +1,77 @@
 /**
- * NFTImage — premium fallback when image is unavailable
- * Tries multiple IPFS gateways before showing the styled fallback
+ * NFTImage — routes ALL images through our proxy first.
+ * Solves: 403, CORS, hotlink protection, ERR_NAME_NOT_RESOLVED
+ * Falls back to gradient placeholder with collection initials.
  */
 import { useState } from 'react'
-import { resolveMediaUrl, getNextGatewayUrl, proxyUrl } from '../utils/media'
+import { resolveMediaUrl } from '../utils/media'
 
-interface NFTImageProps {
+interface Props {
   src?:       string | null
   alt:        string
   className?: string
   style?:     React.CSSProperties
 }
 
-// Generate a consistent gradient from the name
-function getGradient(name: string): string {
-  let hash = 0
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  const colors = [
-    ['#00d4aa', '#0099ff'],
-    ['#8b5cf6', '#00d4aa'],
-    ['#0099ff', '#8b5cf6'],
-    ['#f59e0b', '#ef4444'],
-    ['#00d4aa', '#8b5cf6'],
-    ['#3b82f6', '#06b6d4'],
-    ['#a855f7', '#3b82f6'],
-    ['#10b981', '#3b82f6'],
+function gradient(name: string) {
+  let h = 0
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h)
+  const pairs = [
+    ['#00d4aa','#0099ff'], ['#8b5cf6','#00d4aa'], ['#0099ff','#8b5cf6'],
+    ['#f59e0b','#ef4444'], ['#10b981','#3b82f6'], ['#a855f7','#3b82f6'],
+    ['#06b6d4','#8b5cf6'], ['#00d4aa','#a855f7'],
   ]
-  const pair = colors[Math.abs(hash) % colors.length]
-  const angle = (Math.abs(hash >> 4) % 360)
-  return `linear-gradient(${angle}deg, ${pair[0]}, ${pair[1]})`
+  const [a, b] = pairs[Math.abs(h) % pairs.length]
+  return `linear-gradient(${Math.abs(h >> 4) % 360}deg, ${a}, ${b})`
 }
 
-export function NFTImage({ src, alt, className, style }: NFTImageProps) {
-  const resolved = resolveMediaUrl(src)
-  // If resolved is empty (bad URL, Move type, relative path) skip straight to fail
-  const initStage = (resolved && resolved.startsWith('http')) ? 'direct'
-                  : (resolved && resolved.startsWith('data:'))  ? 'direct'
-                  : 'fail'
-  const [stage,  setStage]  = useState<'direct'|'next'|'proxy'|'fail'>(initStage as any)
-  const [url,    setUrl]    = useState(resolved || '')
-  const [loaded, setLoaded] = useState(false)
+function Fallback({ alt, className, style }: { alt: string; className?: string; style?: React.CSSProperties }) {
+  return (
+    <div className={className} style={{ background: gradient(alt), display: 'flex',
+      alignItems: 'center', justifyContent: 'center', ...style }}>
+      <span style={{ fontSize: 'clamp(14px,3vw,26px)', fontWeight: 800,
+        color: 'rgba(255,255,255,0.9)', letterSpacing: '-0.02em',
+        textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
+        {(alt || '?').slice(0, 2).toUpperCase()}
+      </span>
+    </div>
+  )
+}
 
-  const initials  = (alt || '?').slice(0, 2).toUpperCase()
-  const gradient  = getGradient(alt || 'nft')
+export default function NFTImage({ src, alt, className, style }: Props) {
+  const resolved = resolveMediaUrl(src)   // filter bad URLs
+  const proxyUrl = resolved ? `/api/img?url=${encodeURIComponent(resolved)}` : ''
+  const [failed,  setFailed]  = useState(false)
+  const [loaded,  setLoaded]  = useState(false)
 
-  const onError = () => {
-    if (stage === 'direct') {
-      const next = getNextGatewayUrl(url)
-      if (next) { setUrl(next); setStage('next'); return }
-      // Try proxy only if we have a real URL
-      if (resolved) { setUrl(proxyUrl(resolved)); setStage('proxy'); return }
-      setStage('fail'); return
-    }
-    if (stage === 'next') {
-      setUrl(proxyUrl(resolved)); setStage('proxy'); return
-    }
-    setStage('fail')
-  }
-
-  if (stage === 'fail') {
-    return (
-      <div
-        className={className}
-        style={{
-          background:     gradient,
-          display:        'flex',
-          flexDirection:  'column',
-          alignItems:     'center',
-          justifyContent: 'center',
-          gap:            '4px',
-          ...style,
-        }}
-      >
-        <span style={{
-          fontSize:   'clamp(16px, 3vw, 28px)',
-          fontWeight: 800,
-          color:      'rgba(255,255,255,0.9)',
-          letterSpacing: '-0.03em',
-          textShadow: '0 2px 8px rgba(0,0,0,0.3)',
-        }}>
-          {initials}
-        </span>
-      </div>
-    )
+  if (!proxyUrl || failed) {
+    return <Fallback alt={alt} className={className} style={style}/>
   }
 
   return (
     <div className={className} style={{ position: 'relative', ...style }}>
+      {/* Gradient shows while image loads */}
       {!loaded && (
-        <div style={{
-          position:   'absolute', inset: 0,
-          background: gradient,
-          display:    'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <span style={{
-            fontSize:   'clamp(16px, 3vw, 28px)',
-            fontWeight: 800,
-            color:      'rgba(255,255,255,0.7)',
-            letterSpacing: '-0.03em',
-          }}>
-            {initials}
+        <div style={{ position: 'absolute', inset: 0,
+          background: gradient(alt), display: 'flex',
+          alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
+          <span style={{ fontSize: 'clamp(14px,3vw,26px)', fontWeight: 800,
+            color: 'rgba(255,255,255,0.6)', letterSpacing: '-0.02em' }}>
+            {(alt || '?').slice(0, 2).toUpperCase()}
           </span>
         </div>
       )}
       <img
-        src={url}
+        src={proxyUrl}
         alt={alt}
-        onLoad={() => setLoaded(true)}
-        onError={onError}
+        onLoad={()  => setLoaded(true)}
+        onError={() => setFailed(true)}
         style={{
-          width:      '100%',
-          height:     '100%',
-          objectFit:  'cover',
-          display:    'block',
-          opacity:    loaded ? 1 : 0,
-          transition: 'opacity 0.4s ease',
-          position:   'relative',
-          zIndex:     1,
+          width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+          opacity: loaded ? 1 : 0, transition: 'opacity 0.3s',
+          position: 'relative', zIndex: 1,
         }}
       />
     </div>
   )
 }
-
-export default NFTImage
