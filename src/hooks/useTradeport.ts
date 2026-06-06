@@ -225,3 +225,42 @@ export async function fetchCollectionActivity(slug: string, limit = 20): Promise
   `, { slug, limit })
   return data?.sui?.recent_actions ?? []
 }
+
+/* ── Trending collections (24h volume) ── */
+export interface TPTrending {
+  current_volume:      number | null
+  current_trades_count:number | null
+  previous_volume:     number | null
+  collection: {
+    id:        string
+    slug:      string
+    title:     string
+    cover_url: string | null
+    floor:     number | null
+    volume:    number | null
+    supply:    number | null
+    verified:  boolean
+  }
+}
+
+export async function fetchTrendingCollections(limit = 12): Promise<TPTrending[]> {
+  const data = await gql(`
+    query GetTrending($limit: Int!) {
+      sui {
+        collections_trending(
+          period: ONE_DAY
+          trending_by: VOLUME
+          limit: $limit
+        ) {
+          current_volume
+          current_trades_count
+          previous_volume
+          collection {
+            id slug title cover_url floor volume supply verified
+          }
+        }
+      }
+    }
+  `, { limit })
+  return data?.sui?.collections_trending ?? []
+}
