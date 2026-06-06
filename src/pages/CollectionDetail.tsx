@@ -39,37 +39,53 @@ export default function CollectionDetail() {
 
       // For NFTs with no media_url, fetch image directly from Sui blockchain
       const missing = nfts.filter(nft => !nft.media_url && nft.token_id)
+      
       if (missing.length > 0) {
         try {
+          // Normalize IDs — Sui requires 0x prefix
+          const ids = missing
+            .map(n => {
+              const id = n.token_id || ''
+              return id.startsWith('0x') ? id : `0x${id}`
+            })
+            .filter(id => id.length > 2)
+
+          console.log('[Tuskr] Fetching Sui images for', ids.length, 'NFTs')
+          console.log('[Tuskr] First token_id sample:', missing[0]?.token_id)
+
           const objects = await client.multiGetObjects({
-            ids:     missing.map(n => n.token_id),
+            ids,
             options: { showDisplay: true, showContent: true },
           })
 
-          // Build a map of token_id -> image_url from Sui display
           const imgMap: Record<string, string> = {}
           objects.forEach((obj, i) => {
             const display = (obj.data?.display as any)?.data ?? {}
-            const content = (obj.data?.content as any)?.fields ?? {}
-            const img = display.image_url
-              || display.img_url
-              || display.media_url
-              || content.image_url
-              || content.img_url
-              || content.media_url
+            const fields  = (obj.data?.content as any)?.fields ?? {}
+            
+            // Try every possible field name
+            const img = display.image_url || display.img_url || display.url
+              || display.media_url || display.image || display.thumbnail
+              || fields.image_url  || fields.img_url || fields.url
+              || fields.media_url  || fields.image   || fields.thumbnail
               || ''
+
+            console.log('[Tuskr] NFT', i, 'image:', img || 'null', '| display keys:', Object.keys(display))
+            
             if (img) imgMap[missing[i].token_id] = img
           })
 
-          // Merge the image URLs back into the NFT list
           const enriched = nfts.map(nft =>
             (!nft.media_url && imgMap[nft.token_id])
               ? { ...nft, media_url: imgMap[nft.token_id] }
               : nft
           )
+          
+          console.log('[Tuskr] Enriched', Object.keys(imgMap).length, 'NFTs with Sui images')
           setNfts(enriched)
-        } catch {
-          setNfts(nfts) // Fallback: just show with no images
+        } catch (err) {
+          console.error('[Tuskr] Sui image fetch failed:', err)
+          setNfts(nfts)
         }
       } else {
         setNfts(nfts)
