@@ -35,8 +35,12 @@ function getGradient(name: string): string {
 
 export function NFTImage({ src, alt, className, style }: NFTImageProps) {
   const resolved = resolveMediaUrl(src)
-  const [stage,  setStage]  = useState<'direct'|'next'|'proxy'|'fail'>(resolved ? 'direct' : 'fail')
-  const [url,    setUrl]    = useState(resolved)
+  // If resolved is empty (bad URL, Move type, relative path) skip straight to fail
+  const initStage = (resolved && resolved.startsWith('http')) ? 'direct'
+                  : (resolved && resolved.startsWith('data:'))  ? 'direct'
+                  : 'fail'
+  const [stage,  setStage]  = useState<'direct'|'next'|'proxy'|'fail'>(initStage as any)
+  const [url,    setUrl]    = useState(resolved || '')
   const [loaded, setLoaded] = useState(false)
 
   const initials  = (alt || '?').slice(0, 2).toUpperCase()
@@ -46,8 +50,9 @@ export function NFTImage({ src, alt, className, style }: NFTImageProps) {
     if (stage === 'direct') {
       const next = getNextGatewayUrl(url)
       if (next) { setUrl(next); setStage('next'); return }
-      // Try proxy
-      setUrl(proxyUrl(resolved)); setStage('proxy'); return
+      // Try proxy only if we have a real URL
+      if (resolved) { setUrl(proxyUrl(resolved)); setStage('proxy'); return }
+      setStage('fail'); return
     }
     if (stage === 'next') {
       setUrl(proxyUrl(resolved)); setStage('proxy'); return
