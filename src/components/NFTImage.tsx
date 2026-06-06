@@ -1,7 +1,7 @@
 /**
- * NFTImage — routes ALL images through our proxy first.
- * Solves: 403, CORS, hotlink protection, ERR_NAME_NOT_RESOLVED
- * Falls back to gradient placeholder with collection initials.
+ * NFTImage — uses TradePort's public CDN (img.tradeport.gg) to load images.
+ * TradePort CDN handles: hotlink protection, CORS, IPFS, dead links.
+ * Falls back to our proxy, then gradient placeholder.
  */
 import { useState } from 'react'
 import { resolveMediaUrl } from '../utils/media'
@@ -25,50 +25,67 @@ function gradient(name: string) {
   return `linear-gradient(${Math.abs(h >> 4) % 360}deg, ${a}, ${b})`
 }
 
-function Fallback({ alt, className, style }: { alt: string; className?: string; style?: React.CSSProperties }) {
-  return (
-    <div className={className} style={{ background: gradient(alt), display: 'flex',
-      alignItems: 'center', justifyContent: 'center', ...style }}>
+const STAGES = ['tradeport', 'ours', 'fail'] as const
+type Stage = typeof STAGES[number]
+
+export default function NFTImage({ src, alt, className, style }: Props) {
+  const resolved = resolveMediaUrl(src)
+  const [stage, setStage] = useState<Stage>(resolved ? 'tradeport' : 'fail')
+  const [loaded, setLoaded] = useState(false)
+
+  const initials = (alt || '?').slice(0, 2).toUpperCase()
+  const bg       = gradient(alt || 'nft')
+
+  const imgSrc = () => {
+    if (stage === 'tradeport') {
+      return `https://img.tradeport.gg?url=${encodeURIComponent(resolved)}&mime-type=image`
+    }
+    if (stage === 'ours') {
+      return `/api/img?url=${encodeURIComponent(resolved)}`
+    }
+    return ''
+  }
+
+  const onError = () => {
+    if (stage === 'tradeport') { setStage('ours');  return }
+    if (stage === 'ours')      { setStage('fail');  return }
+  }
+
+  const Placeholder = (
+    <div style={{ position: 'absolute', inset: 0, background: bg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
       <span style={{ fontSize: 'clamp(14px,3vw,26px)', fontWeight: 800,
-        color: 'rgba(255,255,255,0.9)', letterSpacing: '-0.02em',
+        color: 'rgba(255,255,255,0.85)', letterSpacing: '-0.02em',
         textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
-        {(alt || '?').slice(0, 2).toUpperCase()}
+        {initials}
       </span>
     </div>
   )
-}
 
-export default function NFTImage({ src, alt, className, style }: Props) {
-  const resolved = resolveMediaUrl(src)   // filter bad URLs
-  const proxyUrl = resolved ? `/api/img?url=${encodeURIComponent(resolved)}` : ''
-  const [failed,  setFailed]  = useState(false)
-  const [loaded,  setLoaded]  = useState(false)
-
-  if (!proxyUrl || failed) {
-    return <Fallback alt={alt} className={className} style={style}/>
+  if (stage === 'fail') {
+    return (
+      <div className={className} style={{ background: bg, display: 'flex',
+        alignItems: 'center', justifyContent: 'center', ...style }}>
+        <span style={{ fontSize: 'clamp(14px,3vw,26px)', fontWeight: 800,
+          color: 'rgba(255,255,255,0.85)', letterSpacing: '-0.02em',
+          textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
+          {initials}
+        </span>
+      </div>
+    )
   }
 
   return (
     <div className={className} style={{ position: 'relative', ...style }}>
-      {/* Gradient shows while image loads */}
-      {!loaded && (
-        <div style={{ position: 'absolute', inset: 0,
-          background: gradient(alt), display: 'flex',
-          alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
-          <span style={{ fontSize: 'clamp(14px,3vw,26px)', fontWeight: 800,
-            color: 'rgba(255,255,255,0.6)', letterSpacing: '-0.02em' }}>
-            {(alt || '?').slice(0, 2).toUpperCase()}
-          </span>
-        </div>
-      )}
+      {!loaded && Placeholder}
       <img
-        src={proxyUrl}
+        src={imgSrc()}
         alt={alt}
         onLoad={()  => setLoaded(true)}
-        onError={() => setFailed(true)}
+        onError={onError}
         style={{
           width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-          opacity: loaded ? 1 : 0, transition: 'opacity 0.3s',
+          opacity: loaded ? 1 : 0, transition: 'opacity 0.3s ease',
           position: 'relative', zIndex: 1,
         }}
       />
