@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSuiClient } from '@mysten/dapp-kit'
 import { useParams, Link } from 'react-router-dom'
 import { fetchCollection, fetchCollectionNFTs, fetchCollectionActivity, type TPCollection, type TPNFT, type TPActivity } from '../hooks/useTradeport'
 import NFTImage from '../components/NFTImage'
@@ -14,6 +15,7 @@ function fmt(n: number | null, d = 2) {
 
 export default function CollectionDetail() {
   const { slug } = useParams<{ slug: string }>()
+  const client = useSuiClient()
   const [col,      setCol]      = useState<TPCollection | null>(null)
   const [nfts,     setNfts]     = useState<TPNFT[]>([])
   const [activity, setActivity] = useState<TPActivity[]>([])
@@ -29,10 +31,49 @@ export default function CollectionDetail() {
       fetchCollection(slug),
       fetchCollectionNFTs(slug, 32),
       fetchCollectionActivity(slug, 20),
-    ]).then(([c, n, a]) => {
+    ]).then(async ([c, n, a]) => {
       setCol(c as TPCollection | null)
-      setNfts(n as TPNFT[])
       setActivity(a as TPActivity[])
+
+      const nfts = n as TPNFT[]
+
+      // For NFTs with no media_url, fetch image directly from Sui blockchain
+      const missing = nfts.filter(nft => !nft.media_url && nft.token_id)
+      if (missing.length > 0) {
+        try {
+          const objects = await client.multiGetObjects({
+            ids:     missing.map(n => n.token_id),
+            options: { showDisplay: true, showContent: true },
+          })
+
+          // Build a map of token_id -> image_url from Sui display
+          const imgMap: Record<string, string> = {}
+          objects.forEach((obj, i) => {
+            const display = (obj.data?.display as any)?.data ?? {}
+            const content = (obj.data?.content as any)?.fields ?? {}
+            const img = display.image_url
+              || display.img_url
+              || display.media_url
+              || content.image_url
+              || content.img_url
+              || content.media_url
+              || ''
+            if (img) imgMap[missing[i].token_id] = img
+          })
+
+          // Merge the image URLs back into the NFT list
+          const enriched = nfts.map(nft =>
+            (!nft.media_url && imgMap[nft.token_id])
+              ? { ...nft, media_url: imgMap[nft.token_id] }
+              : nft
+          )
+          setNfts(enriched)
+        } catch {
+          setNfts(nfts) // Fallback: just show with no images
+        }
+      } else {
+        setNfts(nfts)
+      }
     }).finally(() => setLoading(false))
   }, [slug])
 
