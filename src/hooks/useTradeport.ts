@@ -6,8 +6,8 @@
 
 const PROXY    = '/api/tradeport'
 const DIRECT   = 'https://api.indexer.xyz/graphql'
-const API_KEY  = 'CVdbun0.5cda839c66e800e174ac0a5ec1dc1a2c'
-const API_USER = 'Tuskr'
+const API_KEY  = 'OpLrmEc.26f3dfafe8f280f066ba11b8b831d61a'
+const API_USER = 'mimisco-tech'
 
 async function gql(query: string, variables: Record<string, unknown> = {}) {
   const payload = JSON.stringify({ query, variables })
