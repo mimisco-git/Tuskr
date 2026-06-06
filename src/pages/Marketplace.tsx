@@ -59,14 +59,15 @@ export default function Marketplace() {
 
   /* Load TradePort collections — public, no wallet needed */
   useEffect(() => {
-    Promise.all([
-      fetchSuiCollections(40),
-      fetchTrendingCollections(8),
-    ]).then(([cols, trend]) => {
-      setCollections(cols)
-      setTrending(trend)
-    }).catch(console.error)
-    .finally(() => setLoadingCols(false))
+    // Load independently so trending failure never blocks collections
+    fetchSuiCollections(40)
+      .then(setCollections)
+      .catch(console.error)
+      .finally(() => setLoadingCols(false))
+
+    fetchTrendingCollections(8)
+      .then(setTrending)
+      .catch(() => {}) // silent — not all API tiers support trending
   }, [])
 
   /* Load Tuskr-native minted NFTs from chain */
