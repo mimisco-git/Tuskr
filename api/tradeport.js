@@ -40,8 +40,8 @@ export default async function handler(req, res) {
       'https://api.indexer.xyz/graphql',
       {
         'Content-Type': 'application/json',
-        'x-api-key':    'CVdbun0.5cda839c66e800e174ac0a5ec1dc1a2c',
-        'x-api-user':   'Tuskr',
+        'x-api-key':    'OpLrmEc.26f3dfafe8f280f066ba11b8b831d61a',
+        'x-api-user':   'mimisco-tech',
       },
       JSON.stringify(body)
     )
