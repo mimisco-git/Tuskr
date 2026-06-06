@@ -78,7 +78,7 @@ export default function ActivityFeed() {
               <div key={(item.id ?? '') + i} className={s.row}>
                 <NFTImage
                   src={item.nft?.media_url ?? null}
-                  alt={item.nft?.name ?? '?'}
+                  alt={item.nft?.name || '?'}
                 />
                 <div className={s.rowBody}>
                   <span className={s.nftName}>{item.nft?.name ?? 'Unknown NFT'}</span>
