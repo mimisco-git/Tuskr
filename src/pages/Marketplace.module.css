@@ -240,3 +240,106 @@
 
 @media(max-width: 1024px) { .trendingRow { grid-template-columns: repeat(2,1fr); } }
 @media(max-width: 600px)  { .trendingRow { grid-template-columns: 1fr 1fr; } }
+
+/* ── Trending tab — big card grid ── */
+.trendingGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.trendBigCard {
+  display: block;
+  text-decoration: none;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.trendBigCard:hover {
+  border-color: rgba(255,255,255,0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+.trendBigImg {
+  position: relative;
+  aspect-ratio: 1;
+  background: rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+
+.trendBigRank {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.6);
+  padding: 3px 8px;
+  border-radius: 99px;
+  backdrop-filter: blur(4px);
+}
+
+.trendBigPct {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 99px;
+  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.6);
+}
+
+.trendBigBody {
+  padding: 14px;
+}
+
+.trendBigName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #f5f5f7;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trendBigStats {
+  display: flex;
+  gap: 16px;
+}
+
+.trendBigStat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trendStatVal {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.trendSui {
+  font-size: 11px;
+  color: rgba(245,245,247,0.35);
+}
+
+.trendStatLabel {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: rgba(245,245,247,0.28);
+}
+
+@media (max-width: 1024px) { .trendingGrid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .trendingGrid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+@media (max-width: 480px)  { .trendingGrid { grid-template-columns: 1fr 1fr; gap: 8px; } }

@@ -11,7 +11,7 @@ import NFTImage from '../components/NFTImage'
 import s from './Marketplace.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
-type Tab = 'explore' | 'tuskr' | 'listed'
+type Tab = 'trending' | 'explore' | 'tuskr' | 'listed'
 
 /* ── TradePort collection card ── */
 function CollectionCard({ col }: { col: TPCollection }) {
@@ -47,7 +47,7 @@ export default function Marketplace() {
   const { success, error: toastErr } = useToast()
   const { mutate: signAndExecute } = useSignAndExecuteTransaction()
 
-  const [tab,          setTab]        = useState<Tab>('explore')
+  const [tab,          setTab]        = useState<Tab>('trending')
   const [trending,     setTrending]    = useState<TPTrending[]>([])
   const [collections,  setCollections] = useState<TPCollection[]>([])
   const [tuskrNfts,    setTuskrNfts]   = useState<any[]>([])
@@ -156,50 +156,11 @@ export default function Marketplace() {
           <Link to="/mint" className={s.mintBtn}>+ Mint NFT</Link>
         </div>
 
-        {/* Trending section */}
-        {(trending.length > 0 || trendingFromVolume.length > 0) && (
-          <div className={s.trendingSection}>
-            <div className={s.trendingHeader}>
-              <span className={s.trendingTitle}>🔥 Trending 24h</span>
-            </div>
-            <div className={s.trendingRow}>
-              {(trending.length > 0 ? trending.map((t, i) => ({
-                  id:    t.collection.id,
-                  slug:  t.collection.slug,
-                  title: t.collection.title,
-                  img:   t.collection.cover_url,
-                  vol:   t.current_volume ?? 0,
-                  pct:   t.previous_volume && t.previous_volume > 0
-                    ? Math.round(((t.current_volume ?? 0) - t.previous_volume) / t.previous_volume * 100)
-                    : null,
-                })) : trendingFromVolume.map((c, _) => ({
-                  id:    c.id,
-                  slug:  c.slug,
-                  title: c.title,
-                  img:   c.cover_url,
-                  vol:   c.volume ?? 0,
-                  pct:   null,
-                }))).map((item, i) => (
-                  <Link key={item.id} to={`/collections/${item.slug}`} className={s.trendCard}>
-                    <span className={s.trendRank}>{i + 1}</span>
-                    <NFTImage src={item.img} alt={item.title} style={{width:36,height:36,borderRadius:8,flexShrink:0}}/>
-                    <div className={s.trendInfo}>
-                      <span className={s.trendName}>{item.title}</span>
-                      <span className={s.trendVol}>{item.vol.toFixed(0)} SUI</span>
-                    </div>
-                    {item.pct != null && (
-                      <span className={`${s.trendPct} ${item.pct >= 0 ? s.trendUp : s.trendDown}`}>
-                        {item.pct >= 0 ? '+' : ''}{item.pct}%
-                      </span>
-                    )}
-                  </Link>
-                ))}
-            </div>
-          </div>
-        )}
-
         {/* Tabs */}
         <div className={s.tabBar}>
+          <button className={`${s.tab} ${tab==='trending' ? s.tabActive : ''}`} onClick={() => setTab('trending')}>
+            🔥 Trending
+          </button>
           <button className={`${s.tab} ${tab==='explore' ? s.tabActive : ''}`} onClick={() => setTab('explore')}>
             Explore Sui ({filteredCols.length})
           </button>
@@ -210,6 +171,60 @@ export default function Marketplace() {
             Listed for Sale ({listings.length})
           </button>
         </div>
+
+        {/* ── TAB: Trending ── */}
+        {tab === 'trending' && (
+          <div>
+            <div className={s.trendingGrid}>
+              {(trending.length > 0 ? trending.map((t, i) => ({
+                id:    t.collection.id,
+                slug:  t.collection.slug,
+                title: t.collection.title,
+                img:   t.collection.cover_url,
+                vol:   t.current_volume ?? 0,
+                floor: t.collection.floor ?? 0,
+                supply:t.collection.supply ?? 0,
+                pct:   t.previous_volume && t.previous_volume > 0
+                  ? Math.round(((t.current_volume ?? 0) - t.previous_volume) / t.previous_volume * 100)
+                  : null,
+              })) : trendingFromVolume.map(c => ({
+                id:     c.id,
+                slug:   c.slug,
+                title:  c.title,
+                img:    c.cover_url,
+                vol:    c.volume ?? 0,
+                floor:  c.floor ?? 0,
+                supply: c.supply ?? 0,
+                pct:    null,
+              }))).map((item, i) => (
+                <Link key={item.id} to={`/collections/${item.slug}`} className={s.trendBigCard}>
+                  <div className={s.trendBigImg}>
+                    <NFTImage src={item.img} alt={item.title} style={{width:'100%',height:'100%',objectFit:'cover'}}/>
+                    <span className={s.trendBigRank}>#{i + 1}</span>
+                    {item.pct != null && (
+                      <span className={`${s.trendBigPct} ${item.pct >= 0 ? s.trendUp : s.trendDown}`}>
+                        {item.pct >= 0 ? '+' : ''}{item.pct}%
+                      </span>
+                    )}
+                  </div>
+                  <div className={s.trendBigBody}>
+                    <p className={s.trendBigName}>{item.title}</p>
+                    <div className={s.trendBigStats}>
+                      <div className={s.trendBigStat}>
+                        <span className={s.trendStatVal}>{item.floor.toFixed(2)} <span className={s.trendSui}>SUI</span></span>
+                        <span className={s.trendStatLabel}>Floor</span>
+                      </div>
+                      <div className={s.trendBigStat}>
+                        <span className={s.trendStatVal}>{item.vol.toFixed(0)} <span className={s.trendSui}>SUI</span></span>
+                        <span className={s.trendStatLabel}>Volume</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── TAB: Explore (TradePort collections) ── */}
         {tab === 'explore' && (
