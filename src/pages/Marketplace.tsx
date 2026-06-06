@@ -121,9 +121,15 @@ export default function Marketplace() {
     if (tab === 'listed') loadListings()
   }, [tab, network.name])
 
-  const filteredCols = collections.filter(c =>
+  // Only show collections with some trading activity — removes broken/abandoned ones
+  const activeCols = collections.filter(c => (c.volume ?? 0) > 0 || (c.floor ?? 0) > 0)
+
+  const filteredCols = activeCols.filter(c =>
     !search || c.title.toLowerCase().includes(search.toLowerCase())
   )
+
+  // Trending = top 8 by volume from active collections (no extra API call needed)
+  const trendingFromVolume = activeCols.slice(0, 8)
   const filteredTuskr = tuskrNfts.filter(n =>
     !search || n.name.toLowerCase().includes(search.toLowerCase())
   )
@@ -151,32 +157,43 @@ export default function Marketplace() {
         </div>
 
         {/* Trending section */}
-        {trending.length > 0 && (
+        {(trending.length > 0 || trendingFromVolume.length > 0) && (
           <div className={s.trendingSection}>
             <div className={s.trendingHeader}>
               <span className={s.trendingTitle}>🔥 Trending 24h</span>
             </div>
             <div className={s.trendingRow}>
-              {trending.map((t, i) => {
-                const pct = t.previous_volume && t.previous_volume > 0
-                  ? Math.round(((t.current_volume ?? 0) - t.previous_volume) / t.previous_volume * 100)
-                  : null
-                return (
-                  <Link key={t.collection.id} to={`/collections/${t.collection.slug}`} className={s.trendCard}>
+              {(trending.length > 0 ? trending.map((t, i) => ({
+                  id:    t.collection.id,
+                  slug:  t.collection.slug,
+                  title: t.collection.title,
+                  img:   t.collection.cover_url,
+                  vol:   t.current_volume ?? 0,
+                  pct:   t.previous_volume && t.previous_volume > 0
+                    ? Math.round(((t.current_volume ?? 0) - t.previous_volume) / t.previous_volume * 100)
+                    : null,
+                })) : trendingFromVolume.map((c, _) => ({
+                  id:    c.id,
+                  slug:  c.slug,
+                  title: c.title,
+                  img:   c.cover_url,
+                  vol:   c.volume ?? 0,
+                  pct:   null,
+                }))).map((item, i) => (
+                  <Link key={item.id} to={`/collections/${item.slug}`} className={s.trendCard}>
                     <span className={s.trendRank}>{i + 1}</span>
-                    <NFTImage src={t.collection.cover_url} alt={t.collection.title} style={{width:36,height:36,borderRadius:8,flexShrink:0}}/>
+                    <NFTImage src={item.img} alt={item.title} style={{width:36,height:36,borderRadius:8,flexShrink:0}}/>
                     <div className={s.trendInfo}>
-                      <span className={s.trendName}>{t.collection.title}</span>
-                      <span className={s.trendVol}>{(t.current_volume ?? 0).toFixed(0)} SUI</span>
+                      <span className={s.trendName}>{item.title}</span>
+                      <span className={s.trendVol}>{item.vol.toFixed(0)} SUI</span>
                     </div>
-                    {pct != null && (
-                      <span className={`${s.trendPct} ${pct >= 0 ? s.trendUp : s.trendDown}`}>
-                        {pct >= 0 ? '+' : ''}{pct}%
+                    {item.pct != null && (
+                      <span className={`${s.trendPct} ${item.pct >= 0 ? s.trendUp : s.trendDown}`}>
+                        {item.pct >= 0 ? '+' : ''}{item.pct}%
                       </span>
                     )}
                   </Link>
-                )
-              })}
+                ))}
             </div>
           </div>
         )}
@@ -184,7 +201,7 @@ export default function Marketplace() {
         {/* Tabs */}
         <div className={s.tabBar}>
           <button className={`${s.tab} ${tab==='explore' ? s.tabActive : ''}`} onClick={() => setTab('explore')}>
-            Explore Sui ({collections.length})
+            Explore Sui ({filteredCols.length})
           </button>
           <button className={`${s.tab} ${tab==='tuskr' ? s.tabActive : ''}`} onClick={() => setTab('tuskr')}>
             Tuskr Minted ({tuskrNfts.length})
