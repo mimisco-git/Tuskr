@@ -7,6 +7,7 @@ import { Transaction } from '@mysten/sui/transactions'
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit'
 import { useNetwork } from '../hooks/useNetwork'
 import { fetchSuiCollections, type TPCollection } from '../hooks/useTradeport'
+import { resolveMediaUrl } from '../utils/media'
 import s from './Marketplace.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -15,11 +16,12 @@ type Tab = 'explore' | 'tuskr' | 'listed'
 /* ── TradePort collection card ── */
 function CollectionCard({ col }: { col: TPCollection }) {
   const [imgErr, setImgErr] = useState(false)
+  const imgSrc = resolveMediaUrl(col.cover_url)
   return (
     <Link to={`/collections/${col.slug}`} className={s.colCard}>
       <div className={s.colCardImg}>
-        {col.cover_url && !imgErr
-          ? <img src={col.cover_url} alt={col.title} onError={() => setImgErr(true)}/>
+        {imgSrc && !imgErr
+          ? <img src={imgSrc} alt={col.title} onError={() => setImgErr(true)}/>
           : <div className={s.colCardFallback}>{col.title.slice(0,2).toUpperCase()}</div>
         }
         {col.verified && <span className={s.verifiedBadge}>✓</span>}
@@ -195,7 +197,7 @@ export default function Marketplace() {
                 <Link key={nft.objectId} to={`/nft/${nft.objectId}`} className={s.nftCard}>
                   <div className={s.nftImg}>
                     {nft.mediaUrl
-                      ? <img src={nft.mediaUrl} alt={nft.name}/>
+                      ? <img src={resolveMediaUrl(nft.mediaUrl)} alt={nft.name}/>
                       : <div className={s.nftImgFallback}>{nft.name.slice(0,2).toUpperCase()}</div>
                     }
                     {nft.blobId && <span className={s.walrusBadge}>WALRUS</span>}

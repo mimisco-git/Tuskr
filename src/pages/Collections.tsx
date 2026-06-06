@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchSuiCollections, type TPCollection } from '../hooks/useTradeport'
+import { resolveMediaUrl } from '../utils/media'
 import s from './Collections.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -21,11 +22,12 @@ function fmtUSD(sui: number | null) {
 
 function CollectionImg({ src, alt }: { src: string | null; alt: string }) {
   const [err, setErr] = useState(false)
+  const resolved = resolveMediaUrl(src)
   const initials = alt.slice(0, 2).toUpperCase()
-  if (!src || err) return (
+  if (!resolved || err) return (
     <div className={s.colImgFallback}>{initials}</div>
   )
-  return <img src={src} alt={alt} className={s.colImg} onError={() => setErr(true)}/>
+  return <img src={resolved} alt={alt} className={s.colImg} onError={() => setErr(true)}/>
 }
 
 type SortKey = 'volume' | 'floor' | 'supply'

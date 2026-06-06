@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchRecentActivity, type TPActivity } from '../hooks/useTradeport'
+import { resolveMediaUrl } from '../utils/media'
 import s from './ActivityFeed.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -21,10 +22,11 @@ function fmt(n: number | null) {
 
 function ImgFallback({ src, alt }: { src: string | null; alt: string }) {
   const [err, setErr] = useState(false)
-  if (!src || err) return (
+  const resolved = resolveMediaUrl(src)
+  if (!resolved || err) return (
     <div className={s.imgFallback}>{alt.slice(0,2).toUpperCase()}</div>
   )
-  return <img src={src} alt={alt} className={s.actImg} onError={() => setErr(true)}/>
+  return <img src={resolved} alt={alt} className={s.actImg} onError={() => setErr(true)}/>
 }
 
 const TYPE_LABELS: Record<string, string> = {
