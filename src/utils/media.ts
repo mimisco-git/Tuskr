@@ -1,65 +1,62 @@
 /**
- * media.ts — URL resolution for NFT images
- *
- * TradePort returns many non-image "URLs":
- *  - Move type identifiers:  0xabc::module::Type
- *  - Relative paths:         /walrus-blob/...
- *  - The string "null"
- *  - Empty strings
- *
- * We filter all of those out and only pass true HTTP/IPFS/Arweave URLs.
+ * media.ts — URL normalisation for Sui/Walrus NFT images
  */
 
-const IPFS_GATEWAYS = [
-  'https://nftstorage.link/ipfs/',
-  'https://ipfs.io/ipfs/',
-  'https://cloudflare-ipfs.com/ipfs/',
-]
+const WALRUS_AGG   = 'https://aggregator.walrus.space/v1/blobs/'
+const WALRUS_TEST  = 'https://aggregator.walrus-testnet.walrus.space/v1/blobs/'
+const IPFS_GW      = 'https://nftstorage.link/ipfs/'
+const ARWEAVE_GW   = 'https://arweave.net/'
 
-/** Returns a browser-loadable URL, or '' if the input is unusable */
 export function resolveMediaUrl(url: string | null | undefined): string {
   if (!url) return ''
-
   const u = url.trim()
+  if (!u || u === 'null' || u === 'undefined') return ''
 
-  // Reject non-URL values
-  if (!u) return ''
-  if (u === 'null' || u === 'undefined') return ''
-  if (u.startsWith('data:')) return u                    // data URI — valid
-  if (u.includes('::') && !u.startsWith('http')) return '' // Move type ID
-  if (u.startsWith('/') && !u.startsWith('//')) return '' // relative path
-  if (u.startsWith('0x') && !u.startsWith('https://') && !u.startsWith('http://')) return '' // hex address
+  // data: URIs — render directly
+  if (u.startsWith('data:')) return u
 
-  if (u.startsWith('https://') || u.startsWith('http://') || u.startsWith('//')) return u
+  // Walrus relative paths  →  absolute aggregator URL
+  if (u.startsWith('/walrus-blob/'))  return WALRUS_AGG  + u.replace('/walrus-blob/',  '')
+  if (u.startsWith('/walrus/'))       return WALRUS_AGG  + u.replace('/walrus/',        '')
+  if (u.startsWith('/blob/'))         return WALRUS_AGG  + u.replace('/blob/',          '')
+  if (u.startsWith('/v1/blobs/'))     return WALRUS_AGG  + u.replace('/v1/blobs/',      '')
 
-  if (u.startsWith('ipfs://')) {
-    const cid = u.replace('ipfs://', '').replace(/^\/+/, '')
-    return `${IPFS_GATEWAYS[0]}${cid}`
+  // IPFS
+  if (u.startsWith('ipfs://')) return IPFS_GW + u.slice(7).replace(/^\/+/, '')
+  if (u.startsWith('Qm') || u.startsWith('bafy') || u.startsWith('bafk') || u.startsWith('bafybe')) {
+    return IPFS_GW + u
   }
 
-  if (u.startsWith('ar://')) return `https://arweave.net/${u.slice(5)}`
+  // Arweave
+  if (u.startsWith('ar://')) return ARWEAVE_GW + u.slice(5)
 
-  // Bare CID
-  if (u.startsWith('Qm') || u.startsWith('bafy') || u.startsWith('bafk')) {
-    return `${IPFS_GATEWAYS[0]}${u}`
-  }
+  // Protocol-relative
+  if (u.startsWith('//')) return 'https:' + u
 
-  return '' // unknown format — reject
+  // Valid HTTP/HTTPS
+  if (u.startsWith('http://') || u.startsWith('https://')) return u
+
+  // ── Reject everything else ──────────────────────────────────
+  // Move type identifiers:  0x123::module::Type
+  if (u.includes('::')) return ''
+  // Sui object IDs with version:  0xabc:1
+  if (u.includes(':') && /^0x/.test(u)) return ''
+  // Bare hex address
+  if (/^0x[0-9a-fA-F]+$/.test(u)) return ''
+  // Other relative paths
+  if (u.startsWith('/')) return ''
+
+  // Unknown — reject
+  return ''
 }
 
-/** Get next IPFS gateway after current one fails */
-export function getNextGatewayUrl(currentUrl: string): string | null {
-  for (let i = 0; i < IPFS_GATEWAYS.length - 1; i++) {
-    if (currentUrl.startsWith(IPFS_GATEWAYS[i])) {
-      const cid = currentUrl.slice(IPFS_GATEWAYS[i].length)
-      return `${IPFS_GATEWAYS[i + 1]}${cid}`
-    }
-  }
-  return null
+export function proxyUrl(resolved: string): string {
+  if (!resolved) return ''
+  return `/api/img?url=${encodeURIComponent(resolved)}`
 }
 
-/** Proxy through our Vercel image server as last resort */
-export function proxyUrl(url: string | null | undefined): string {
+/** Route any image through TradePort's public CDN — handles hotlink + CORS */
+export function tradeportImg(url: string): string {
   if (!url) return ''
-  return `/api/img?url=${encodeURIComponent(url)}`
+  return `https://img.tradeport.gg?url=${encodeURIComponent(url)}&mime-type=image`
 }
