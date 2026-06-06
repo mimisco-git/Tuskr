@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchCollection, fetchCollectionNFTs, fetchCollectionActivity, type TPCollection, type TPNFT, type TPActivity } from '../hooks/useTradeport'
-import { resolveMediaUrl } from '../utils/media'
+import { resolveMediaUrl, proxyUrl } from '../utils/media'
 import s from './CollectionDetail.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -11,10 +11,18 @@ function fmt(n: number | null, d = 2) {
 }
 
 function ImgWithFallback({ src, alt, className }: { src: string | null; alt: string; className: string }) {
-  const [err, setErr] = useState(false)
+  const [stage, setStage] = useState<'direct'|'proxy'|'fail'>('direct')
   const resolved = resolveMediaUrl(src)
-  if (!resolved || err) return <div className={s.imgFallback}>{alt.slice(0,2).toUpperCase()}</div>
-  return <img src={resolved} alt={alt} className={className} onError={() => setErr(true)}/>
+
+  if (!resolved || stage === 'fail') {
+    return <div className={s.imgFallback}>{alt.slice(0,2).toUpperCase()}</div>
+  }
+  if (stage === 'proxy') {
+    return <img src={proxyUrl(resolved)} alt={alt} className={className}
+      onError={() => setStage('fail')}/>
+  }
+  return <img src={resolved} alt={alt} className={className}
+    onError={() => setStage('proxy')}/>
 }
 
 export default function CollectionDetail() {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchRecentActivity, type TPActivity } from '../hooks/useTradeport'
-import { resolveMediaUrl } from '../utils/media'
+import { resolveMediaUrl, proxyUrl } from '../utils/media'
 import s from './ActivityFeed.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -21,12 +21,15 @@ function fmt(n: number | null) {
 }
 
 function ImgFallback({ src, alt }: { src: string | null; alt: string }) {
-  const [err, setErr] = useState(false)
+  const [stage, setStage] = useState<'direct'|'proxy'|'fail'>('direct')
   const resolved = resolveMediaUrl(src)
-  if (!resolved || err) return (
-    <div className={s.imgFallback}>{alt.slice(0,2).toUpperCase()}</div>
-  )
-  return <img src={resolved} alt={alt} className={s.actImg} onError={() => setErr(true)}/>
+  if (!resolved || stage === 'fail') return <div className={s.imgFallback}>{alt.slice(0,2).toUpperCase()}</div>
+  if (stage === 'proxy') {
+    return <img src={proxyUrl(resolved)} alt={alt} className={s.actImg}
+      onError={() => setStage('fail')}/>
+  }
+  return <img src={resolved} alt={alt} className={s.actImg}
+    onError={() => setStage('proxy')}/>
 }
 
 const TYPE_LABELS: Record<string, string> = {
