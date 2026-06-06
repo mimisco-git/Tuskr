@@ -1,69 +1,127 @@
 /**
- * Image proxy — fetches NFT images server-side to bypass
- * hotlink protection, CORS restrictions, and rate limiting.
- * Usage: /api/img?url=<encoded_image_url>
+ * Image proxy — ALL NFT images route through here.
+ * This solves: 403, CORS, hotlink protection, ERR_NAME_NOT_RESOLVED
  */
 import https from 'https'
 import http  from 'http'
 
-export default async function handler(req, res) {
-  const { url } = req.query
-  if (!url) { res.status(400).send('Missing url param'); return }
+const IPFS_GATEWAY = 'https://nftstorage.link/ipfs/'
 
-  let target
-  try { target = decodeURIComponent(url) }
-  catch { res.status(400).send('Bad url param'); return }
+function normalizeUrl(raw) {
+  if (!raw || raw === 'null' || raw === 'undefined') return null
 
-  // Only allow http/https
-  if (!target.startsWith('http://') && !target.startsWith('https://')) {
-    res.status(400).send('Only http/https allowed'); return
-  }
+  let url = raw.trim()
 
-  // Resolve IPFS and Arweave
-  if (target.startsWith('ipfs://')) target = `https://cloudflare-ipfs.com/ipfs/${target.slice(7)}`
-  if (target.startsWith('ar://'))   target = `https://arweave.net/${target.slice(5)}`
+  // Reject Move type identifiers (0x..::module::Type)
+  if (url.includes('::') && !url.startsWith('http')) return null
+  // Reject relative paths
+  if (url.startsWith('/') && !url.startsWith('//')) return null
+  // Reject bare hex addresses
+  if (/^0x[0-9a-fA-F]+$/.test(url)) return null
 
-  const lib = target.startsWith('https://') ? https : http
+  // data URLs — return as-is (no proxy needed)
+  if (url.startsWith('data:')) return url
 
-  try {
-    await new Promise((resolve, reject) => {
-      const request = lib.get(target, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; Tuskr/1.0)',
-          'Referer':    'https://www.tradeport.xyz/',
-          'Accept':     'image/*,*/*',
+  // IPFS
+  if (url.startsWith('ipfs://')) return IPFS_GATEWAY + url.replace('ipfs://', '').replace(/^\/+/, '')
+
+  // Arweave
+  if (url.startsWith('ar://')) return 'https://arweave.net/' + url.slice(5)
+
+  // Bare CID
+  if (/^(Qm|bafy|bafk|bafybe)/.test(url)) return IPFS_GATEWAY + url
+
+  // Must be http/https at this point
+  if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('//')) return null
+
+  if (url.startsWith('//')) url = 'https:' + url
+
+  return url
+}
+
+function fetchImage(url) {
+  return new Promise((resolve, reject) => {
+    const lib = url.startsWith('https://') ? https : http
+    const req = lib.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer':    'https://www.tradeport.xyz/',
+        'Accept':     'image/webp,image/apng,image/*,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      timeout: 12000,
+    }, res => {
+      // Follow redirects (up to 3)
+      if ([301, 302, 303, 307, 308].includes(res.statusCode)) {
+        const loc = res.headers.location
+        if (loc) {
+          const next = loc.startsWith('http') ? loc : new URL(loc, url).href
+          return resolve({ redirect: next })
         }
-      }, (imgRes) => {
-        // Follow redirects
-        if (imgRes.statusCode === 301 || imgRes.statusCode === 302) {
-          const redirectUrl = imgRes.headers.location
-          if (redirectUrl) {
-            res.redirect(imgRes.statusCode, `/api/img?url=${encodeURIComponent(redirectUrl)}`)
-          } else {
-            res.status(502).send('Bad redirect'); 
-          }
-          resolve(null)
-          return
-        }
-
-        if (imgRes.statusCode !== 200) {
-          res.status(imgRes.statusCode || 502).send('Image fetch failed')
-          resolve(null)
-          return
-        }
-
-        const contentType = imgRes.headers['content-type'] || 'image/jpeg'
-        res.setHeader('Content-Type', contentType)
-        res.setHeader('Cache-Control', 'public, max-age=86400') // cache 24h
-        res.setHeader('Access-Control-Allow-Origin', '*')
-        imgRes.pipe(res)
-        imgRes.on('end', resolve)
-        imgRes.on('error', reject)
-      })
-      request.on('error', reject)
-      request.setTimeout(10000, () => { request.destroy(); reject(new Error('timeout')) })
+      }
+      const chunks = []
+      res.on('data',  c => chunks.push(c))
+      res.on('end',   () => resolve({
+        status:      res.statusCode,
+        contentType: res.headers['content-type'] || 'image/jpeg',
+        body:        Buffer.concat(chunks),
+      }))
     })
-  } catch (err) {
-    if (!res.headersSent) res.status(502).send(`Proxy error: ${err.message}`)
+    req.on('error',   reject)
+    req.on('timeout', () => { req.destroy(); reject(new Error('timeout')) })
+  })
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+
+  const rawUrl = req.query.url
+  const target = normalizeUrl(rawUrl)
+
+  if (!target) {
+    res.status(400).json({ error: 'Invalid or unsupported URL', url: rawUrl })
+    return
   }
+
+  // data: URLs — just redirect browser directly (no proxy needed)
+  if (target.startsWith('data:')) {
+    res.setHeader('Location', target)
+    res.status(302).end()
+    return
+  }
+
+  let url = target
+  let redirects = 0
+
+  while (redirects < 4) {
+    try {
+      const result = await fetchImage(url)
+
+      if (result.redirect) {
+        url = result.redirect
+        redirects++
+        continue
+      }
+
+      if (result.status === 200) {
+        res.setHeader('Content-Type',  result.contentType)
+        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600')
+        res.status(200).send(result.body)
+        return
+      }
+
+      // Non-200 from image server
+      res.status(result.status || 502).json({
+        error: `Image server returned ${result.status}`,
+        url,
+      })
+      return
+
+    } catch (err) {
+      res.status(502).json({ error: 'Fetch failed', detail: String(err), url })
+      return
+    }
+  }
+
+  res.status(502).json({ error: 'Too many redirects', url })
 }
