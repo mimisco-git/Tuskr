@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { fetchCollection, fetchCollectionNFTs, fetchCollectionActivity, type TPCollection, type TPNFT, type TPActivity } from '../hooks/useTradeport'
-import { resolveMediaUrl, proxyUrl } from '../utils/media'
+import NFTImage from '../components/NFTImage'
 import s from './CollectionDetail.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -10,20 +10,7 @@ function fmt(n: number | null, d = 2) {
   return n.toLocaleString('en-US', { maximumFractionDigits: d })
 }
 
-function ImgWithFallback({ src, alt, className }: { src: string | null; alt: string; className: string }) {
-  const [stage, setStage] = useState<'direct'|'proxy'|'fail'>('direct')
-  const resolved = resolveMediaUrl(src)
-
-  if (!resolved || stage === 'fail') {
-    return <div className={s.imgFallback}>{alt.slice(0,2).toUpperCase()}</div>
-  }
-  if (stage === 'proxy') {
-    return <img src={proxyUrl(resolved)} alt={alt} className={className}
-      onError={() => setStage('fail')}/>
-  }
-  return <img src={resolved} alt={alt} className={className}
-    onError={() => setStage('proxy')}/>
-}
+// NFTImage component imported from components/NFTImage.tsx
 
 export default function CollectionDetail() {
   const { slug } = useParams<{ slug: string }>()
@@ -89,7 +76,7 @@ export default function CollectionDetail() {
         {/* Identity */}
         <div className={s.identity}>
           <div className={s.avatarWrap}>
-            <ImgWithFallback src={col.cover_url} alt={col.title || '?'} className={s.avatar}/>
+            <NFTImage src={col.cover_url} alt={col.title || '?'} className={s.avatar}/>
           </div>
           <div className={s.identityInfo}>
             <div className={s.identityTop}>
@@ -156,7 +143,7 @@ export default function CollectionDetail() {
               {floorNfts.map(nft => (
                 <div key={nft.token_id} className={s.card}>
                   <div className={s.cardImg}>
-                    <ImgWithFallback
+                    <NFTImage
                       src={nft.media_url}
                       alt={nft.name || '#'+nft.token_id}
                       className={s.nftImg}

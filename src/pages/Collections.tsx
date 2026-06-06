@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchSuiCollections, type TPCollection } from '../hooks/useTradeport'
-import { resolveMediaUrl, proxyUrl } from '../utils/media'
+import NFTImage from '../components/NFTImage'
 import s from './Collections.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -20,18 +20,7 @@ function fmtUSD(sui: number | null) {
   return `$${usd.toFixed(0)}`
 }
 
-function CollectionImg({ src, alt }: { src: string | null; alt: string }) {
-  const [stage, setStage] = useState<'direct'|'proxy'|'fail'>('direct')
-  const resolved = resolveMediaUrl(src)
-  const initials = alt.slice(0, 2).toUpperCase()
-  if (!resolved || stage === 'fail') return <div className={s.colImgFallback}>{initials}</div>
-  if (stage === 'proxy') {
-    return <img src={proxyUrl(resolved)} alt={alt} className={s.colImg}
-      onError={() => setStage('fail')}/>
-  }
-  return <img src={resolved} alt={alt} className={s.colImg}
-    onError={() => setStage('proxy')}/>
-}
+// Uses NFTImage component
 
 type SortKey = 'volume' | 'floor' | 'supply'
 
@@ -136,7 +125,7 @@ export default function Collections() {
                     <td className={s.tdRank}>{idx + 1}</td>
                     <td className={s.tdName}>
                       <Link to={`/collections/${col.slug}`} className={s.colLink}>
-                        <CollectionImg src={col.cover_url} alt={col.title || '?'}/>
+                        <NFTImage src={col.cover_url} alt={col.title || '?'}/>
                         <div className={s.colInfo}>
                           <span className={s.colTitle}>{col.title || col.slug}</span>
                           {col.verified && <span className={s.verifiedBadge}>✓</span>}

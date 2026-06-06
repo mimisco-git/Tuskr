@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchRecentActivity, type TPActivity } from '../hooks/useTradeport'
-import { resolveMediaUrl, proxyUrl } from '../utils/media'
+import NFTImage from '../components/NFTImage'
 import s from './ActivityFeed.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -20,17 +20,7 @@ function fmt(n: number | null) {
   return n.toLocaleString('en-US', { maximumFractionDigits: 2 })
 }
 
-function ImgFallback({ src, alt }: { src: string | null; alt: string }) {
-  const [stage, setStage] = useState<'direct'|'proxy'|'fail'>('direct')
-  const resolved = resolveMediaUrl(src)
-  if (!resolved || stage === 'fail') return <div className={s.imgFallback}>{alt.slice(0,2).toUpperCase()}</div>
-  if (stage === 'proxy') {
-    return <img src={proxyUrl(resolved)} alt={alt} className={s.actImg}
-      onError={() => setStage('fail')}/>
-  }
-  return <img src={resolved} alt={alt} className={s.actImg}
-    onError={() => setStage('proxy')}/>
-}
+// Uses NFTImage component
 
 const TYPE_LABELS: Record<string, string> = {
   sale:    'Sold',
@@ -86,7 +76,7 @@ export default function ActivityFeed() {
           <div className={s.list}>
             {items.map((item, i) => (
               <div key={(item.id ?? '') + i} className={s.row}>
-                <ImgFallback
+                <NFTImage
                   src={item.nft?.media_url ?? null}
                   alt={item.nft?.name ?? '?'}
                 />

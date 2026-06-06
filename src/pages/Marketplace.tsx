@@ -6,8 +6,8 @@ import { useToast } from '../components/Toast'
 import { Transaction } from '@mysten/sui/transactions'
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit'
 import { useNetwork } from '../hooks/useNetwork'
-import { fetchSuiCollections, type TPCollection } from '../hooks/useTradeport'
-import { resolveMediaUrl } from '../utils/media'
+import { fetchSuiCollections, fetchTrendingCollections, type TPCollection, type TPTrending } from '../hooks/useTradeport'
+import NFTImage from '../components/NFTImage'
 import s from './Marketplace.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
@@ -15,15 +15,10 @@ type Tab = 'explore' | 'tuskr' | 'listed'
 
 /* ── TradePort collection card ── */
 function CollectionCard({ col }: { col: TPCollection }) {
-  const [imgErr, setImgErr] = useState(false)
-  const imgSrc = resolveMediaUrl(col.cover_url)
   return (
     <Link to={`/collections/${col.slug}`} className={s.colCard}>
       <div className={s.colCardImg}>
-        {imgSrc && !imgErr
-          ? <img src={imgSrc} alt={col.title} onError={() => setImgErr(true)}/>
-          : <div className={s.colCardFallback}>{col.title.slice(0,2).toUpperCase()}</div>
-        }
+        <NFTImage src={col.cover_url} alt={col.title} style={{width:'100%',height:'100%',objectFit:'cover' as const}}/>
         {col.verified && <span className={s.verifiedBadge}>✓</span>}
       </div>
       <div className={s.colCardBody}>
@@ -53,6 +48,7 @@ export default function Marketplace() {
   const { mutate: signAndExecute } = useSignAndExecuteTransaction()
 
   const [tab,          setTab]        = useState<Tab>('explore')
+  const [trending,     setTrending]    = useState<TPTrending[]>([])
   const [collections,  setCollections] = useState<TPCollection[]>([])
   const [tuskrNfts,    setTuskrNfts]   = useState<any[]>([])
   const [listings,     setListings]    = useState<any[]>([])
@@ -63,10 +59,14 @@ export default function Marketplace() {
 
   /* Load TradePort collections — public, no wallet needed */
   useEffect(() => {
-    fetchSuiCollections(40)
-      .then(setCollections)
-      .catch(console.error)
-      .finally(() => setLoadingCols(false))
+    Promise.all([
+      fetchSuiCollections(40),
+      fetchTrendingCollections(8),
+    ]).then(([cols, trend]) => {
+      setCollections(cols)
+      setTrending(trend)
+    }).catch(console.error)
+    .finally(() => setLoadingCols(false))
   }, [])
 
   /* Load Tuskr-native minted NFTs from chain */
@@ -149,6 +149,37 @@ export default function Marketplace() {
           <Link to="/mint" className={s.mintBtn}>+ Mint NFT</Link>
         </div>
 
+        {/* Trending section */}
+        {trending.length > 0 && (
+          <div className={s.trendingSection}>
+            <div className={s.trendingHeader}>
+              <span className={s.trendingTitle}>🔥 Trending 24h</span>
+            </div>
+            <div className={s.trendingRow}>
+              {trending.map((t, i) => {
+                const pct = t.previous_volume && t.previous_volume > 0
+                  ? Math.round(((t.current_volume ?? 0) - t.previous_volume) / t.previous_volume * 100)
+                  : null
+                return (
+                  <Link key={t.collection.id} to={`/collections/${t.collection.slug}`} className={s.trendCard}>
+                    <span className={s.trendRank}>{i + 1}</span>
+                    <NFTImage src={t.collection.cover_url} alt={t.collection.title} style={{width:36,height:36,borderRadius:8,flexShrink:0}}/>
+                    <div className={s.trendInfo}>
+                      <span className={s.trendName}>{t.collection.title}</span>
+                      <span className={s.trendVol}>{(t.current_volume ?? 0).toFixed(0)} SUI</span>
+                    </div>
+                    {pct != null && (
+                      <span className={`${s.trendPct} ${pct >= 0 ? s.trendUp : s.trendDown}`}>
+                        {pct >= 0 ? '+' : ''}{pct}%
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className={s.tabBar}>
           <button className={`${s.tab} ${tab==='explore' ? s.tabActive : ''}`} onClick={() => setTab('explore')}>
@@ -197,8 +228,8 @@ export default function Marketplace() {
                 <Link key={nft.objectId} to={`/nft/${nft.objectId}`} className={s.nftCard}>
                   <div className={s.nftImg}>
                     {nft.mediaUrl
-                      ? <img src={resolveMediaUrl(nft.mediaUrl)} alt={nft.name}/>
-                      : <div className={s.nftImgFallback}>{nft.name.slice(0,2).toUpperCase()}</div>
+                      
+                      
                     }
                     {nft.blobId && <span className={s.walrusBadge}>WALRUS</span>}
                   </div>
