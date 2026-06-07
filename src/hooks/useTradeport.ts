@@ -105,7 +105,10 @@ export async function fetchSuiCollections(limit = 50): Promise<TPCollection[]> {
     const data = await gql<any>(`
       query($limit: Int!) {
         sui {
-          collections(limit: $limit) {
+          collections(
+            order_by: { volume: desc_nulls_last }
+            limit: $limit
+          ) {
             id slug title cover_url supply verified floor volume
           }
         }
