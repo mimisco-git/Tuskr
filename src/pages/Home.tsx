@@ -528,14 +528,6 @@ export default function Home() {
       </section>
 
 
-      {/* ════ TUSKR MASCOT BRAND ════ */}
-      <section className={s.brandSection}>
-        <div className={s.brandWord}>tuskr</div>
-        <div className={s.brandMascotWrap}>
-          <img src="/mascot.png" alt="Tuskr mascot" className={s.brandMascot} draggable={false}/>
-        </div>
-      </section>
-
       {/* ════ CTA ════ */}
       <section className={s.ctaSection}>
         <div className="container">
