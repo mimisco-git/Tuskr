@@ -1,101 +1,106 @@
-/* ════ TUSKR BRAND SECTION — walrus.xyz style ════ */
-.brand {
-  width: 100%;
-  background: #000;
-  overflow: hidden;
-  padding-top: 48px;
-  /* No container — full bleed */
-}
-
-.brandRow {
-  position: relative;
-  display: flex;
-  align-items: flex-end;   /* text sits at bottom, mascot rises above */
-  justify-content: center;
-  width: 100%;
-  line-height: 1;
-}
-
-/* Giant "tuskr" text — covers the full width */
-.brandText {
-  font-size: clamp(120px, 24vw, 320px);
-  font-weight: 900;
-  letter-spacing: -0.06em;
-  color: #fff;
-  line-height: 0.82;
-  user-select: none;
-  white-space: nowrap;
-  /* Stretch to fill: */
-  width: 100%;
-  text-align: center;
-  display: block;
-}
-
-/* Mascot sits on top of / inside the text */
-.brandMascot {
-  position: absolute;
-  bottom: 0;                /* feet rest at the text baseline */
-  left: 50%;
-  transform: translateX(-50%);
-  width: clamp(180px, 22vw, 360px);
-  height: auto;
-  z-index: 2;
-  filter: drop-shadow(0 -8px 40px rgba(0,212,170,0.30));
-  animation: mascotFloat 5s ease-in-out infinite;
-}
-
-@keyframes mascotFloat {
-  0%, 100% { transform: translateX(-50%) translateY(0);    }
-  50%       { transform: translateX(-50%) translateY(-14px); }
-}
-
-@media (max-width: 640px) {
-  .brand { padding-top: 32px; }
-  .brandText { font-size: clamp(80px, 22vw, 140px); }
-  .brandMascot { width: clamp(100px, 30vw, 180px); }
-}
-
-/* ════ FOOTER LINKS ════ */
+/* ── Footer links ── */
 .footer {
   border-top: 1px solid rgba(255,255,255,0.07);
-  padding: 40px 0 24px;
-  background: rgba(0,0,0,0.3);
+  padding: 48px 0 32px;
+  background: rgba(0,0,0,0.25);
 }
-
 .grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1.5fr;
   gap: 40px;
   margin-bottom: 36px;
 }
-
 .brandCol {}
-.logo { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: #fff; display: block; margin-bottom: 8px; }
-.tagline { font-size: 14px; color: rgba(245,245,247,0.4); margin-bottom: 14px; }
-.badges { display: flex; gap: 8px; flex-wrap: wrap; }
-.badge { padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(245,245,247,0.6); }
-
+.logo     { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: #fff; display: block; margin-bottom: 8px; }
+.tagline  { font-size: 14px; color: rgba(245,245,247,0.4); margin-bottom: 14px; }
+.badges   { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge    { padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(245,245,247,0.6); }
 .col {}
-.colTitle { font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(245,245,247,0.28); margin-bottom: 14px; }
-.link { display: block; font-size: 14px; color: rgba(245,245,247,0.5); text-decoration: none; margin-bottom: 8px; transition: color 0.15s; }
+.colTitle { font-family: 'Space Mono',monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(245,245,247,0.28); margin-bottom: 14px; }
+.link     { display: block; font-size: 14px; color: rgba(245,245,247,0.5); text-decoration: none; margin-bottom: 8px; transition: color 0.15s; }
 .link:hover { color: var(--a); }
-
 .contract { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); text-decoration: none; transition: background 0.15s; }
 .contract:hover { background: rgba(0,212,170,0.06); border-color: rgba(0,212,170,0.20); }
-.contractLabel { font-size: 12px; color: rgba(245,245,247,0.4); flex: 1; }
-.contractAddr { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--a); }
-.contractArrow { font-size: 11px; color: rgba(245,245,247,0.25); flex-shrink: 0; }
-
-.bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 12px; }
-.copy { font-size: 13px; color: rgba(245,245,247,0.25); }
-.bottomLinks { display: flex; gap: 20px; }
-.bottomLink { font-size: 13px; color: rgba(245,245,247,0.3); text-decoration: none; transition: color 0.15s; }
+.contractLabel  { font-size: 12px; color: rgba(245,245,247,0.4); flex: 1; }
+.contractAddr   { font-family: 'Space Mono',monospace; font-size: 10px; color: var(--a); }
+.contractArrow  { font-size: 11px; color: rgba(245,245,247,0.25); }
+.bottom         { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 12px; }
+.copy           { font-size: 13px; color: rgba(245,245,247,0.25); }
+.bottomLinks    { display: flex; gap: 20px; }
+.bottomLink     { font-size: 13px; color: rgba(245,245,247,0.3); text-decoration: none; transition: color 0.15s; }
 .bottomLink:hover { color: var(--a); }
 
 @media (max-width: 768px) {
   .grid { grid-template-columns: 1fr 1fr; gap: 24px; }
   .brandCol { grid-column: 1 / -1; }
 }
+@media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+
+
+/* ── BRAND CLOSER — the very last element on every page ── */
+.brand {
+  /* Full viewport width — NO container, NO max-width, NO padding */
+  width: 100%;
+  background: #000;
+  overflow: hidden;
+  position: relative;
+
+  /* Height: enough for the mascot head to peek above the text */
+  /* text is ~26vw tall (line-height 0.85), head space above = 30vw */
+  height: 56vw;
+
+  /* Nothing comes after this */
+}
+
+/* Mascot — positioned so body sits AT the text level, head rises ABOVE */
+.brandMascot {
+  position: absolute;
+  /* Center horizontally */
+  left: 50%;
+  transform: translateX(-50%);
+  /* Sit at the bottom — feet are below the brand section (clipped) */
+  bottom: -8vw;
+  /* Height: taller than the text so the head pokes well above */
+  height: 46vw;
+  width: auto;
+  /* Behind the text letters */
+  z-index: 1;
+  /* Glow effect */
+  filter: drop-shadow(0 0 6vw rgba(0,212,170,0.25))
+          drop-shadow(0 0 2vw rgba(130,60,220,0.20));
+}
+
+/* Giant "tuskr" — fills full width like walrus.xyz */
+.brandText {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  font-size: 26.5vw;       /* fills ~100% viewport width for 5 chars */
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.82;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+
+  /* In FRONT of the mascot body */
+  z-index: 2;
+
+  /* No padding — flush to edges */
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 768px) {
+  .brand       { height: 70vw; }
+  .brandMascot { height: 55vw; bottom: -10vw; }
+  .brandText   { font-size: 27vw; }
+}
+
 @media (max-width: 480px) {
-  .grid { grid-template-columns: 1fr; }
+  .brand       { height: 80vw; }
+  .brandMascot { height: 62vw; bottom: -12vw; }
+  .brandText   { font-size: 28vw; }
 }
