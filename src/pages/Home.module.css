@@ -632,133 +632,100 @@
 
 
 
-/* ════ WALRUS BRAND SECTION ════ */
+
+/* ════ WALRUS PROOF SECTION ════ */
 .walrusSection {
-  background: #000;
-  overflow: hidden;
-  position: relative;
-  padding: 80px 0 60px;
+  padding: 80px 0;
+  background: rgba(0,212,170,0.05);
+  border-top: 1px solid rgba(0,212,170,0.20);
+  border-bottom: 1px solid rgba(0,212,170,0.20);
   text-align: center;
-  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.walrusBadge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 99px;
+  background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.25);
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  color: var(--a); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 20px;
+}
+.walrusDot { width: 7px; height: 7px; border-radius: 50%; background: var(--a); box-shadow: 0 0 8px var(--a); animation: wPulse 2s infinite; }
+@keyframes wPulse { 50%{opacity:.3;} }
+.walrusTitle { font-size: clamp(26px,4vw,48px); font-weight: 800; letter-spacing: -0.04em; color: #fff; margin-bottom: 16px; }
+.walrusSub { font-size: clamp(14px,1.6vw,17px); color: rgba(245,245,247,0.5); max-width: 580px; margin: 0 auto 36px; line-height: 1.7; }
+.walrusFlow { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 36px; }
+.wFlowStep { display: flex; flex-direction: column; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 16px 20px; min-width: 90px; }
+.wFlowIcon { font-size: 24px; }
+.wFlowLabel { font-size: 11px; font-weight: 600; color: rgba(245,245,247,0.55); white-space: nowrap; }
+.wFlowArrow { font-size: 18px; color: var(--a); flex-shrink: 0; }
+.walrusProof { background: rgba(0,0,0,0.3); border: 1px solid rgba(0,212,170,0.18); border-radius: 14px; padding: 18px 22px; max-width: 600px; margin: 0 auto 36px; text-align: left; }
+.walrusProofLabel { font-family: 'Space Mono',monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(245,245,247,0.3); margin-bottom: 10px; }
+.walrusProofUrl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.walrusProofCode { font-family: 'Space Mono',monospace; font-size: 12px; color: rgba(245,245,247,0.65); word-break: break-all; }
+.walrusProofBlob { color: var(--a); }
+.walrusProofLink { padding: 5px 12px; border-radius: 8px; background: rgba(0,212,170,0.10); border: 1px solid rgba(0,212,170,0.25); color: var(--a); font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap; flex-shrink: 0; transition: background 0.15s; }
+.walrusProofLink:hover { background: rgba(0,212,170,0.18); }
+.walrusStats { display: flex; justify-content: center; max-width: 520px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; }
+.wStat { flex: 1; padding: 18px 12px; text-align: center; border-right: 1px solid rgba(255,255,255,0.07); }
+.wStat:last-child { border-right: none; }
+.wStatVal { font-size: clamp(20px,2.5vw,28px); font-weight: 800; color: var(--a); letter-spacing: -0.03em; margin-bottom: 4px; }
+.wStatLabel { font-size: 10px; color: rgba(245,245,247,0.3); line-height: 1.3; }
+
+@media (max-width: 640px) {
+  .walrusSection { padding: 56px 0; }
+  .walrusFlow { gap: 6px; }
+  .wFlowStep { padding: 10px 14px; min-width: 70px; }
+  .wFlowArrow { font-size: 14px; }
+  .walrusProof { padding: 14px 16px; }
+  .walrusProofCode { font-size: 10px; }
+  .walrusStats { flex-wrap: wrap; }
+  .wStat { min-width: 50%; }
 }
 
-.walrusBig {
+/* ════ TUSKR MASCOT BRAND SECTION ════ */
+.brandSection {
+  background: #000;
   position: relative;
-  z-index: 1;
+  overflow: hidden;
+  text-align: center;
+  padding-top: 60px;
+  padding-bottom: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.walrusBigLabel {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  color: rgba(245,245,247,0.35);
-  margin-bottom: 16px;
-}
-
-/* BIG WALRUS LETTERS */
-.walrusBigWord {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 0.85;
-  margin-bottom: -20px;
-  position: relative;
-  z-index: 0;
-}
-.walrusBigW, .walrusBigA, .walrusBigL,
-.walrusBigR, .walrusBigU, .walrusBigS {
-  font-size: clamp(80px, 16vw, 200px);
+.brandWord {
+  font-size: clamp(100px, 22vw, 280px);
   font-weight: 900;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.06em;
   color: #fff;
-  line-height: 1;
+  line-height: 0.85;
+  user-select: none;
+  text-transform: lowercase;
 }
 
-/* Mascot sits ON TOP of the W */
-.walrusMascotWrap {
+.brandMascotWrap {
   position: relative;
+  margin-top: -60px;
   z-index: 2;
-  margin-top: -20px;
-  margin-bottom: -10px;
 }
-.walrusMascot {
-  font-size: clamp(64px, 12vw, 140px);
-  line-height: 1;
-  filter: drop-shadow(0 0 40px rgba(0,212,170,0.4));
-  animation: float 4s ease-in-out infinite;
+
+.brandMascot {
+  width: clamp(160px, 28vw, 340px);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 0 60px rgba(0,212,170,0.25));
+  animation: mascotFloat 5s ease-in-out infinite;
 }
-@keyframes float {
+
+@keyframes mascotFloat {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-12px); }
+  50%       { transform: translateY(-16px); }
 }
-
-.walrusBigSub {
-  font-size: clamp(14px, 1.8vw, 18px);
-  color: rgba(245,245,247,0.45);
-  max-width: 560px;
-  line-height: 1.7;
-  margin: 24px auto 28px;
-}
-
-.walrusBigActions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-.walrusOutLink {
-  font-size: 14px;
-  color: rgba(245,245,247,0.45);
-  text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 99px;
-  border: 1px solid rgba(255,255,255,0.12);
-  transition: all 0.2s;
-}
-.walrusOutLink:hover {
-  color: #fff;
-  border-color: rgba(255,255,255,0.3);
-}
-.walrusVerifyBtn {
-  font-size: 14px;
-  font-weight: 700;
-  color: #000;
-  background: var(--a);
-  text-decoration: none;
-  padding: 10px 22px;
-  border-radius: 99px;
-  transition: background 0.15s, transform 0.15s;
-}
-.walrusVerifyBtn:hover {
-  background: #00efc0;
-  transform: translateY(-1px);
-}
-
-.walrusProofRow {
-  margin-top: 8px;
-}
-.walrusProofCode {
-  font-family: 'Space Mono', monospace;
-  font-size: 12px;
-  color: rgba(245,245,247,0.3);
-  word-break: break-all;
-}
-.walrusBlob { color: var(--a); }
 
 @media (max-width: 640px) {
-  .walrusSection { padding: 60px 0 48px; }
-  .walrusBigW, .walrusBigA, .walrusBigL,
-  .walrusBigR, .walrusBigU, .walrusBigS {
-    font-size: clamp(48px, 13vw, 80px);
-  }
-  .walrusMascot { font-size: 72px; }
-  .walrusBigActions { flex-direction: column; align-items: stretch; }
-  .walrusVerifyBtn, .walrusOutLink { text-align: center; }
+  .brandWord { font-size: clamp(72px, 20vw, 120px); }
+  .brandMascot { width: clamp(120px, 40vw, 180px); }
+  .brandMascotWrap { margin-top: -40px; }
 }

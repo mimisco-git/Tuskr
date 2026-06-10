@@ -489,44 +489,50 @@ export default function Home() {
       </section>
 
 
-      {/* ════ WALRUS BRAND SECTION ════ */}
+      {/* ════ WALRUS PROOF ════ */}
       <section className={s.walrusSection}>
-        <div className={s.walrusBig}>
-          <div className={s.walrusBigLabel}>NFT media stored on</div>
-          <div className={s.walrusBigWord}>
-            <span className={s.walrusBigW}>W</span>
-            <span className={s.walrusBigA}>A</span>
-            <span className={s.walrusBigL}>L</span>
-            <span className={s.walrusBigR}>R</span>
-            <span className={s.walrusBigU}>U</span>
-            <span className={s.walrusBigS}>S</span>
+        <div className="container">
+          <div className={s.walrusBadge}>
+            <span className={s.walrusDot}/>
+            <span>Powered by Walrus</span>
           </div>
-          <div className={s.walrusMascotWrap}>
-            <div className={s.walrusMascot}>🦭</div>
-          </div>
-          <p className={s.walrusBigSub}>
-            Decentralized blob storage for Sui.
-            Every Tuskr NFT image is permanently stored on Walrus —
-            erasure-coded across hundreds of nodes, verifiable on-chain.
+          <h2 className={s.walrusTitle}>Every NFT. Verified on Walrus.</h2>
+          <p className={s.walrusSub}>
+            Unlike IPFS or AWS, Walrus stores your NFT media permanently with
+            erasure-coding across hundreds of nodes. Every Tuskr NFT has a
+            verifiable blob ID written on-chain at mint time.
           </p>
-          <div className={s.walrusBigActions}>
-            <a href="https://walrus.xyz" target="_blank" rel="noopener noreferrer" className={s.walrusOutLink}>
-              walrus.xyz ↗
-            </a>
-            <a
-              href="https://aggregator.walrus.space"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={s.walrusVerifyBtn}
-            >
-              Verify Blob Storage →
-            </a>
+          <div className={s.walrusFlow}>
+            <div className={s.wFlowStep}><div className={s.wFlowIcon}>📁</div><div className={s.wFlowLabel}>Your File</div></div>
+            <div className={s.wFlowArrow}>→</div>
+            <div className={s.wFlowStep}><div className={s.wFlowIcon}>🌊</div><div className={s.wFlowLabel}>Walrus Upload</div></div>
+            <div className={s.wFlowArrow}>→</div>
+            <div className={s.wFlowStep}><div className={s.wFlowIcon}>🔑</div><div className={s.wFlowLabel}>Blob ID</div></div>
+            <div className={s.wFlowArrow}>→</div>
+            <div className={s.wFlowStep}><div className={s.wFlowIcon}>⛓</div><div className={s.wFlowLabel}>On-chain Record</div></div>
           </div>
-          <div className={s.walrusProofRow}>
-            <code className={s.walrusProofCode}>
-              aggregator.walrus.space/v1/blobs/<span className={s.walrusBlob}>&lt;blobId&gt;</span>
-            </code>
+          <div className={s.walrusProof}>
+            <p className={s.walrusProofLabel}>Verify any Tuskr NFT's media</p>
+            <div className={s.walrusProofUrl}>
+              <code className={s.walrusProofCode}>aggregator.walrus.space/v1/blobs/<span className={s.walrusProofBlob}>{'<blobId>'}</span></code>
+              <a href="https://aggregator.walrus.space" target="_blank" rel="noopener noreferrer" className={s.walrusProofLink}>Open Walrus ↗</a>
+            </div>
           </div>
+          <div className={s.walrusStats}>
+            <div className={s.wStat}><div className={s.wStatVal}>∞</div><div className={s.wStatLabel}>Permanent Storage</div></div>
+            <div className={s.wStat}><div className={s.wStatVal}>100+</div><div className={s.wStatLabel}>Storage Nodes</div></div>
+            <div className={s.wStat}><div className={s.wStatVal}>0x</div><div className={s.wStatLabel}>Centralized Servers</div></div>
+            <div className={s.wStat}><div className={s.wStatVal}>✓</div><div className={s.wStatLabel}>On-chain Verified</div></div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* ════ TUSKR MASCOT BRAND ════ */}
+      <section className={s.brandSection}>
+        <div className={s.brandWord}>tuskr</div>
+        <div className={s.brandMascotWrap}>
+          <img src="/mascot.png" alt="Tuskr mascot" className={s.brandMascot} draggable={false}/>
         </div>
       </section>
 
