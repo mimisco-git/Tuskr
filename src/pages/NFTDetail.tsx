@@ -77,7 +77,7 @@ export default function NFTDetail() {
         id:         objectId,
         name:       fields.name        || display.name       || 'Tuskr NFT',
         description:fields.description || display.description || '',
-        image:      fields.media_url   || display.image_url  || '',
+        image:      display.image_url  || fields._media_url_resolved || '',
         blobId:     fields.blob_id     || '',
         creator:    fields.creator     || '',
         royaltyBps: Number(fields.royalty_bps ?? 0),
