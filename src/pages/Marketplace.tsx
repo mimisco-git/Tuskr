@@ -75,24 +75,50 @@ export default function Marketplace() {
       const parsed = (objs as any[])
         .filter(o => o.data)
         .map(o => {
-          const f      = o.data.content?.fields ?? {}
-          const d      = o.data.display?.data   ?? {}
-          const blobId = f.blob_id || d.blob_id || ''
+          // content.fields is MoveStruct — can be direct map OR { fields: {...}, type: "..." }
+          const content = o.data.content ?? {}
+          const raw = content.fields ?? {}
+          // Handle both MoveStruct variants
+          const f = (raw.fields && typeof raw.fields === 'object' && !Array.isArray(raw.fields))
+            ? raw.fields
+            : raw
 
-          // Priority: blob_id → Walrus URL (most reliable)
-          // Fallback: Display image_url, then media_url (Url type unwrapping)
-          const rawUrl = f.media_url
-          const urlStr = typeof rawUrl === 'string' ? rawUrl
-            : (rawUrl?.url ?? rawUrl?.id ?? '')
+          const d      = o.data.display?.data ?? {}
 
-          const mediaUrl = blobId
-            ? walrusUrl(blobId, network.name)
-            : (d.image_url || urlStr || '')
+          // blob_id is a plain String — reliable
+          const blobId = (f.blob_id ?? d.blob_id ?? '').toString()
+
+          // media_url is Url type: could be string, { url: "..." }, or { fields: { url: "..." }, type: "..." }
+          const rawUrl = f.media_url ?? f.mediaUrl ?? ''
+          let urlStr = ''
+          if (typeof rawUrl === 'string') {
+            urlStr = rawUrl
+          } else if (rawUrl?.url) {
+            urlStr = rawUrl.url
+          } else if (rawUrl?.fields?.url) {
+            urlStr = rawUrl.fields.url
+          } else if (typeof rawUrl === 'object' && rawUrl !== null) {
+            // Last resort: grab first string value
+            urlStr = Object.values(rawUrl).find(v => typeof v === 'string' && v.startsWith('http')) as string || ''
+          }
+
+          // If media_url contains a Walrus URL but blob_id is empty, extract blob_id from URL
+          let effectiveBlobId = blobId
+          if (!effectiveBlobId && urlStr.includes('walrus') && urlStr.includes('/blobs/')) {
+            effectiveBlobId = urlStr.split('/blobs/').pop()?.split('?')[0] || ''
+          }
+
+          // Build final mediaUrl with priority order
+          const mediaUrl = effectiveBlobId
+            ? walrusUrl(effectiveBlobId, network.name)   // Always prefer Walrus blob
+            : (d.image_url || urlStr || '')               // Fallback to Display or raw URL
+
+          console.log(`[NFT] ${(f.name||'?').slice(0,20)} | blob=${effectiveBlobId.slice(0,12)||'none'} | url=${mediaUrl.slice(0,60)||'EMPTY'}`)
 
           return {
             objectId: o.data.objectId,
             name:     f.name || d.name || 'Tuskr NFT',
-            blobId,
+            blobId:   effectiveBlobId,
             mediaUrl,
           }
         })
