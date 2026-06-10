@@ -7,35 +7,55 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit'
 import { NetworkProvider } from './hooks/useNetwork'
-import { getFullnodeUrl } from '@mysten/sui/client'
+import { SuiJsonRpcClient, getJsonRpcFullnodeUrl } from '@mysten/sui/jsonRpc'
+import { registerEnokiWallets } from '@mysten/enoki'
 import '@mysten/dapp-kit/dist/index.css'
 import App from './App'
 import './index.css'
 
 const queryClient = new QueryClient()
 
-const networks = {
-  testnet: { url: getFullnodeUrl('testnet') },
-  mainnet: { url: getFullnodeUrl('mainnet') },
-}
-
-// Read saved network — we reload on switch so this applies immediately
 const savedNetwork = localStorage.getItem('tuskr_network')
 const defaultNetwork: 'mainnet' | 'testnet' =
-  savedNetwork === 'testnet' ? 'testnet' : 'mainnet'
+  savedNetwork === 'mainnet' ? 'mainnet' : 'testnet'
+
+// SuiJsonRpcClient requires both url AND network fields in v2
+const networks = {
+  testnet: new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl('testnet'), network: 'testnet' }),
+  mainnet: new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl('mainnet'), network: 'mainnet' }),
+}
+
+// Enoki — Google becomes a wallet in the dApp Kit wallet selector
+// Sponsored transactions → users mint without gas → address visible on Suiscan immediately
+const ENOKI_KEY     = import.meta.env.VITE_ENOKI_API_KEY    || ''
+const GOOGLE_CLIENT = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
+
+if (ENOKI_KEY && GOOGLE_CLIENT) {
+  registerEnokiWallets({
+    apiKey: ENOKI_KEY,
+    providers: {
+      google: {
+        clientId:    GOOGLE_CLIENT,
+        redirectUrl: `${window.location.origin}/zklogin`,
+      },
+    },
+    client:  networks[defaultNetwork],
+    network: defaultNetwork,
+  })
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <NetworkProvider>
-      <SuiClientProvider networks={networks} defaultNetwork={defaultNetwork}>
-        <WalletProvider autoConnect>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </WalletProvider>
-      </SuiClientProvider>
-    </NetworkProvider>
+        <SuiClientProvider networks={networks} defaultNetwork={defaultNetwork}>
+          <WalletProvider autoConnect>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </WalletProvider>
+        </SuiClientProvider>
+      </NetworkProvider>
     </QueryClientProvider>
   </React.StrictMode>
 )
