@@ -25,6 +25,10 @@
     "api/sponsor.js": {
       "memory": 128,
       "maxDuration": 15
+    },
+    "api/nft-debug.js": {
+      "memory": 128,
+      "maxDuration": 30
     }
   }
 }
