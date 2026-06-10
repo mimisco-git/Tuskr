@@ -60,15 +60,25 @@ export default function NFTImage({ src, alt, className, style }: Props) {
     </div>
   )
 
+  // Check if URL is a Walrus blob that likely expired
+  const isWalrusBlob = resolved.includes('walrus')
+
   if (!imgSrc || failed) {
     return (
-      <div className={className} style={{ background: bg, display: 'flex',
-        alignItems: 'center', justifyContent: 'center', ...style }}>
+      <div className={className} style={{ background: bg, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: 4, ...style }}>
         <span style={{ fontSize: 'clamp(14px,3vw,26px)', fontWeight: 800,
           color: 'rgba(255,255,255,0.85)', letterSpacing: '-0.02em',
           textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
           {initials}
         </span>
+        {failed && isWalrusBlob && (
+          <span style={{ fontSize: 9, fontFamily: 'monospace', color: 'rgba(255,255,255,0.5)',
+            background: 'rgba(0,0,0,0.35)', padding: '2px 6px', borderRadius: 99,
+            letterSpacing: '0.08em' }}>
+            BLOB EXPIRED
+          </span>
+        )}
       </div>
     )
   }
