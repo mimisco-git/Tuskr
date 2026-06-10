@@ -88,3 +88,12 @@
   border-radius: 18px; border: 1px solid; padding: 18px 20px;
   margin-bottom: 4px;
 }
+
+.blobLabelRow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.blobVerifyLink {
+  font-size: 12px; color: var(--a); text-decoration: none;
+  padding: 3px 10px; border-radius: 6px;
+  background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.20);
+  transition: background 0.15s; white-space: nowrap;
+}
+.blobVerifyLink:hover { background: rgba(0,212,170,0.15); }

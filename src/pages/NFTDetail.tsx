@@ -166,9 +166,19 @@ export default function NFTDetail() {
             {/* Blob info */}
             {nft.blobId && (
               <div className={s.blobCard}>
-                <div className={s.blobLabel}>Walrus Blob ID</div>
-                <div className={s.blobId}>{nft.blobId.slice(0,24)}…</div>
-                <div className={s.blobSub}>Permanently stored on Walrus decentralized storage</div>
+                <div className={s.blobLabelRow}>
+                  <div className={s.blobLabel}>Walrus Blob ID</div>
+                  <a
+                    href={`https://aggregator.walrus.space/v1/blobs/${nft.blobId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={s.blobVerifyLink}
+                  >
+                    Verify on Walrus ↗
+                  </a>
+                </div>
+                <div className={s.blobId}>{nft.blobId}</div>
+                <div className={s.blobSub}>Permanently stored on Walrus decentralized storage. Click to verify.</div>
               </div>
             )}
           </div>
