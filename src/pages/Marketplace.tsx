@@ -1,3 +1,4 @@
+import LiveTicker from '../components/LiveTicker'
 import { useState, useEffect, useCallback } from 'react'
 import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { Link } from 'react-router-dom'
@@ -257,6 +258,7 @@ export default function Marketplace() {
 
   return (
     <main className={s.page}>
+      <LiveTicker/>
       <div className="container">
 
         <div className={s.header}>

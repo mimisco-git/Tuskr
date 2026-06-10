@@ -1,3 +1,4 @@
+import LiveTicker from '../components/LiveTicker'
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchRecentActivity, type TPActivity } from '../hooks/useTradeport'
@@ -54,6 +55,7 @@ export default function ActivityFeed() {
 
   return (
     <main className={s.page}>
+      <LiveTicker/>
       <div className="container">
 
         <div className={s.pageHead}>
