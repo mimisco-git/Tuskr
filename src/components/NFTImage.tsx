@@ -37,13 +37,15 @@ export default function NFTImage({ src, alt, className, style }: Props) {
   const initials = (alt || '?').slice(0, 2).toUpperCase()
   const bg       = gradient(alt || 'nft')
 
-  // Build proxy URL: our server fetches TradePort CDN with correct Referer
-  const tpCdn   = resolved
-    ? `https://img.tradeport.gg?url=${encodeURIComponent(resolved)}&mime-type=image`
-    : ''
-  const imgSrc  = tpCdn
-    ? `/api/img?url=${encodeURIComponent(tpCdn)}`
-    : ''
+  // Walrus/IPFS URLs: go directly through our proxy (TradePort can't fetch these)
+  // External NFT images: route through TradePort CDN (handles hotlink protection)
+  const isWalrus = resolved.includes('walrus.space') || resolved.includes('walrus-testnet')
+  const isIpfs   = resolved.includes('ipfs') || resolved.includes('arweave')
+
+  const imgSrc = !resolved ? ''
+    : (isWalrus || isIpfs)
+      ? `/api/img?url=${encodeURIComponent(resolved)}`
+      : `/api/img?url=${encodeURIComponent(`https://img.tradeport.gg?url=${encodeURIComponent(resolved)}&mime-type=image`)}`
 
   const Placeholder = (
     <div style={{
