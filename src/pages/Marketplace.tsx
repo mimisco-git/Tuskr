@@ -57,12 +57,29 @@ export default function Marketplace() {
       const ids = events.data.map((e: any) => e.parsedJson?.nft_id || e.parsedJson?.id).filter(Boolean)
       if (!ids.length) { setTuskrNfts([]); return }
       const objs = await client.multiGetObjects({ ids, options: { showContent: true, showDisplay: true } })
-      setTuskrNfts(objs.filter(o => o.data).map(o => {
-        const f = (o.data?.content as any)?.fields ?? {}
-        const d = (o.data?.display as any)?.data   ?? {}
-        return { objectId: o.data!.objectId, name: f.name || d.name || 'Tuskr NFT',
-          mediaUrl: f.media_url || d.image_url || '', blobId: f.blob_id || '' }
-      }))
+      const net    = localStorage.getItem('tuskr_network') || 'testnet'
+      const walrusAgg = net === 'mainnet'
+        ? 'https://aggregator.walrus.space'
+        : 'https://aggregator.walrus-testnet.walrus.space'
+
+      const parsed = objs.filter(o => o.data).map(o => {
+        const f      = (o.data?.content as any)?.fields ?? {}
+        const d      = (o.data?.display  as any)?.data  ?? {}
+        const blobId = f.blob_id || d.blob_id || ''
+
+        // media_url is Sui Url type — may be { url: "..." } not plain string
+        const rawUrl    = f.media_url
+        const contentUrl = typeof rawUrl === 'string' ? rawUrl
+          : (rawUrl?.url ?? rawUrl?.id ?? '')
+
+        const mediaUrl = d.image_url          // Display resolves Url → plain string ✓
+          || contentUrl
+          || (blobId ? `${walrusAgg}/v1/blobs/${blobId}` : '')
+
+        return { objectId: o.data!.objectId, name: f.name || d.name || 'Tuskr NFT', mediaUrl, blobId }
+      })
+      // Only show NFTs that have Walrus storage (blobId) — hides old broken ones
+      setTuskrNfts(parsed.filter(n => n.blobId))
     } catch { setTuskrNfts([]) }
     finally  { setLoadingTuskr(false) }
   }, [PACKAGE_ID])
