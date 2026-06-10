@@ -77,9 +77,10 @@
   left: 0;
   width: 100%;
 
-  font-size: 26.5vw;       /* fills ~100% viewport width for 5 chars */
+  /* Large enough to overflow viewport edges — exactly like walrus.xyz */
+  font-size: 36vw;
   font-weight: 900;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.02em;
   line-height: 0.82;
   color: #fff;
   text-align: center;
@@ -88,19 +89,27 @@
   /* In FRONT of the mascot body */
   z-index: 2;
 
-  /* No padding — flush to edges */
   margin: 0;
   padding: 0;
 }
 
+/* Taller brand section to accommodate the bigger text */
+.brand {
+  height: 62vw;
+}
+.brandMascot {
+  height: 52vw;
+  bottom: -10vw;
+}
+
 @media (max-width: 768px) {
-  .brand       { height: 70vw; }
-  .brandMascot { height: 55vw; bottom: -10vw; }
-  .brandText   { font-size: 27vw; }
+  .brand       { height: 78vw; }
+  .brandMascot { height: 64vw; bottom: -12vw; }
+  .brandText   { font-size: 37vw; }
 }
 
 @media (max-width: 480px) {
-  .brand       { height: 80vw; }
-  .brandMascot { height: 62vw; bottom: -12vw; }
-  .brandText   { font-size: 28vw; }
+  .brand       { height: 90vw; }
+  .brandMascot { height: 72vw; bottom: -14vw; }
+  .brandText   { font-size: 38vw; }
 }
