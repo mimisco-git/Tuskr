@@ -113,12 +113,16 @@ export function useSeal() {
       })
 
       // Build seal_approve transaction bytes
-      // This calls the seal_approve function in the NFT contract
+      // seal_approve(id: vector<u8>, nft: &TuskrNFT, ctx: &TxContext)
+      // id = NFT object ID as raw bytes (hex-decoded)
+      const idBytes = Array.from(
+        nftId.replace('0x','').match(/../g)!.map((b: string) => parseInt(b, 16))
+      )
       const tx = new Transaction()
       tx.moveCall({
         target:    `${packageId}::tuskr_nft::seal_approve`,
         arguments: [
-          tx.pure.vector('u8', Array.from(nftId.replace('0x','').match(/../g)!.map(b => parseInt(b,16)))),
+          tx.pure.vector('u8', idBytes),
           tx.object(nftId),
         ],
       })
