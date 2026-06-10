@@ -631,108 +631,134 @@
 ════════════════════════════════════════════════════════════ */
 
 
-/* ════ WALRUS PROOF SECTION ════ */
+
+/* ════ WALRUS BRAND SECTION ════ */
 .walrusSection {
-  padding: 80px 0;
-  background: rgba(0,212,170,0.05);
-  border-top: 1px solid rgba(0,212,170,0.20);
-  border-bottom: 1px solid rgba(0,212,170,0.20);
+  background: #000;
+  overflow: hidden;
+  position: relative;
+  padding: 80px 0 60px;
   text-align: center;
+  border-top: 1px solid rgba(255,255,255,0.07);
 }
 
-.walrusBadge {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 6px 16px; border-radius: 99px;
-  background: rgba(0,212,170,0.08);
-  border: 1px solid rgba(0,212,170,0.25);
-  font-family: 'Space Mono', monospace; font-size: 11px;
-  color: var(--a); letter-spacing: 0.12em; text-transform: uppercase;
+.walrusBig {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.walrusBigLabel {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: rgba(245,245,247,0.35);
+  margin-bottom: 16px;
+}
+
+/* BIG WALRUS LETTERS */
+.walrusBigWord {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0.85;
+  margin-bottom: -20px;
+  position: relative;
+  z-index: 0;
+}
+.walrusBigW, .walrusBigA, .walrusBigL,
+.walrusBigR, .walrusBigU, .walrusBigS {
+  font-size: clamp(80px, 16vw, 200px);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: #fff;
+  line-height: 1;
+}
+
+/* Mascot sits ON TOP of the W */
+.walrusMascotWrap {
+  position: relative;
+  z-index: 2;
+  margin-top: -20px;
+  margin-bottom: -10px;
+}
+.walrusMascot {
+  font-size: clamp(64px, 12vw, 140px);
+  line-height: 1;
+  filter: drop-shadow(0 0 40px rgba(0,212,170,0.4));
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+
+.walrusBigSub {
+  font-size: clamp(14px, 1.8vw, 18px);
+  color: rgba(245,245,247,0.45);
+  max-width: 560px;
+  line-height: 1.7;
+  margin: 24px auto 28px;
+}
+
+.walrusBigActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
   margin-bottom: 20px;
 }
-.walrusDot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--a); box-shadow: 0 0 8px var(--a);
-  animation: wPulse 2s infinite;
+.walrusOutLink {
+  font-size: 14px;
+  color: rgba(245,245,247,0.45);
+  text-decoration: none;
+  padding: 8px 18px;
+  border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: all 0.2s;
 }
-@keyframes wPulse { 50% { opacity: .3; box-shadow: 0 0 4px var(--a); } }
+.walrusOutLink:hover {
+  color: #fff;
+  border-color: rgba(255,255,255,0.3);
+}
+.walrusVerifyBtn {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+  background: var(--a);
+  text-decoration: none;
+  padding: 10px 22px;
+  border-radius: 99px;
+  transition: background 0.15s, transform 0.15s;
+}
+.walrusVerifyBtn:hover {
+  background: #00efc0;
+  transform: translateY(-1px);
+}
 
-.walrusTitle {
-  font-size: clamp(28px,5vw,52px); font-weight: 800;
-  letter-spacing: -0.04em; color: #fff; margin-bottom: 16px;
-}
-.walrusSub {
-  font-size: clamp(14px,1.8vw,18px); color: rgba(245,245,247,0.5);
-  max-width: 600px; margin: 0 auto 40px; line-height: 1.7;
-}
-
-/* Flow diagram */
-.walrusFlow {
-  display: flex; align-items: center; justify-content: center;
-  gap: 12px; flex-wrap: wrap; margin-bottom: 40px;
-}
-.wFlowStep {
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 16px; padding: 18px 24px; min-width: 100px;
-}
-.wFlowIcon { font-size: 28px; }
-.wFlowLabel { font-size: 12px; font-weight: 600; color: rgba(245,245,247,0.6); white-space: nowrap; }
-.wFlowArrow { font-size: 20px; color: var(--a); flex-shrink: 0; }
-
-/* Proof URL */
-.walrusProof {
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(0,212,170,0.20);
-  border-radius: 14px; padding: 20px 24px;
-  max-width: 640px; margin: 0 auto 40px; text-align: left;
-}
-.walrusProofLabel {
-  font-family: 'Space Mono', monospace; font-size: 10px; text-transform: uppercase;
-  letter-spacing: 0.12em; color: rgba(245,245,247,0.3); margin-bottom: 10px;
-}
-.walrusProofUrl {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+.walrusProofRow {
+  margin-top: 8px;
 }
 .walrusProofCode {
-  font-family: 'Space Mono', monospace; font-size: 13px;
-  color: rgba(245,245,247,0.7); word-break: break-all;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: rgba(245,245,247,0.3);
+  word-break: break-all;
 }
-.walrusProofBlob { color: var(--a); }
-.walrusProofLink {
-  padding: 6px 14px; border-radius: 8px;
-  background: rgba(0,212,170,0.10); border: 1px solid rgba(0,212,170,0.25);
-  color: var(--a); font-size: 13px; font-weight: 600;
-  text-decoration: none; white-space: nowrap; flex-shrink: 0;
-  transition: background 0.15s;
-}
-.walrusProofLink:hover { background: rgba(0,212,170,0.18); }
-
-/* Stats */
-.walrusStats {
-  display: flex; justify-content: center; gap: 0;
-  max-width: 560px; margin: 0 auto;
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px; overflow: hidden;
-}
-.wStat {
-  flex: 1; padding: 20px 16px; text-align: center;
-  border-right: 1px solid rgba(255,255,255,0.07);
-}
-.wStat:last-child { border-right: none; }
-.wStatVal {
-  font-size: clamp(22px,3vw,32px); font-weight: 800;
-  color: var(--a); letter-spacing: -0.03em; margin-bottom: 4px;
-}
-.wStatLabel { font-size: 11px; color: rgba(245,245,247,0.35); line-height: 1.3; }
+.walrusBlob { color: var(--a); }
 
 @media (max-width: 640px) {
-  .walrusSection { padding: 56px 0; }
-  .walrusFlow { gap: 8px; }
-  .wFlowStep { padding: 12px 16px; min-width: 70px; }
-  .wFlowIcon { font-size: 20px; }
-  .wFlowArrow { font-size: 14px; }
-  .walrusProof { padding: 14px 16px; }
-  .walrusProofCode { font-size: 11px; }
-  .walrusStats { flex-wrap: wrap; }
-  .wStat { min-width: 50%; border-right: 1px solid rgba(255,255,255,0.07) !important; }
-  .wStat:nth-child(2), .wStat:last-child { border-right: none !important; }
+  .walrusSection { padding: 60px 0 48px; }
+  .walrusBigW, .walrusBigA, .walrusBigL,
+  .walrusBigR, .walrusBigU, .walrusBigS {
+    font-size: clamp(48px, 13vw, 80px);
+  }
+  .walrusMascot { font-size: 72px; }
+  .walrusBigActions { flex-direction: column; align-items: stretch; }
+  .walrusVerifyBtn, .walrusOutLink { text-align: center; }
 }
