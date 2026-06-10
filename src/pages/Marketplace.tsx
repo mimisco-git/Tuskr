@@ -16,13 +16,20 @@ function fmt(n: number | null, d = 2) {
   return n.toLocaleString('en-US', { maximumFractionDigits: d })
 }
 
+function walrusUrl(blobId: string, network: string) {
+  const agg = network === 'mainnet'
+    ? 'https://aggregator.walrus.space'
+    : 'https://aggregator.walrus-testnet.walrus.space'
+  return `${agg}/v1/blobs/${blobId}`
+}
+
 export default function Marketplace() {
   usePageTitle('Marketplace')
   const { network } = useNetwork()
   const PACKAGE_ID  = network.packageId
   const account     = useCurrentAccount()
   const client      = useSuiClient()
-  const { error: toastErr } = useToast()
+  const { } = useToast()
   const { } = useNFTMarketplace()
 
   const [tab,          setTab]         = useState<Tab>('trending')
@@ -32,20 +39,16 @@ export default function Marketplace() {
   const [listings,     setListings]     = useState<any[]>([])
   const [loadingCols,  setLoadingCols]  = useState(true)
   const [loadingTuskr, setLoadingTuskr] = useState(false)
+  const [loadingList,  setLoadingList]  = useState(false)
   const [search,       setSearch]       = useState('')
   const [sortBy,       setSortBy]       = useState<'volume'|'floor'>('volume')
 
   useEffect(() => {
-    fetchSuiCollections(60)
-      .then(setCollections)
-      .catch(console.error)
-      .finally(() => setLoadingCols(false))
-
-    fetchTrendingCollections(12)
-      .then(setTrending)
-      .catch(() => {})
+    fetchSuiCollections(60).then(setCollections).catch(console.error).finally(() => setLoadingCols(false))
+    fetchTrendingCollections(12).then(setTrending).catch(() => {})
   }, [])
 
+  /* ── Load Tuskr minted NFTs ── */
   const loadTuskrNfts = useCallback(async () => {
     setLoadingTuskr(true)
     try {
@@ -53,75 +56,108 @@ export default function Marketplace() {
         query: { MoveEventType: `${PACKAGE_ID}::tuskr_nft::MintedEvent` },
         limit: 50,
       }).catch(() => ({ data: [] }))
+
       if (!events.data.length) { setTuskrNfts([]); return }
-      const ids = events.data.map((e: any) => e.parsedJson?.nft_id || e.parsedJson?.id).filter(Boolean)
-      if (!ids.length) { setTuskrNfts([]); return }
-      const objs = await client.multiGetObjects({ ids, options: { showContent: true, showDisplay: true } })
-      const net    = localStorage.getItem('tuskr_network') || 'testnet'
-      const walrusAgg = net === 'mainnet'
-        ? 'https://aggregator.walrus.space'
-        : 'https://aggregator.walrus-testnet.walrus.space'
 
-      const parsed = objs.filter(o => o.data).map(o => {
-        const f      = (o.data?.content as any)?.fields ?? {}
-        const d      = (o.data?.display  as any)?.data  ?? {}
-        const blobId = f.blob_id || d.blob_id || ''
+      // blob_id is in the MintedEvent itself — use it directly
+      const fromEvents = (events.data as any[])
+        .filter(e => e.parsedJson?.blob_id)
+        .map(e => ({
+          objectId: e.parsedJson.nft_id || e.parsedJson.id || '',
+          name:     e.parsedJson.name   || 'Tuskr NFT',
+          blobId:   e.parsedJson.blob_id,
+          mediaUrl: walrusUrl(e.parsedJson.blob_id, network.name),
+        }))
+        .filter(n => n.objectId && n.blobId)
 
-        // media_url is Sui Url type — may be { url: "..." } not plain string
-        const rawUrl    = f.media_url
-        const contentUrl = typeof rawUrl === 'string' ? rawUrl
-          : (rawUrl?.url ?? rawUrl?.id ?? '')
+      if (fromEvents.length) {
+        setTuskrNfts(fromEvents)
+        return
+      }
 
-        const mediaUrl = d.image_url          // Display resolves Url → plain string ✓
-          || contentUrl
-          || (blobId ? `${walrusAgg}/v1/blobs/${blobId}` : '')
-
-        return { objectId: o.data!.objectId, name: f.name || d.name || 'Tuskr NFT', mediaUrl, blobId }
-      })
-      // Only show NFTs that have Walrus storage (blobId) — hides old broken ones
-      setTuskrNfts(parsed.filter(n => n.blobId))
-    } catch { setTuskrNfts([]) }
-    finally  { setLoadingTuskr(false) }
-  }, [PACKAGE_ID])
-
-  const loadListings = useCallback(async () => {
-    try {
-      // Get all ListedEvent events to find listing IDs
-      const events = await client.queryEvents({
-        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` },
-        limit: 100,
-      }).catch(() => ({ data: [] }))
-
-      if (!events.data.length) { setListings([]); return }
-
-      // Get the listing object IDs from events
-      const listingIds = events.data
-        .map((e: any) => e.parsedJson?.listing_id)
+      // Fallback: fetch objects and read blob_id from content
+      const ids = (events.data as any[])
+        .map((e: any) => e.parsedJson?.nft_id || e.parsedJson?.id)
         .filter(Boolean)
 
-      if (!listingIds.length) { setListings([]); return }
+      if (!ids.length) { setTuskrNfts([]); return }
 
-      // Fetch actual listing objects from chain
       const objs = await client.multiGetObjects({
-        ids: listingIds,
+        ids,
         options: { showContent: true, showDisplay: true },
       }).catch(() => [])
 
-      const parsed = objs
-        .filter((o: any) => o.data && !o.error)
-        .map((o: any) => {
-          const f = (o.data?.content as any)?.fields ?? {}
+      const parsed = (objs as any[])
+        .filter(o => o.data)
+        .map(o => {
+          const f      = o.data.content?.fields ?? {}
+          const d      = o.data.display?.data   ?? {}
+          const blobId = f.blob_id || d.blob_id || ''
+          const mediaUrl = blobId ? walrusUrl(blobId, network.name) : (d.image_url || '')
+          return { objectId: o.data.objectId, name: f.name || d.name || 'Tuskr NFT', blobId, mediaUrl }
+        })
+        .filter(n => n.blobId)   // only show NFTs with Walrus storage
+
+      setTuskrNfts(parsed)
+    } catch (err) {
+      console.error('loadTuskrNfts:', err)
+      setTuskrNfts([])
+    } finally {
+      setLoadingTuskr(false)
+    }
+  }, [PACKAGE_ID, network.name])
+
+  /* ── Load marketplace listings ── */
+  const loadListings = useCallback(async () => {
+    setLoadingList(true)
+    try {
+      // Fetch all event types in parallel
+      const [listedRes, soldRes, delistedRes] = await Promise.all([
+        client.queryEvents({ query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent`   }, limit: 200 }).catch(() => ({ data: [] })),
+        client.queryEvents({ query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::SoldEvent`     }, limit: 200 }).catch(() => ({ data: [] })),
+        client.queryEvents({ query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::DelistedEvent` }, limit: 200 }).catch(() => ({ data: [] })),
+      ])
+
+      const soldIds     = new Set((soldRes.data     as any[]).map(e => e.parsedJson?.listing_id).filter(Boolean))
+      const delistedIds = new Set((delistedRes.data as any[]).map(e => e.parsedJson?.listing_id).filter(Boolean))
+
+      // Only keep listing IDs that are still active
+      const activeIds = (listedRes.data as any[])
+        .map(e => e.parsedJson?.listing_id)
+        .filter((id: string) => id && !soldIds.has(id) && !delistedIds.has(id))
+
+      console.log('[Listings] total listed:', listedRes.data.length, '| active:', activeIds.length)
+
+      if (!activeIds.length) { setListings([]); return }
+
+      // Fetch Listing objects from chain
+      const objs = await client.multiGetObjects({
+        ids: activeIds,
+        options: { showContent: true },
+      }).catch(() => [])
+
+      const parsed = (objs as any[])
+        .filter(o => o.data && !o.error)
+        .map(o => {
+          const f = o.data.content?.fields ?? {}
           return {
             listingId: o.data.objectId,
             nftId:     f.nft_id?.id || f.nft_id || '',
             price:     Number(f.price ?? 0),
             seller:    f.seller || '',
-            name:      f.name || 'Tuskr NFT',
+            name:      f.name   || 'Tuskr NFT',
           }
         })
+        .filter(l => l.seller)
 
+      console.log('[Listings] parsed:', parsed.length)
       setListings(parsed)
-    } catch { setListings([]) }
+    } catch (err) {
+      console.error('loadListings:', err)
+      setListings([])
+    } finally {
+      setLoadingList(false)
+    }
   }, [PACKAGE_ID])
 
   useEffect(() => {
@@ -129,7 +165,7 @@ export default function Marketplace() {
     if (tab === 'listed') loadListings()
   }, [tab, network.name])
 
-  /* Build display lists */
+  /* ── Display data ── */
   const trendList = trending.length > 0
     ? trending.map(t => ({
         id: t.collection.id, slug: t.collection.slug,
@@ -137,23 +173,20 @@ export default function Marketplace() {
         floor: t.collection.floor, volume: t.current_volume,
         supply: t.collection.supply, verified: t.collection.verified,
         pct: t.previous_volume && t.previous_volume > 0
-          ? Math.round(((t.current_volume ?? 0) - t.previous_volume) / t.previous_volume * 100)
-          : null,
+          ? Math.round(((t.current_volume ?? 0) - t.previous_volume) / t.previous_volume * 100) : null,
       }))
-    : [...collections]
-        .sort((a,b) => (b.volume ?? 0) - (a.volume ?? 0))
-        .slice(0, 12)
-        .map(c => ({ id: c.id, slug: c.slug, title: c.title, img: c.cover_url,
-          floor: c.floor, volume: c.volume, supply: c.supply, verified: c.verified, pct: null }))
+    : [...collections].sort((a,b) => (b.volume??0)-(a.volume??0)).slice(0,12)
+        .map(c => ({ id:c.id, slug:c.slug, title:c.title, img:c.cover_url,
+          floor:c.floor, volume:c.volume, supply:c.supply, verified:c.verified, pct:null }))
 
   const exploreCols = [...collections]
     .filter(c => !search || c.title.toLowerCase().includes(search.toLowerCase()))
-    .sort((a,b) => sortBy === 'volume'
-      ? (b.volume ?? 0) - (a.volume ?? 0)
-      : (b.floor ?? 0) - (a.floor ?? 0)
-    )
+    .sort((a,b) => sortBy==='volume' ? (b.volume??0)-(a.volume??0) : (b.floor??0)-(a.floor??0))
 
-  const Skel = ({ n = 8 }: { n?: number }) => (
+  const myListings  = listings.filter(l => account && l.seller === account.address)
+  const allListings = [...myListings, ...listings.filter(l => !account || l.seller !== account.address)]
+
+  const Skel = ({ n=8 }: { n?: number }) => (
     <div className={s.skelList}>{[...Array(n)].map((_,i)=><div key={i} className={s.skelRow}/>)}</div>
   )
 
@@ -172,52 +205,51 @@ export default function Marketplace() {
           </div>
         </div>
 
-        {/* ── Tabs ── */}
+        {/* Tabs */}
         <div className={s.tabBar}>
-          {([['trending','🔥 Trending'],['explore','Explore Sui'],['tuskr','Tuskr Minted'],['listed','Listed for Sale']] as [Tab,string][]).map(([k,l])=>(
+          {([
+            ['trending', '🔥 Trending'],
+            ['explore',  `Explore Sui (${exploreCols.length})`],
+            ['tuskr',    `Tuskr Minted (${tuskrNfts.length})`],
+            ['listed',   `Listed for Sale (${listings.length})`],
+          ] as [Tab,string][]).map(([k,l]) => (
             <button key={k} className={`${s.tab} ${tab===k?s.tabActive:''}`} onClick={()=>setTab(k)}>{l}</button>
           ))}
         </div>
 
         {/* ── TRENDING ── */}
         {tab==='trending' && (
-          <div>
-            <table className={s.table}>
-              <thead>
-                <tr>
-                  <th className={s.thNum}>#</th>
-                  <th className={s.thName}>Collection</th>
-                  <th className={s.thNum}>Floor</th>
-                  <th className={s.thNum}>Volume</th>
-                  <th className={s.thNum}>Supply</th>
-                  <th className={s.thNum}>24h %</th>
+          <table className={s.table}>
+            <thead><tr>
+              <th className={s.thNum}>#</th>
+              <th className={s.thName}>Collection</th>
+              <th className={s.thNum}>Floor</th>
+              <th className={s.thNum}>Volume</th>
+              <th className={s.thNum}>Supply</th>
+              <th className={s.thNum}>24h %</th>
+            </tr></thead>
+            <tbody>
+              {trendList.map((item,i) => (
+                <tr key={item.id} className={s.row}>
+                  <td className={s.tdNum}>{i+1}</td>
+                  <td className={s.tdName}>
+                    <Link to={`/collections/${item.slug}`} className={s.colLink}>
+                      <NFTImage src={item.img} alt={item.title} className={s.colThumb}/>
+                      <span className={s.colTitle}>{item.title}</span>
+                      {item.verified && <span className={s.tick}>✓</span>}
+                    </Link>
+                  </td>
+                  <td className={s.tdNum}>{fmt(item.floor,2)} <span className={s.sui}>SUI</span></td>
+                  <td className={s.tdNum}>{fmt(item.volume,0)} <span className={s.sui}>SUI</span></td>
+                  <td className={s.tdNum}>{item.supply?.toLocaleString()??'—'}</td>
+                  <td className={s.tdNum}>{item.pct!=null
+                    ? <span className={item.pct>=0?s.up:s.down}>{item.pct>=0?'+':''}{item.pct}%</span>
+                    : <span className={s.dim}>—</span>}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {trendList.map((item, i) => (
-                  <tr key={item.id} className={s.row}>
-                    <td className={s.tdNum}>{i+1}</td>
-                    <td className={s.tdName}>
-                      <Link to={`/collections/${item.slug}`} className={s.colLink}>
-                        <NFTImage src={item.img} alt={item.title} className={s.colThumb}/>
-                        <span className={s.colTitle}>{item.title}</span>
-                        {item.verified && <span className={s.tick}>✓</span>}
-                      </Link>
-                    </td>
-                    <td className={s.tdNum}>{fmt(item.floor,2)} <span className={s.sui}>SUI</span></td>
-                    <td className={s.tdNum}>{fmt(item.volume,0)} <span className={s.sui}>SUI</span></td>
-                    <td className={s.tdNum}>{item.supply?.toLocaleString() ?? '—'}</td>
-                    <td className={s.tdNum}>
-                      {item.pct != null
-                        ? <span className={item.pct>=0?s.up:s.down}>{item.pct>=0?'+':''}{item.pct}%</span>
-                        : <span className={s.dim}>—</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {trendList.length===0 && !loadingCols && <div className={s.empty}><p className={s.emptyTitle}>Loading trending data...</p></div>}
-          </div>
+              ))}
+            </tbody>
+          </table>
         )}
 
         {/* ── EXPLORE ── */}
@@ -233,21 +265,18 @@ export default function Marketplace() {
                 <button className={`${s.sortBtn} ${sortBy==='floor'?s.sortActive:''}`} onClick={()=>setSortBy('floor')}>Floor</button>
               </div>
             </div>
-
             {loadingCols ? <Skel n={8}/> : (
               <table className={s.table}>
-                <thead>
-                  <tr>
-                    <th className={s.thNum}>#</th>
-                    <th className={s.thName}>Collection</th>
-                    <th className={s.thNum}>Floor</th>
-                    <th className={s.thNum}>Volume</th>
-                    <th className={s.thNum}>Supply</th>
-                    <th className={s.thNum}>Verified</th>
-                  </tr>
-                </thead>
+                <thead><tr>
+                  <th className={s.thNum}>#</th>
+                  <th className={s.thName}>Collection</th>
+                  <th className={s.thNum}>Floor</th>
+                  <th className={s.thNum}>Volume</th>
+                  <th className={s.thNum}>Supply</th>
+                  <th className={s.thNum}>Verified</th>
+                </tr></thead>
                 <tbody>
-                  {exploreCols.map((col, i) => (
+                  {exploreCols.map((col,i) => (
                     <tr key={col.id} className={s.row}>
                       <td className={s.tdNum}>{i+1}</td>
                       <td className={s.tdName}>
@@ -265,13 +294,13 @@ export default function Marketplace() {
                 </tbody>
               </table>
             )}
-            {exploreCols.length===0 && !loadingCols && <div className={s.empty}><p>No collections found for "{search}"</p></div>}
           </div>
         )}
 
         {/* ── TUSKR MINTED ── */}
         {tab==='tuskr' && (
-          loadingTuskr ? <Skel/> : tuskrNfts.length===0 ? (
+          loadingTuskr ? <Skel/> :
+          tuskrNfts.length===0 ? (
             <div className={s.empty}>
               <p className={s.emptyIcon}>🎨</p>
               <p className={s.emptyTitle}>No Tuskr NFTs on {network.name} yet</p>
@@ -281,7 +310,10 @@ export default function Marketplace() {
             <div className={s.nftGrid}>
               {tuskrNfts.map(nft => (
                 <Link key={nft.objectId} to={`/nft/${nft.objectId}`} className={s.nftCard}>
-                  <div className={s.nftImg}><NFTImage src={nft.mediaUrl} alt={nft.name} style={{width:'100%',height:'100%'}}/>{nft.blobId&&<span className={s.walrusBadge}>WALRUS</span>}</div>
+                  <div className={s.nftImg}>
+                    <NFTImage src={nft.mediaUrl} alt={nft.name} style={{width:'100%',height:'100%'}}/>
+                    {nft.blobId && <span className={s.walrusBadge}>WALRUS</span>}
+                  </div>
                   <div className={s.nftBody}><p className={s.nftName}>{nft.name}</p></div>
                 </Link>
               ))}
@@ -289,14 +321,53 @@ export default function Marketplace() {
           )
         )}
 
-        {/* ── LISTED ── */}
+        {/* ── LISTED FOR SALE ── */}
         {tab==='listed' && (
-          <div className={s.empty}>
-            <p className={s.emptyIcon}>🏪</p>
-            <p className={s.emptyTitle}>No listings on {network.name} yet</p>
-            <p className={s.emptySub}>Mint and list an NFT to start the marketplace.</p>
-            <Link to="/mint" className="btn btn-primary">Mint an NFT</Link>
-          </div>
+          loadingList ? <Skel/> :
+          listings.length===0 ? (
+            <div className={s.empty}>
+              <p className={s.emptyIcon}>🏪</p>
+              <p className={s.emptyTitle}>No active listings on {network.name}</p>
+              <p className={s.emptySub}>Mint an NFT and list it for sale to get started.</p>
+              <Link to="/mint" className="btn btn-primary">Mint an NFT</Link>
+            </div>
+          ) : (
+            <div>
+              {account && myListings.length > 0 && (
+                <p style={{fontSize:13,color:'rgba(245,245,247,0.4)',marginBottom:12}}>
+                  🟢 Your {myListings.length} listing{myListings.length>1?'s':''} shown first.
+                </p>
+              )}
+              <table className={s.table}>
+                <thead><tr>
+                  <th className={s.thName}>NFT</th>
+                  <th className={s.thNum}>Price</th>
+                  <th className={s.thNum}>Seller</th>
+                  <th className={s.thNum}>Status</th>
+                </tr></thead>
+                <tbody>
+                  {allListings.map((l:any) => (
+                    <tr key={l.listingId} className={s.row}>
+                      <td className={s.tdName}><span className={s.colTitle}>{l.name}</span></td>
+                      <td className={s.tdNum}>
+                        {(l.price/1_000_000_000).toFixed(3)} <span className={s.sui}>SUI</span>
+                      </td>
+                      <td className={s.tdNum}>
+                        <span className={s.dim}>
+                          {account?.address===l.seller ? '🟢 You' : `${l.seller.slice(0,6)}...${l.seller.slice(-4)}`}
+                        </span>
+                      </td>
+                      <td className={s.tdNum}>
+                        {account?.address===l.seller
+                          ? <span style={{color:'var(--a)',fontSize:12}}>Active</span>
+                          : <span className={s.dim}>For Sale</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         )}
 
       </div>
