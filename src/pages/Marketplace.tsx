@@ -59,31 +59,16 @@ export default function Marketplace() {
 
       if (!events.data.length) { setTuskrNfts([]); return }
 
-      // blob_id is in the MintedEvent itself — use it directly
-      const fromEvents = (events.data as any[])
-        .filter(e => e.parsedJson?.blob_id)
-        .map(e => ({
-          objectId: e.parsedJson.nft_id || e.parsedJson.id || '',
-          name:     e.parsedJson.name   || 'Tuskr NFT',
-          blobId:   e.parsedJson.blob_id,
-          mediaUrl: walrusUrl(e.parsedJson.blob_id, network.name),
-        }))
-        .filter(n => n.objectId && n.blobId)
-
-      if (fromEvents.length) {
-        setTuskrNfts(fromEvents)
-        return
-      }
-
-      // Fallback: fetch objects and read blob_id from content
-      const ids = (events.data as any[])
+      // Collect all NFT IDs from events (including those without blob_id)
+      const allIds = (events.data as any[])
         .map((e: any) => e.parsedJson?.nft_id || e.parsedJson?.id)
         .filter(Boolean)
 
-      if (!ids.length) { setTuskrNfts([]); return }
+      if (!allIds.length) { setTuskrNfts([]); return }
 
+      // Fetch all NFT objects with content + display
       const objs = await client.multiGetObjects({
-        ids,
+        ids: allIds,
         options: { showContent: true, showDisplay: true },
       }).catch(() => [])
 
@@ -93,11 +78,27 @@ export default function Marketplace() {
           const f      = o.data.content?.fields ?? {}
           const d      = o.data.display?.data   ?? {}
           const blobId = f.blob_id || d.blob_id || ''
-          const mediaUrl = blobId ? walrusUrl(blobId, network.name) : (d.image_url || '')
-          return { objectId: o.data.objectId, name: f.name || d.name || 'Tuskr NFT', blobId, mediaUrl }
-        })
-        .filter(n => n.blobId)   // only show NFTs with Walrus storage
 
+          // Priority: blob_id → Walrus URL (most reliable)
+          // Fallback: Display image_url, then media_url (Url type unwrapping)
+          const rawUrl = f.media_url
+          const urlStr = typeof rawUrl === 'string' ? rawUrl
+            : (rawUrl?.url ?? rawUrl?.id ?? '')
+
+          const mediaUrl = blobId
+            ? walrusUrl(blobId, network.name)
+            : (d.image_url || urlStr || '')
+
+          return {
+            objectId: o.data.objectId,
+            name:     f.name || d.name || 'Tuskr NFT',
+            blobId,
+            mediaUrl,
+          }
+        })
+
+      // Sort: NFTs with blobId (Walrus) first, then others
+      parsed.sort((a: any, b: any) => (b.blobId ? 1 : 0) - (a.blobId ? 1 : 0))
       setTuskrNfts(parsed)
     } catch (err) {
       console.error('loadTuskrNfts:', err)
@@ -151,7 +152,34 @@ export default function Marketplace() {
         .filter(l => l.seller)
 
       console.log('[Listings] parsed:', parsed.length)
-      setListings(parsed)
+
+      // Fetch NFT images for each listing using nft_id
+      const nftIds = parsed.map((l: any) => l.nftId).filter(Boolean)
+      if (nftIds.length) {
+        const nftObjs = await client.multiGetObjects({
+          ids: nftIds,
+          options: { showContent: true, showDisplay: true },
+        }).catch(() => [])
+
+        const nftMap: Record<string, string> = {}
+        ;(nftObjs as any[]).filter(o => o.data).forEach(o => {
+          const f      = o.data.content?.fields ?? {}
+          const d      = o.data.display?.data   ?? {}
+          const blobId = f.blob_id || d.blob_id || ''
+          const rawUrl = f.media_url
+          const urlStr = typeof rawUrl === 'string' ? rawUrl : (rawUrl?.url ?? '')
+          const img    = blobId ? walrusUrl(blobId, network.name) : (d.image_url || urlStr || '')
+          if (img) nftMap[o.data.objectId] = img
+        })
+
+        const withImages = parsed.map((l: any) => ({
+          ...l,
+          mediaUrl: nftMap[l.nftId] || '',
+        }))
+        setListings(withImages)
+      } else {
+        setListings(parsed)
+      }
     } catch (err) {
       console.error('loadListings:', err)
       setListings([])
@@ -348,7 +376,12 @@ export default function Marketplace() {
                 <tbody>
                   {allListings.map((l:any) => (
                     <tr key={l.listingId} className={s.row}>
-                      <td className={s.tdName}><span className={s.colTitle}>{l.name}</span></td>
+                      <td className={s.tdName}>
+                        <div className={s.colLink}>
+                          <NFTImage src={l.mediaUrl} alt={l.name} className={s.colThumb}/>
+                          <span className={s.colTitle}>{l.name}</span>
+                        </div>
+                      </td>
                       <td className={s.tdNum}>
                         {(l.price/1_000_000_000).toFixed(3)} <span className={s.sui}>SUI</span>
                       </td>
