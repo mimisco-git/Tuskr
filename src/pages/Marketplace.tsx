@@ -69,10 +69,41 @@ export default function Marketplace() {
 
   const loadListings = useCallback(async () => {
     try {
-      const e = await client.queryEvents({
-        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` }, limit: 50,
+      // Get all ListedEvent events to find listing IDs
+      const events = await client.queryEvents({
+        query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` },
+        limit: 100,
       }).catch(() => ({ data: [] }))
-      setListings(e.data)
+
+      if (!events.data.length) { setListings([]); return }
+
+      // Get the listing object IDs from events
+      const listingIds = events.data
+        .map((e: any) => e.parsedJson?.listing_id)
+        .filter(Boolean)
+
+      if (!listingIds.length) { setListings([]); return }
+
+      // Fetch actual listing objects from chain
+      const objs = await client.multiGetObjects({
+        ids: listingIds,
+        options: { showContent: true, showDisplay: true },
+      }).catch(() => [])
+
+      const parsed = objs
+        .filter((o: any) => o.data && !o.error)
+        .map((o: any) => {
+          const f = (o.data?.content as any)?.fields ?? {}
+          return {
+            listingId: o.data.objectId,
+            nftId:     f.nft_id?.id || f.nft_id || '',
+            price:     Number(f.price ?? 0),
+            seller:    f.seller || '',
+            name:      f.name || 'Tuskr NFT',
+          }
+        })
+
+      setListings(parsed)
     } catch { setListings([]) }
   }, [PACKAGE_ID])
 
