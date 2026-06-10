@@ -200,9 +200,7 @@ export default function Navbar() {
             {isSignedIn ? (
               <div ref={acctRef} style={{ position:'relative' }}>
                 <button className={s.pill} onClick={() => setAcctOpen(v => !v)}>
-                  {google.pic
-                    ? <img src={google.pic} className={s.pillAva} alt="" />
-                    : <span className={s.pillIni}>{initials}</span>}
+                  <span className={s.pillIni}>{initials}</span>
                   <span className={s.pillName}>{displayName}</span>
                   <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity:.5, transition:'transform .2s', transform: acctOpen?'rotate(180deg)':'none' }}>
                     <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -213,10 +211,10 @@ export default function Navbar() {
                   <div className={s.acctDrop}>
                     {/* header */}
                     <div className={s.acctHead}>
-                      {google.pic ? <img src={google.pic} className={s.acctAva} alt="" /> : <span className={s.acctIni}>{initials}</span>}
+                      <span className={s.acctIni}>{initials}</span>
                       <div>
                         <div className={s.acctName}>{displayName}</div>
-                        {google.email && <div className={s.acctEmail}>{google.email}</div>}
+
                       </div>
                     </div>
                     <div className={s.acctDivider} />
@@ -240,11 +238,7 @@ export default function Navbar() {
                     <Link to="/profile" className={s.acctAction} onClick={() => setAcctOpen(false)}>My Profile</Link>
                     <Link to="/mint" className={s.acctAction} onClick={() => setAcctOpen(false)}>Mint NFT</Link>
                     <div className={s.acctDivider} />
-                    {google.isLoggedIn && (
-                      <button className={`${s.acctAction} ${s.acctActionRed}`} onClick={() => { google.signOut(); setAcctOpen(false) }}>
-                        Sign out of Google
-                      </button>
-                    )}
+
                     {wallet && (
                       <button className={`${s.acctAction} ${s.acctActionRed}`} onClick={() => { disconnect(); setAcctOpen(false) }}>
                         Disconnect Wallet
@@ -254,10 +248,7 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <div className={s.authRow}>
-                <Link to="/zklogin" className={s.signInBtn}><GIcon />Sign in</Link>
-                <ConnectButton />
-              </div>
+              <ConnectButton />
             )}
           </div>
 
@@ -294,68 +285,18 @@ export default function Navbar() {
             {isSignedIn ? (
               <div className={s.idCard}>
                 <div className={s.idRow}>
-                  {google.pic
-                    ? <img src={google.pic} className={s.idAva} alt="" />
-                    : <span className={s.idIni}>{initials}</span>}
+                  <span className={s.idIni}>{initials}</span>
                   <div>
                     <div className={s.idName}>{displayName}</div>
-                    {google.email && <div className={s.idEmail}>{google.email}</div>}
+                    <div className={s.idAddr}>{wallet?.address.slice(0,14)}...{wallet?.address.slice(-8)}</div>
                   </div>
-                </div>
-                {wallet && (
-                  <div className={s.idAddr}>{wallet.address.slice(0,14)}...{wallet.address.slice(-8)}</div>
-                )}
-                {!wallet && (
-                  <div className={s.idConnectWrap}><ConnectButton /></div>
-                )}
-                {!google.isLoggedIn && (
-                  <Link to="/zklogin" className={s.idGoogleBtn} onClick={() => setMobile(false)}>
-                    <GIcon /> Connect Google
-                  </Link>
-                )}
-                <div className={s.idActions}>
-                  <Link to="/profile" className={s.idBtn} onClick={() => setMobile(false)}>Profile</Link>
-                  {google.isLoggedIn && (
-                    <button className={`${s.idBtn} ${s.idBtnRed}`} onClick={() => { google.signOut(); setMobile(false) }}>Sign out</button>
-                  )}
-                  {wallet && (
-                    <button className={`${s.idBtn} ${s.idBtnRed}`} onClick={() => { disconnect(); setMobile(false) }}>Disconnect</button>
-                  )}
                 </div>
               </div>
             ) : (
-              <div className={s.authCard}>
-                <p className={s.authCardTitle}>Join Tuskr</p>
-                <Link to="/zklogin" className={s.authGoogleBtn} onClick={() => setMobile(false)}>
-                  <GIcon /> Sign in with Google
-                </Link>
-                <div className={s.authWalletWrap}><ConnectButton /></div>
+              <div className={s.idCard}>
+                <ConnectButton />
               </div>
             )}
-
-            {/* Quick links */}
-            <div className={s.quickRow}>
-              <Link to="/marketplace" className={`${s.quickBtn} ${s.quickPrimary}`} onClick={() => setMobile(false)}>Explore</Link>
-              <Link to="/mint/ai"     className={s.quickBtn} onClick={() => setMobile(false)}>AI Mint</Link>
-              <Link to="/mint"        className={s.quickBtn} onClick={() => setMobile(false)}>Mint</Link>
-            </div>
-
-            {/* Nav sections */}
-            {LINKS.map(section => (
-              <div key={section.label} className={s.navSection}>
-                <div className={s.navSectionTitle}>{section.label}</div>
-                {section.sub.map(lnk =>
-                  'href' in lnk
-                    ? <a key={lnk.label} href={lnk.href} target="_blank" rel="noopener noreferrer"
-                        className={s.navLink} onClick={() => setMobile(false)}>
-                        {lnk.label} <span>↗</span>
-                      </a>
-                    : <Link key={lnk.label} to={lnk.to!} className={s.navLink} onClick={() => setMobile(false)}>
-                        {lnk.label}
-                      </Link>
-                )}
-              </div>
-            ))}
           </div>
         </div>
       )}
