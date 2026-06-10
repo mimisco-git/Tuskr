@@ -1,6 +1,6 @@
 import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
 import { Transaction } from '@mysten/sui/transactions'
-import type { SuiObjectData } from '@mysten/sui/client'
+import type { SuiObjectData } from '@mysten/sui/jsonRpc'
 
 /**
  * Reads network from localStorage so it matches the UI switcher.
