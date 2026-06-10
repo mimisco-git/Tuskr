@@ -11,7 +11,16 @@ export default function Footer() {
   const suiscan = net === 'testnet' ? 'https://suiscan.xyz/testnet' : 'https://suiscan.xyz/mainnet'
 
   return (
-    <footer className={s.footer}>
+    <>
+      {/* Tuskr mascot brand — same style as walrus.xyz */}
+      <div className={s.brandSection}>
+        <div className={s.brandWord}>tuskr</div>
+        <div className={s.brandMascotWrap}>
+          <img src="/mascot.png" alt="Tuskr mascot" className={s.brandMascot} draggable={false}/>
+        </div>
+      </div>
+
+      <footer className={s.footer}>
       <div className="container">
         <div className={s.grid}>
 
@@ -70,6 +79,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-    </footer>
+      </footer>
+    </>
   )
 }
