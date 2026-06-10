@@ -162,6 +162,86 @@ https://aggregator.walrus.space/v1/blobs/{blobId}
 
 Replace `{blobId}` with the blob ID from the NFT's on-chain data. The media file will be returned directly from the Walrus network.
 
+
+---
+
+## Architecture Diagram
+
+```
+User Browser
+     │
+     ├─── Sui dApp Kit (wallet / zkLogin)
+     │         │
+     │         └─── Sui Mainnet RPC ──► Smart Contracts
+     │                                   tuskr_nft::mint()
+     │                                   tuskr_marketplace::list()
+     │                                   tuskr_marketplace::buy()
+     │
+     ├─── Tuskr Frontend (React/Vite on Vercel)
+     │         │
+     │         ├─── /api/walrus-upload ──► Walrus Publisher
+     │         │                           publisher.walrus.space
+     │         │                               │
+     │         │                               └── Returns blobId
+     │         │                                   (written on-chain at mint)
+     │         │
+     │         ├─── /api/tradeport ──► TradePort Indexer
+     │         │                       api.indexer.xyz/graphql
+     │         │                       (collections, NFTs, activity)
+     │         │
+     │         └─── /api/img ──► Image Proxy
+     │                           (bypasses hotlink protection)
+     │
+     └─── Groq API (AI concept generation)
+               llama-3.3-70b-versatile
+```
+
+---
+
+## Why Sui + Walrus?
+
+**Why Sui:** Sui's object-centric model makes NFTs first-class citizens. Each NFT is a Move object with typed fields — no separate metadata JSON. Gas fees are predictable. TPS is sufficient for a marketplace. zkLogin enables social login without seed phrases.
+
+**Why Walrus:** IPFS pins can be removed. AWS S3 can go offline. Walrus is a decentralized storage network with erasure-coding — your NFT media is split across 100+ nodes and can be reconstructed even if most fail. A blob ID is a permanent content address on-chain. Nobody can take down your NFT's image.
+
+---
+
+## Future Roadmap
+
+- [ ] Offers and bidding system
+- [ ] Collection-level royalties enforced on-chain
+- [ ] Walrus Sites for per-NFT websites
+- [ ] Dynamic metadata updates via Walrus (updatable NFTs)
+- [ ] Cross-collection bundles
+- [ ] Creator analytics dashboard
+- [ ] Mobile app (React Native)
+- [ ] SuiNS name resolution on profiles
+
+---
+
+## Walrus Blob Example
+
+Any NFT minted on Tuskr has a Walrus blob ID stored on-chain. To verify:
+
+```bash
+# Replace {BLOB_ID} with the blob ID from any minted NFT
+curl https://aggregator.walrus.space/v1/blobs/{BLOB_ID}
+# Returns the actual media file directly from Walrus
+```
+
+The blob ID is also embedded in the NFT's Move object fields:
+```
+tuskr_nft::TuskrNFT {
+  id: UID,
+  name: String,
+  description: String,
+  blob_id: String,    ← Walrus blob ID
+  media_url: String,  ← Full Walrus aggregator URL
+  royalty_bps: u16,
+  creator: address,
+}
+```
+
 ---
 
 ## Team
