@@ -147,10 +147,10 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  const isSignedIn = !!(wallet || google.isLoggedIn)
+  const isSignedIn = !!wallet
 
   /* best display name */
-  const displayName = google.name || (wallet ? wallet.address.slice(0,8)+'...' : '')
+  const displayName = wallet ? wallet.address.slice(0,8)+'...' : ''
   const initials    = displayName.slice(0,2).toUpperCase() || '?'
 
   return (
@@ -234,20 +234,7 @@ export default function Navbar() {
                       <div className={s.acctConnectWrap}><ConnectButton /></div>
                     )}
 
-                    {/* google */}
-                    {google.isLoggedIn ? (
-                      <div className={s.acctRow}>
-                        <span className={s.acctRowDot} />
-                        <div>
-                          <div className={s.acctRowLabel}>Google</div>
-                          <div className={s.acctRowVal}>{google.email}</div>
-                        </div>
-                      </div>
-                    ) : (
-                      <Link to="/zklogin" className={s.acctLink} onClick={() => setAcctOpen(false)}>
-                        <GIcon /> Sign in with Google
-                      </Link>
-                    )}
+                    {/* Google via Enoki shows in ConnectButton wallet modal */}
 
                     <div className={s.acctDivider} />
                     <Link to="/profile" className={s.acctAction} onClick={() => setAcctOpen(false)}>My Profile</Link>
