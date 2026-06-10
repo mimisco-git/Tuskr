@@ -218,11 +218,24 @@ export default function Profile() {
               {/* zkLogin Sui address row */}
               {googleUser && (
                 <div className={s.suiAddrRow}>
-                  <span className={s.suiAddrLabel}>zkLogin Sui address</span>
-                  <button className={s.addrBtn} onClick={()=>doCopy(googleUser.address)}>
-                    <span className={s.suiAddrVal}>{shortAddr(googleUser.address)}</span>
-                    <span className={s.copyHint}>{copied ? '✓ Copied' : 'Copy'}</span>
-                  </button>
+                  <span className={s.suiAddrLabel}>zkLogin Sui Address</span>
+                  <div className={s.suiAddrActions}>
+                    <button className={s.addrBtn} onClick={()=>doCopy(googleUser.address)}>
+                      <span className={s.suiAddrVal}>{shortAddr(googleUser.address)}</span>
+                      <span className={s.copyHint}>{copied ? '✓ Copied' : 'Copy'}</span>
+                    </button>
+                    <a
+                      href={`https://suiscan.xyz/${localStorage.getItem('tuskr_network')||'mainnet'}/account/${googleUser.address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={s.suiscanLink}
+                    >
+                      View on Suiscan ↗
+                    </a>
+                  </div>
+                  <p className={s.suiAddrNote}>
+                    This address appears on Suiscan after your first transaction (e.g., minting an NFT).
+                  </p>
                 </div>
               )}
             </div>

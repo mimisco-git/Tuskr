@@ -78,3 +78,26 @@
   .nftGrid{grid-template-columns:repeat(2,1fr);gap:10px;}
   .exploreControls{flex-direction:column;align-items:stretch;}
 }
+
+/* ── Mobile card layout for tables ── */
+@media (max-width: 640px) {
+  .table thead { display: none; }
+  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table tr {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    padding: 12px;
+  }
+  .table tr:hover { background: rgba(255,255,255,0.04); transform: none; }
+  .table td {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0; border: none; text-align: left;
+  }
+  .tdNum { text-align: left; }
+  .tdName { flex-direction: column; align-items: flex-start; }
+  .colLink { flex-direction: row; }
+  /* Hide rank and verified on tiny screens */
+  .table td:first-child { display: none; }
+}

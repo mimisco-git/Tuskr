@@ -488,6 +488,82 @@ export default function Home() {
         </div>
       </section>
 
+
+      {/* ════ WALRUS PROOF ════ */}
+      <section className={s.walrusSection}>
+        <div className="container">
+          <div className={s.walrusBadge}>
+            <span className={s.walrusDot}/>
+            <span>Powered by Walrus</span>
+          </div>
+          <h2 className={s.walrusTitle}>Every NFT. Verified on Walrus.</h2>
+          <p className={s.walrusSub}>
+            Unlike IPFS or AWS, Walrus stores your NFT media permanently with
+            erasure-coding across hundreds of nodes. Every Tuskr NFT has a
+            verifiable blob ID written on-chain at mint time.
+          </p>
+
+          <div className={s.walrusFlow}>
+            <div className={s.wFlowStep}>
+              <div className={s.wFlowIcon}>📁</div>
+              <div className={s.wFlowLabel}>Your File</div>
+            </div>
+            <div className={s.wFlowArrow}>→</div>
+            <div className={s.wFlowStep}>
+              <div className={s.wFlowIcon}>🌊</div>
+              <div className={s.wFlowLabel}>Walrus Upload</div>
+            </div>
+            <div className={s.wFlowArrow}>→</div>
+            <div className={s.wFlowStep}>
+              <div className={s.wFlowIcon}>🔑</div>
+              <div className={s.wFlowLabel}>Blob ID</div>
+            </div>
+            <div className={s.wFlowArrow}>→</div>
+            <div className={s.wFlowStep}>
+              <div className={s.wFlowIcon}>⛓</div>
+              <div className={s.wFlowLabel}>On-chain Record</div>
+            </div>
+          </div>
+
+          <div className={s.walrusProof}>
+            <p className={s.walrusProofLabel}>Example: Verify any Tuskr NFT's media</p>
+            <div className={s.walrusProofUrl}>
+              <code className={s.walrusProofCode}>
+                aggregator.walrus.space/v1/blobs/
+                <span className={s.walrusProofBlob}>{'<blobId>'}</span>
+              </code>
+              <a
+                href="https://aggregator.walrus.space"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={s.walrusProofLink}
+              >
+                Open Walrus ↗
+              </a>
+            </div>
+          </div>
+
+          <div className={s.walrusStats}>
+            <div className={s.wStat}>
+              <div className={s.wStatVal}>∞</div>
+              <div className={s.wStatLabel}>Permanent Storage</div>
+            </div>
+            <div className={s.wStat}>
+              <div className={s.wStatVal}>100+</div>
+              <div className={s.wStatLabel}>Storage Nodes</div>
+            </div>
+            <div className={s.wStat}>
+              <div className={s.wStatVal}>0x</div>
+              <div className={s.wStatLabel}>Centralized Servers</div>
+            </div>
+            <div className={s.wStat}>
+              <div className={s.wStatVal}>✓</div>
+              <div className={s.wStatLabel}>On-chain Verified</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ════ CTA ════ */}
       <section className={s.ctaSection}>
         <div className="container">

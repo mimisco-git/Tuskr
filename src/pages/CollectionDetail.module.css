@@ -149,3 +149,25 @@
 .activityPrice { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; }
 .activitySui { font-size: 11px; color: rgba(245,245,247,0.35); }
 .activityTime { font-size: 11px; color: rgba(245,245,247,0.25); white-space: nowrap; flex-shrink: 0; }
+
+/* ── CollectionDetail mobile ── */
+@media (max-width: 640px) {
+  .banner { height: 140px; }
+  .identity { margin-top: -36px; gap: 12px; flex-wrap: wrap; }
+  .avatar { width: 64px; height: 64px; border-radius: 14px; }
+  .imgFallback { width: 64px; height: 64px; border-radius: 14px; font-size: 20px; }
+  .identityInfo { padding-top: 40px; }
+  .colTitle { font-size: 22px; }
+  .backBtn { display: none; }
+  .statsBar { padding: 12px 10px; gap: 0; flex-wrap: wrap; }
+  .stat { min-width: 50%; padding: 6px 8px; text-align: center; }
+  .statNum { font-size: 18px; }
+  .statDivider { display: none; }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .skelGrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .tabBar { gap: 2px; }
+  .tab { padding: 8px 12px; font-size: 13px; }
+  .tradeportLink { font-size: 11px; padding: 4px 8px; }
+  .activityRow { flex-wrap: wrap; gap: 8px; }
+  .activityTime { width: 100%; text-align: right; }
+}

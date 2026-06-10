@@ -112,3 +112,33 @@
   .table th:nth-child(7),
   .table td:nth-child(7) { display: none; } /* hide Market Cap */
 }
+
+/* ── Collections mobile ── */
+@media (max-width: 640px) {
+  .page { padding: 56px 0 72px; }
+  .title { font-size: 26px; }
+  .headRow { flex-direction: column; align-items: flex-start; }
+  .createBtn { align-self: stretch; text-align: center; padding: 12px; }
+  .controls { flex-direction: column; align-items: stretch; }
+  .sortBtns { overflow-x: auto; flex-wrap: nowrap; }
+
+  /* Table to cards on mobile */
+  .table thead { display: none; }
+  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table tr {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    padding: 12px;
+  }
+  .table td {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 0; border: none;
+  }
+  .tdRank { display: none; }
+  /* Hide less important columns */
+  .table td:nth-child(5),
+  .table td:nth-child(6),
+  .table td:nth-child(7) { display: none; }
+}
