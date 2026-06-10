@@ -123,9 +123,20 @@ export default function Marketplace() {
           }
         })
 
-      // Sort: NFTs with blobId (Walrus) first, then others
-      parsed.sort((a: any, b: any) => (b.blobId ? 1 : 0) - (a.blobId ? 1 : 0))
-      setTuskrNfts(parsed)
+      // Filter out expired Walrus blobs — check each one via our proxy
+      const checkBlob = async (url: string) => {
+        if (!url) return false
+        try {
+          const r = await fetch(`/api/img?url=${encodeURIComponent(url)}`, { method: 'HEAD' })
+          return r.ok
+        } catch { return false }
+      }
+
+      const checks = await Promise.all(parsed.map(n => checkBlob(n.mediaUrl)))
+      const live   = parsed.filter((_: any, i: number) => checks[i])
+
+      // Sort: newest first (events are already newest first)
+      setTuskrNfts(live)
     } catch (err) {
       console.error('loadTuskrNfts:', err)
       setTuskrNfts([])
