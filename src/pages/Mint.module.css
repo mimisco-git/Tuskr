@@ -330,17 +330,19 @@
 }
 .doneExplorer:hover { background: rgba(0,212,170,0.12); }
 .doneProfile {
-  padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
-  background: var(--a); color: #000; text-decoration: none;
+  padding: 11px 20px; border-radius: 10px; font-size: 15px; font-weight: 700;
+  background: #00d4aa; color: #000; text-decoration: none;
+  border: 2px solid #00d4aa;
   transition: background 0.15s;
+  display: inline-block;
 }
-.doneProfile:hover { background: #00efc0; }
+.doneProfile:hover { background: #00efc0; border-color: #00efc0; }
 .doneReset {
-  padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
-  color: rgba(245,245,247,0.6); cursor: pointer; transition: background 0.15s;
+  padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.20);
+  color: #fff; cursor: pointer; transition: background 0.15s;
 }
-.doneReset:hover { background: rgba(255,255,255,0.10); }
+.doneReset:hover { background: rgba(255,255,255,0.14); }
 
 /* ── Spinner inline ── */
 .spinner {

@@ -350,13 +350,13 @@ export default function AIGenerator() {
                 <a
                   href={`https://suivision.xyz/txblock/${txDigest}${network.name === "testnet" ? "?network=testnet" : ""}`}
                   target="_blank" rel="noreferrer"
-                  className="btn btn-ghost"
+                  className="btn btn-outline"
                 >
                   View on Explorer ↗
                 </a>
               )}
-              <Link to="/profile" className="btn btn-ghost">My NFTs</Link>
-              <Link to="/list" className="btn btn-primary">List for sale</Link>
+              <Link to="/profile" className="btn btn-outline">View my NFTs</Link>
+              <Link to="/list" className="btn btn-primary">List for Sale →</Link>
             </div>
 
             <button className={s.regenBtn} style={{ marginTop:24 }} onClick={reset}>

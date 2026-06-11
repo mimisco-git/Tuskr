@@ -208,8 +208,14 @@ export default function ListNFT() {
                     className="btn btn-primary"
                     onClick={handleList}
                     disabled={listing || !price || parseFloat(price) <= 0}
+                    style={{
+                      background: '#00d4aa',
+                      color: '#000',
+                      opacity: (!price || parseFloat(price) <= 0) ? 0.5 : 1,
+                      minWidth: 140,
+                    }}
                   >
-                    {listing ? 'Listing…' : `List for ${price || '0'} SUI`}
+                    {listing ? 'Listing…' : (!price || parseFloat(price) <= 0) ? 'Enter a price' : `List for ${price} SUI`}
                   </button>
                 </div>
               </div>

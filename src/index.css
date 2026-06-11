@@ -149,10 +149,24 @@ p { font-size: clamp(14px, 1.8vw, 17px); }
   touch-action: manipulation;
 }
 .btn-primary {
-  background: var(--a); color: #000;
+  background: var(--a); color: #000; border: none;
 }
 .btn-primary:hover   { filter: brightness(1.1); transform: translateY(-1px); }
 .btn-primary:active  { transform: scale(0.97); }
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  filter: none !important;
+}
+.btn-primary:disabled {
+  background: var(--a);
+  color: #000;
+  opacity: 0.5;
+}
+.btn-ghost:disabled {
+  color: rgba(245,245,247,0.3);
+}
 
 .btn-outline {
   background: transparent; color: var(--white);
