@@ -51,7 +51,7 @@ export default function Mint() {
 
   const upload = async () => {
     if (!file) return
-    const r = await uploadBlob(file)
+    const r = await uploadBlob(file, account?.address)
     if (r) { setBlobId(r.blobId); setMediaUrl(r.mediaUrl); setStep('details') }
   }
 

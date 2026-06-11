@@ -27,7 +27,7 @@ export function useWalrus() {
   const [uploading, setUploading] = useState(false)
   const [error,     setError]     = useState<string | null>(null)
 
-  const uploadBlob = async (file: File): Promise<WalrusUploadResult | null> => {
+  const uploadBlob = async (file: File, walletAddress?: string): Promise<WalrusUploadResult | null> => {
     setUploading(true)
     setError(null)
 
@@ -35,9 +35,13 @@ export function useWalrus() {
     const agg     = AGGREGATOR[network] ?? AGGREGATOR.mainnet
 
     try {
+      // Build upload URL — send_to transfers the blob object to the user's wallet
+      const sendTo = walletAddress ? `&send_to=${walletAddress}` : ''
+      const uploadUrl = `/api/walrus-upload?network=${network}&epochs=5${sendTo}`
+
       // Call our Vercel proxy — avoids CORS entirely
       const response = await fetch(
-        `/api/walrus-upload?network=${network}&epochs=5`,
+        uploadUrl,
         {
           method:  'PUT',
           body:    file,

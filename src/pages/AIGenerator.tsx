@@ -76,7 +76,7 @@ export default function AIGenerator() {
 
     // Upload to Walrus
     toast('Uploading image to Walrus...', 'loading')
-    const uploaded = await uploadBlob(imageFile)
+    const uploaded = await uploadBlob(imageFile, account?.address)
     if (!uploaded) {
       toastError('Walrus upload failed — check your network connection')
       setStep('review')
