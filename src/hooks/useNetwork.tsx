@@ -22,8 +22,8 @@ export const NETWORKS: Record<Network, NetworkConfig> = {
   },
   testnet: {
     name: 'testnet',
-    packageId:     '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d',
-    marketplaceId: '0xd1a40986e214e59d9882b3e47c861eea3b732367958d27c03e9fc3b1f747a3b2',
+    packageId:     '0xe2a80cf865bb40a9b4c7a63e2e82da841d8eb80455091947c394b13ae6d3dc56',
+    marketplaceId: '0x194b2610a10950958e6bfbb4e36e9b9f5c278e02d740d6d8013b2d60934a5002',
     walrusPublisher: 'https://publisher.walrus-testnet.walrus.space',
     walrusAggregator: 'https://aggregator.walrus-testnet.walrus.space',
     explorerBase: 'https://testnet.suivision.xyz/txblock',

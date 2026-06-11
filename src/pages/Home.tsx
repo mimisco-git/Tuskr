@@ -6,7 +6,7 @@ import NFTCard, { NFT } from '../components/NFTCard'
 import usePageTitle from '../hooks/usePageTitle'
 import s from './Home.module.css'
 
-const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0xe2a80cf865bb40a9b4c7a63e2e82da841d8eb80455091947c394b13ae6d3dc56'
 
 /* ═══════════════════════════════════════
    Intelligence feature set, Tuskr DNA

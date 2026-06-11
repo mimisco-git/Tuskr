@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import s from './Footer.module.css'
 
-const MAINNET_PKG = '0xd3a0071d104926cdc53e3e0ddb1fc9bfe3f38b5dd0a9e844707bb49b7a3c6787'
-const MAINNET_MKT = '0x9524c9adde77ae46b14ef9703b62899bb823124a30d8597a1fd837157d911650'
+const MAINNET_PKG = '0xe2a80cf865bb40a9b4c7a63e2e82da841d8eb80455091947c394b13ae6d3dc56'
+const MAINNET_MKT = '0x194b2610a10950958e6bfbb4e36e9b9f5c278e02d740d6d8013b2d60934a5002'
 function short(a: string) { return a.slice(0,6)+'...'+a.slice(-4) }
 
 export default function Footer() {

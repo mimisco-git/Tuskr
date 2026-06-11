@@ -69,8 +69,8 @@ Tuskr's AI NFT Generator uses Groq's inference API to generate creative NFT conc
 ### Testnet
 | Contract | Address |
 |----------|---------|
-| Package | `0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d` |
-| Marketplace | `0xd1a40986e214e59d9882b3e47c861eea3b732367958d27c03e9fc3b1f747a3b2` |
+| Package | `0xe2a80cf865bb40a9b4c7a63e2e82da841d8eb80455091947c394b13ae6d3dc56` |
+| Marketplace | `0x194b2610a10950958e6bfbb4e36e9b9f5c278e02d740d6d8013b2d60934a5002` |
 
 ---
 
@@ -129,8 +129,8 @@ VITE_INDEXER_API_USER=your_tradeport_api_user
 
 ### Testnet Variables
 ```env
-VITE_TESTNET_PACKAGE_ID=0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d
-VITE_TESTNET_MARKETPLACE_ID=0xd1a40986e214e59d9882b3e47c861eea3b732367958d27c03e9fc3b1f747a3b2
+VITE_TESTNET_PACKAGE_ID=0xe2a80cf865bb40a9b4c7a63e2e82da841d8eb80455091947c394b13ae6d3dc56
+VITE_TESTNET_MARKETPLACE_ID=0x194b2610a10950958e6bfbb4e36e9b9f5c278e02d740d6d8013b2d60934a5002
 ```
 
 ---
