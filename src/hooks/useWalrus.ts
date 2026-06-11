@@ -37,7 +37,7 @@ export function useWalrus() {
     try {
       // Call our Vercel proxy — avoids CORS entirely
       const response = await fetch(
-        `/api/walrus-upload?network=${network}&epochs=180`,
+        `/api/walrus-upload?network=${network}&epochs=5`,
         {
           method:  'PUT',
           body:    file,
