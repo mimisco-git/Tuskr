@@ -19,6 +19,7 @@ import BatchMint        from './pages/BatchMint'
 import ListNFT          from './pages/ListNFT'
 import Leaderboard      from './pages/Leaderboard'
 import Auction          from './pages/Auction'
+import VerifyBlob    from './pages/VerifyBlob'
 import NotFound         from './pages/NotFound'
 import ZkLogin          from './pages/ZkLogin'
 import ScrollToTop      from './components/ScrollToTop'
@@ -52,6 +53,7 @@ function AnimatedRoutes() {
           <Route path="/leaderboard" element={<ErrorBoundary><Leaderboard /></ErrorBoundary>} />
           <Route path="/auction"     element={<ErrorBoundary><Auction /></ErrorBoundary>} />
           <Route path="/zklogin"     element={<ErrorBoundary><ZkLogin /></ErrorBoundary>} />
+          <Route path="/verify/:blobId" element={<ErrorBoundary><VerifyBlob /></ErrorBoundary>} />
           <Route path="*"           element={<NotFound />} />
         </Routes>
         <Footer />

@@ -169,15 +169,7 @@ export default function NFTDetail() {
                 <div className={s.blobLabelRow}>
                   <div className={s.blobLabel}>Walrus Blob ID</div>
                   <a
-                    href={(() => {
-                      const net = localStorage.getItem('tuskr_network') || 'testnet'
-                      const agg = net === 'mainnet'
-                        ? 'https://aggregator.walrus.space'
-                        : 'https://aggregator.walrus-testnet.walrus.space'
-                      return `${agg}/v1/blobs/${nft.blobId}`
-                    })()}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={`/verify/${nft.blobId}`}
                     className={s.blobVerifyLink}
                   >
                     Verify on Walrus ↗
