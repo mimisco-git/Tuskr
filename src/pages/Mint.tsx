@@ -31,6 +31,7 @@ export default function Mint() {
   const [step,     setStep]     = useState<Step>('upload')
   const [file,     setFile]     = useState<File | null>(null)
   const [preview,  setPreview]  = useState<string | null>(null)
+  const [isVideo,  setIsVideo]  = useState(false)
   const [blobId,   setBlobId]   = useState<string | null>(null)
   const [mediaUrl, setMediaUrl] = useState<string | null>(null)
   const [name,     setName]     = useState('')
@@ -42,6 +43,7 @@ export default function Mint() {
 
   const handleFile = (f: File) => {
     setFile(f)
+    setIsVideo(f.type.startsWith('video/'))
     setPreview(URL.createObjectURL(f))
   }
 
@@ -76,7 +78,7 @@ export default function Mint() {
   }
 
   const reset = () => {
-    setStep('upload'); setFile(null); setPreview(null)
+    setStep('upload'); setFile(null); setPreview(null); setIsVideo(false)
     setBlobId(null); setMediaUrl(null)
     setName(''); setDesc(''); setRoyalty(5); setTxDigest(null)
   }
@@ -162,7 +164,12 @@ export default function Mint() {
               onClick={() => document.getElementById('mintFile')?.click()}
             >
               {preview ? (
-                <img src={preview} alt="Preview" className={s.dropPreview}/>
+                isVideo ? (
+                  <video src={preview} className={s.dropPreview} autoPlay loop muted playsInline controls={false}
+                    style={{ objectFit:'cover', width:'100%', height:'100%', borderRadius:12 }}/>
+                ) : (
+                  <img src={preview} alt="Preview" className={s.dropPreview}/>
+                )
               ) : (
                 <div className={s.dropEmpty}>
                   <div className={s.dropIconWrap}>
@@ -201,6 +208,15 @@ export default function Mint() {
               </div>
             )}
 
+            {isVideo && (
+              <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 14px',
+                background:'rgba(99,102,241,0.10)', border:'1px solid rgba(99,102,241,0.25)',
+                borderRadius:10, marginBottom:8 }}>
+                <span style={{ fontSize:18 }}>🎬</span>
+                <span style={{ fontSize:13, fontWeight:700, color:'#818cf8' }}>Video NFT</span>
+                <span style={{ fontSize:12, color:'rgba(245,245,247,0.4)' }}>· Stored permanently on Walrus</span>
+              </div>
+            )}
             {wErr && <p className={s.errMsg}>{wErr}</p>}
 
             <div className={s.walrusBadgeRow}>

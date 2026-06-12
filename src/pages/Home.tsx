@@ -248,9 +248,25 @@ export default function Home() {
   const [activeFeat, setActiveFeat] = useState(0)
   const [featured,   setFeatured]   = useState<NFT[]>([])
   const [counter,    setCounter]    = useState({ nfts: 0, vol: 0, creators: 0 })
+  const [liveStats,  setLiveStats]  = useState({ minted: 0, listed: 0, walrusMB: 0 })
   const client   = useSuiClient()
   const feat     = FEATURES[activeFeat]
   const allPart  = [...PARTNERS, ...PARTNERS]
+
+  // Load live stats
+  useEffect(() => {
+    fetch('/api/tuskr-nfts?type=minted&network=testnet')
+      .then(r => r.json())
+      .then(d => {
+        const minted = d.nfts?.length ?? 0
+        setLiveStats(prev => ({ ...prev, minted, walrusMB: parseFloat((minted * 0.18).toFixed(1)) }))
+      }).catch(() => {})
+    fetch('/api/tuskr-nfts?type=listings&network=testnet')
+      .then(r => r.json())
+      .then(d => {
+        setLiveStats(prev => ({ ...prev, listed: d.activeIds?.length ?? 0 }))
+      }).catch(() => {})
+  }, [])
 
   // Load real featured listings
   useEffect(() => {
