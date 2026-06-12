@@ -70,10 +70,19 @@ export default function Marketplace() {
   const loadTuskrNfts = useCallback(async () => {
     setLoadingTuskr(true)
     try {
-      const events = await client.queryEvents({
-        query: { MoveEventType: `${PACKAGE_ID}::tuskr_nft::MintedEvent` },
-        limit: 50,
-      }).catch(() => ({ data: [] }))
+      // Query both current and previous package IDs to show all minted NFTs
+      const OLD_PKG = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+      const pkgs = PACKAGE_ID === OLD_PKG ? [PACKAGE_ID] : [PACKAGE_ID, OLD_PKG]
+
+      const allEventResults = await Promise.all(
+        pkgs.map(pkg =>
+          client.queryEvents({
+            query: { MoveEventType: `${pkg}::tuskr_nft::MintedEvent` },
+            limit: 50,
+          }).catch(() => ({ data: [] }))
+        )
+      )
+      const events = { data: allEventResults.flatMap(r => r.data) }
 
       if (!events.data.length) { setTuskrNfts([]); return }
 
@@ -168,10 +177,12 @@ export default function Marketplace() {
     setLoadingList(true)
     try {
       // Fetch all event types in parallel
+      const OLD_PKG2 = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+      const allPkgs = PACKAGE_ID === OLD_PKG2 ? [PACKAGE_ID] : [PACKAGE_ID, OLD_PKG2]
       const [listedRes, soldRes, delistedRes] = await Promise.all([
-        client.queryEvents({ query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent`   }, limit: 200 }).catch(() => ({ data: [] })),
-        client.queryEvents({ query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::SoldEvent`     }, limit: 200 }).catch(() => ({ data: [] })),
-        client.queryEvents({ query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::DelistedEvent` }, limit: 200 }).catch(() => ({ data: [] })),
+        Promise.all(allPkgs.map(p => client.queryEvents({ query: { MoveEventType: `${p}::tuskr_marketplace::ListedEvent`   }, limit: 200 }).catch(() => ({ data: [] })))).then(rs => ({ data: rs.flatMap(r => r.data) })),
+        Promise.all(allPkgs.map(p => client.queryEvents({ query: { MoveEventType: `${p}::tuskr_marketplace::SoldEvent`     }, limit: 200 }).catch(() => ({ data: [] })))).then(rs => ({ data: rs.flatMap(r => r.data) })),
+        Promise.all(allPkgs.map(p => client.queryEvents({ query: { MoveEventType: `${p}::tuskr_marketplace::DelistedEvent` }, limit: 200 }).catch(() => ({ data: [] })))).then(rs => ({ data: rs.flatMap(r => r.data) })),
       ])
 
       const soldIds     = new Set((soldRes.data     as any[]).map(e => e.parsedJson?.listing_id).filter(Boolean))
