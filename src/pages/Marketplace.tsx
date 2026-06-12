@@ -410,7 +410,7 @@ export default function Marketplace() {
                   🟢 Your {myListings.length} listing{myListings.length>1?'s':''} shown first.
                 </p>
               )}
-              <table className={s.table}>
+              <table className={`${s.table} ${s.listedTable}`}>
                 <thead><tr>
                   <th className={s.thName}>NFT</th>
                   <th className={s.thNum}>Price</th>

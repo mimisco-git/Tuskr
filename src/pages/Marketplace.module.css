@@ -1,6 +1,7 @@
-.page { padding: 72px 0 96px; min-height: 80vh; }
+/* ── Page ── */
+.page { padding: 72px 0 120px; min-height: 80vh; }
 
-/* Header */
+/* ── Header ── */
 .header { margin-bottom: 28px; }
 .eyebrow { display: inline-flex; align-items: center; gap: 7px; font-family: 'Space Mono',monospace; font-size: 10px; color: var(--a); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 12px; }
 .eyebrowDot { width: 6px; height: 6px; border-radius: 50%; background: var(--a); box-shadow: 0 0 8px var(--a); animation: pulse 2s infinite; }
@@ -11,16 +12,17 @@
 .mintBtn { padding: 11px 22px; border-radius: 12px; background: #00d4aa; color: #000; font-size: 15px; font-weight: 700; text-decoration: none; white-space: nowrap; transition: background 0.15s; }
 .mintBtn:hover { background: #00efc0; }
 
-/* Tabs */
-.tabBar { display: flex; gap: 2px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 24px; overflow-x: auto; }
-.tab { padding: 10px 20px; font-size: 15px; font-weight: 500; color: rgba(245,245,247,0.4); background: transparent; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+/* ── Tabs ── */
+.tabBar { display: flex; gap: 2px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 24px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.tabBar::-webkit-scrollbar { display: none; }
+.tab { padding: 10px 18px; font-size: 14px; font-weight: 500; color: rgba(245,245,247,0.4); background: transparent; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; white-space: nowrap; flex-shrink: 0; }
 .tab:hover { color: rgba(245,245,247,0.75); }
 .tabActive { color: #fff; border-bottom-color: var(--a); }
 
-/* Table shared */
+/* ── Table ── */
 .table { width: 100%; border-collapse: collapse; }
-.table th { font-family: 'Space Mono',monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: rgba(245,245,247,0.25); padding: 0 12px 12px; text-align: right; white-space: nowrap; cursor: pointer; }
-.thNum  { text-align: right; width: 60px; }
+.table th { font-family: 'Space Mono',monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.10em; color: rgba(245,245,247,0.25); padding: 0 12px 12px; text-align: right; white-space: nowrap; }
+.thNum  { text-align: right; width: 80px; }
 .thName { text-align: left; }
 .row { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.12s; }
 .row:hover { background: rgba(255,255,255,0.03); }
@@ -30,10 +32,10 @@
 
 /* Collection row */
 .colLink { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-.colThumb { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; overflow: hidden; }
+.colThumb { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; overflow: hidden; background: rgba(255,255,255,0.06); }
 .colTitle { font-size: 15px; font-weight: 600; color: #f5f5f7; }
 .colLink:hover .colTitle { color: var(--a); }
-.tick { font-size: 10px; color: var(--a); background: rgba(0,212,170,0.1); border: 1px solid rgba(0,212,170,0.2); padding: 1px 6px; border-radius: 99px; flex-shrink: 0; }
+.tick { font-size: 10px; color: var(--a); background: rgba(0,212,170,0.10); border: 1px solid rgba(0,212,170,0.2); padding: 1px 6px; border-radius: 99px; flex-shrink: 0; }
 .sui  { font-size: 11px; color: rgba(245,245,247,0.3); }
 .dim  { color: rgba(245,245,247,0.25); }
 .up   { color: #00d4aa; font-weight: 700; }
@@ -51,7 +53,7 @@
 .sortBtn:hover { color: #f5f5f7; }
 .sortActive { background: rgba(0,212,170,0.10); border-color: rgba(0,212,170,0.25); color: var(--a); }
 
-/* NFT Grid for Tuskr tab */
+/* NFT grid for Tuskr tab */
 .nftGrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
 .nftCard { display: block; text-decoration: none; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; overflow: hidden; transition: all 0.2s; }
 .nftCard:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-3px); }
@@ -62,7 +64,7 @@
 
 /* Skeleton */
 .skelList { display: flex; flex-direction: column; gap: 4px; }
-.skelRow { height: 54px; border-radius: 10px; background: rgba(255,255,255,0.04); animation: shimmer 1.4s ease infinite; }
+.skelRow { height: 56px; border-radius: 10px; background: rgba(255,255,255,0.04); animation: shimmer 1.4s ease infinite; }
 @keyframes shimmer { 50%{opacity:.4;} }
 
 /* Empty state */
@@ -71,33 +73,162 @@
 .emptyTitle { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
 .emptySub { font-size: 15px; color: rgba(245,245,247,0.4); margin-bottom: 20px; }
 
-/* Responsive */
-@media(max-width:768px){
-  .page{padding:60px 0 72px;}
-  .table th:nth-child(5),.table td:nth-child(5),.table th:nth-child(6),.table td:nth-child(6){display:none;}
-  .nftGrid{grid-template-columns:repeat(2,1fr);gap:10px;}
-  .exploreControls{flex-direction:column;align-items:stretch;}
+/* ══════════════════════════════════
+   MOBILE — ≤ 768px
+   ══════════════════════════════════ */
+@media (max-width: 768px) {
+  .page { padding: 60px 0 96px; }
+  .nftGrid { grid-template-columns: repeat(2,1fr); gap: 10px; }
+  .exploreControls { flex-direction: column; align-items: stretch; }
+
+  /* Hide less important columns on tablet */
+  .table th:nth-child(n+4),
+  .table td:nth-child(n+4) { display: none; }
 }
 
-/* ── Mobile card layout for tables ── */
-@media (max-width: 640px) {
+/* ══════════════════════════════════
+   MOBILE — ≤ 600px  (card layout)
+   ══════════════════════════════════ */
+@media (max-width: 600px) {
+  /* Convert all tables to card list */
   .table thead { display: none; }
-  .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+  .table { display: block; }
+  .table tbody { display: block; }
+
+  /* Each row = a card */
   .table tr {
-    background: rgba(255,255,255,0.025);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px;
+    border-radius: 14px;
     margin-bottom: 8px;
-    padding: 12px;
+    padding: 12px 14px;
   }
-  .table tr:hover { background: rgba(255,255,255,0.04); transform: none; }
-  .table td {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 4px 0; border: none; text-align: left;
+  .table tr:hover { background: rgba(255,255,255,0.05); }
+
+  /* All cells hidden by default */
+  .table td { display: none; padding: 0; }
+
+  /* Show only name column (has the image) */
+  .table td.tdName {
+    display: flex;
+    flex: 1;
+    min-width: 0;
   }
-  .tdNum { text-align: left; }
-  .tdName { flex-direction: column; align-items: flex-start; }
-  .colLink { flex-direction: row; }
-  /* Hide rank and verified on tiny screens */
-  .table td:first-child { display: none; }
+
+  /* Show price column */
+  .table td.tdNum:nth-of-type(1) {
+    display: flex;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    text-align: right;
+  }
+
+  /* Make colLink always row direction with image */
+  .colLink {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .colThumb {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .colTitle {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Listed for Sale — show all key columns */
+  .table td.tdName,
+  .table td.tdNum { display: flex; }
+
+  /* NFT grid 2 columns */
+  .nftGrid { grid-template-columns: 1fr 1fr; gap: 8px; }
+}
+
+/* ══════════════════════════════════
+   MOBILE CARD VIEW — clean, pro
+   ══════════════════════════════════ */
+@media (max-width: 600px) {
+
+  /* --- Ranking tables (Trending, Explore) --- */
+  .table:not(.listedTable) thead { display: none; }
+  .table:not(.listedTable) { display: block; }
+  .table:not(.listedTable) tbody { display: block; }
+  .table:not(.listedTable) tr {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0;
+    background: transparent;
+    margin: 0;
+  }
+  .table:not(.listedTable) tr:first-child { border-top: 1px solid rgba(255,255,255,0.06); }
+  /* Hide rank col */
+  .table:not(.listedTable) td:nth-child(1) { display: none; }
+  /* Show name col */
+  .table:not(.listedTable) td:nth-child(2) {
+    display: flex; flex: 1; min-width: 0;
+    padding: 0;
+  }
+  /* Show volume col */
+  .table:not(.listedTable) td:nth-child(4) {
+    display: flex; flex-shrink: 0;
+    font-size: 13px; font-weight: 700; color: #fff;
+    padding: 0;
+  }
+  /* Hide the rest */
+  .table:not(.listedTable) td:nth-child(3),
+  .table:not(.listedTable) td:nth-child(5),
+  .table:not(.listedTable) td:nth-child(6) { display: none; }
+
+  /* --- Listed for Sale table --- */
+  .listedTable thead { display: none; }
+  .listedTable { display: block; }
+  .listedTable tbody { display: block; }
+  .listedTable tr {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    margin-bottom: 8px;
+    background: rgba(255,255,255,0.025);
+  }
+  .listedTable td { padding: 0; border: none; }
+  /* NFT image + name — flex:1 */
+  .listedTable td:nth-child(1) {
+    display: flex; flex: 1; min-width: 0;
+  }
+  /* Price */
+  .listedTable td:nth-child(2) {
+    display: flex; flex-shrink: 0;
+    font-size: 13px; font-weight: 700; color: #fff;
+  }
+  /* Hide seller */
+  .listedTable td:nth-child(3) { display: none; }
+  /* Buy button */
+  .listedTable td:nth-child(4) {
+    display: flex; flex-shrink: 0;
+  }
+
+  /* colLink always row on mobile */
+  .colLink { flex-direction: row !important; gap: 8px; min-width: 0; }
+  .colThumb { width: 40px; height: 40px; flex-shrink: 0; }
+  .colTitle { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
