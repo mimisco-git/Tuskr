@@ -30,8 +30,8 @@ export default function Marketplace() {
   const PACKAGE_ID  = network.packageId
   const account     = useCurrentAccount()
   const client      = useSuiClient()
-  const { } = useToast()
-  const { } = useNFTMarketplace()
+  const { error: toastErr } = useToast()
+  const { buyNFT } = useNFTMarketplace()
 
   const [tab,          setTab]         = useState<Tab>('trending')
   const [collections,  setCollections]  = useState<TPCollection[]>([])
@@ -41,8 +41,25 @@ export default function Marketplace() {
   const [loadingCols,  setLoadingCols]  = useState(true)
   const [loadingTuskr, setLoadingTuskr] = useState(false)
   const [loadingList,  setLoadingList]  = useState(false)
+  const [buying,       setBuying]       = useState<string|null>(null) // listingId being bought
   const [search,       setSearch]       = useState('')
   const [sortBy,       setSortBy]       = useState<'volume'|'floor'>('volume')
+
+  /* ── Buy an NFT ── */
+  const handleBuy = async (l: any) => {
+    if (!account) { toastErr('Connect your wallet first'); return }
+    if (buying) return
+    setBuying(l.listingId)
+    try {
+      await buyNFT(l.listingId, BigInt(l.price))
+      setListings(prev => prev.filter((x: any) => x.listingId !== l.listingId))
+      toastErr(`✅ Bought! "${l.name}" is now yours.`)
+    } catch (e: any) {
+      toastErr(e?.message?.slice(0,120) || 'Purchase failed')
+    } finally {
+      setBuying(null)
+    }
+  }
 
   useEffect(() => {
     fetchSuiCollections(60).then(setCollections).catch(console.error).finally(() => setLoadingCols(false))
@@ -226,12 +243,8 @@ export default function Marketplace() {
     }
   }, [PACKAGE_ID])
 
-  useEffect(() => {
-    if (tab === 'tuskr')  loadTuskrNfts()
-    if (tab === 'listed') loadListings()
-  }, [tab, network.name])
+  /* ── Buy an NFT ── */
 
-  /* ── Display data ── */
   const trendList = trending.length > 0
     ? trending.map(t => ({
         id: t.collection.id, slug: t.collection.slug,
@@ -430,9 +443,24 @@ export default function Marketplace() {
                         </span>
                       </td>
                       <td className={s.tdNum}>
-                        {account?.address===l.seller
-                          ? <span style={{color:'var(--a)',fontSize:12}}>Active</span>
-                          : <span className={s.dim}>For Sale</span>}
+                        {account?.address===l.seller ? (
+                          <span style={{color:'var(--a)',fontSize:12,fontWeight:700}}>Your listing</span>
+                        ) : account ? (
+                          <button
+                            onClick={() => handleBuy(l)}
+                            disabled={!!buying}
+                            style={{
+                              padding:'6px 14px', borderRadius:8, fontSize:13, fontWeight:700,
+                              background:'#00d4aa', color:'#000', border:'none', cursor:'pointer',
+                              opacity: buying===l.listingId ? 0.7 : 1,
+                              minWidth:70,
+                            }}
+                          >
+                            {buying===l.listingId ? '...' : 'Buy'}
+                          </button>
+                        ) : (
+                          <span style={{fontSize:11,color:'rgba(245,245,247,0.35)'}}>Connect wallet</span>
+                        )}
                       </td>
                     </tr>
                   ))}
