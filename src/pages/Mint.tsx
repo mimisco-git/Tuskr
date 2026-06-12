@@ -279,6 +279,41 @@ export default function Mint() {
                   />
                 </div>
 
+                {/* Seal encryption toggle */}
+                {sealAvailable && (
+                  <div style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 12,
+                    padding: '14px 16px',
+                    background: useSealEncrypt ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${useSealEncrypt ? 'rgba(168,85,247,0.30)' : 'rgba(255,255,255,0.08)'}`,
+                    borderRadius: 12, cursor: 'pointer', transition: 'all 0.2s',
+                    marginBottom: 4,
+                  }}
+                  onClick={() => setUseSealEncrypt(v => !v)}
+                  >
+                    <div style={{
+                      width: 20, height: 20, borderRadius: 6, flexShrink: 0, marginTop: 1,
+                      background: useSealEncrypt ? '#a855f7' : 'rgba(255,255,255,0.08)',
+                      border: `2px solid ${useSealEncrypt ? '#a855f7' : 'rgba(255,255,255,0.20)'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      transition: 'all 0.2s',
+                    }}>
+                      {useSealEncrypt && <span style={{ color:'#fff', fontSize:12, lineHeight:1 }}>✓</span>}
+                    </div>
+                    <div>
+                      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:3 }}>
+                        <span style={{ fontSize:13, fontWeight:700, color: useSealEncrypt ? '#a855f7' : '#f5f5f7' }}>
+                          🔐 Encrypt description with Seal
+                        </span>
+                      </div>
+                      <p style={{ fontSize:12, color:'rgba(245,245,247,0.4)', margin:0, lineHeight:1.5 }}>
+                        Your description will be encrypted on Walrus. Only you (the NFT owner) can decrypt and read it.
+                        Powered by Mysten Labs Seal.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className={s.field}>
                   <label className={s.fieldLabel}>
                     Creator Royalty
