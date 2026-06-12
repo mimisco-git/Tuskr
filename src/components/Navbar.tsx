@@ -281,6 +281,38 @@ export default function Navbar() {
               <NetBadge />
             </div>
 
+            {/* Nav links */}
+            <nav className={s.drawerNav}>
+              {LINKS.map(item => (
+                <div key={item.label} className={s.drawerGroup}>
+                  <span className={s.drawerGroupLabel}>{item.label}</span>
+                  {item.sub.map(sub => (
+                    sub.href ? (
+                      <a
+                        key={sub.href}
+                        href={sub.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={s.drawerLink}
+                        onClick={() => setMobile(false)}
+                      >
+                        {sub.label} ↗
+                      </a>
+                    ) : (
+                      <Link
+                        key={sub.to}
+                        to={sub.to!}
+                        className={s.drawerLink}
+                        onClick={() => setMobile(false)}
+                      >
+                        {sub.label}
+                      </Link>
+                    )
+                  ))}
+                </div>
+              ))}
+            </nav>
+
             {/* Auth card */}
             {isSignedIn ? (
               <div className={s.idCard}>
