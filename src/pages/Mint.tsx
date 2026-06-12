@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useCurrentAccount, ConnectButton } from '@mysten/dapp-kit'
+import { useSeal }        from '../hooks/useSeal'
 import { useWalrus } from '../hooks/useWalrus'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useXP } from '../hooks/useXP'
@@ -22,9 +23,11 @@ export default function Mint() {
   const { network } = useNetwork()
   const account = useCurrentAccount()
   const { uploadBlob, uploading, error: wErr } = useWalrus()
+  const { encrypt: sealEncrypt, isAvailable: sealAvailable } = useSeal()
   const { mintNFT } = useNFTMarketplace()
   const { awardXP } = useXP(account?.address)
 
+  const [useSealEncrypt, setUseSealEncrypt] = useState(false)
   const [step,     setStep]     = useState<Step>('upload')
   const [file,     setFile]     = useState<File | null>(null)
   const [preview,  setPreview]  = useState<string | null>(null)

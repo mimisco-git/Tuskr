@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { useNetwork } from '../hooks/useNetwork'
+import { useSeal }            from '../hooks/useSeal'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useXP } from '../hooks/useXP'
 import { useWatchlist } from '../hooks/useWatchlist'
@@ -20,6 +22,7 @@ interface NFTData {
   royaltyBps:  number
   price:       string
   listed:      boolean
+  sealedBlobId?: string
 }
 
 const PRICE_HISTORY = [
@@ -43,6 +46,8 @@ export default function NFTDetail() {
   const { id } = useParams<{ id: string }>()
   const account  = useCurrentAccount()
   const client   = useSuiClient()
+  const { network }  = useNetwork()
+  const { encrypt: sealEncrypt, decrypt: sealDecrypt } = useSeal()
   const { buyNFT } = useNFTMarketplace()
   const { awardXP } = useXP(account?.address)
   const { isWatched, toggleWatch } = useWatchlist()
@@ -52,7 +57,11 @@ export default function NFTDetail() {
   const [loading,   setLoading]   = useState(true)
   const [notFound,  setNotFound]  = useState(false)
   const [buying,    setBuying]    = useState(false)
-  const [showOffer, setShowOffer] = useState(false)
+  const [showOffer,    setShowOffer]    = useState(false)
+  const [sealedBlobId, setSealedBlobId] = useState('')
+  const [sealContent,  setSealContent]  = useState<string|null>(null)
+  const [sealLoading,  setSealLoading]  = useState(false)
+  const [sealError,    setSealError]    = useState('')
   const [offerAmt,  setOfferAmt]  = useState('')
 
   useEffect(() => {
@@ -73,12 +82,14 @@ export default function NFTDetail() {
       const fields  = (obj.data.content as any)?.fields ?? {}
       const display = (obj.data.display as any)?.data ?? {}
 
+      setSealedBlobId(fields.sealed_blob_id || '')
       setNft({
         id:         objectId,
         name:       fields.name        || display.name       || 'Tuskr NFT',
         description:fields.description || display.description || '',
         image:      display.image_url  || fields._media_url_resolved || '',
         blobId:     fields.blob_id     || '',
+        sealedBlobId: fields.sealed_blob_id || '',
         creator:    fields.creator     || '',
         royaltyBps: Number(fields.royalty_bps ?? 0),
         price:      '0',
@@ -88,6 +99,38 @@ export default function NFTDetail() {
       setNotFound(true)
     } finally {
       setLoading(false)
+    }
+  }
+
+  /* ── Seal decrypt ── */
+  const handleSealUnlock = async () => {
+    if (!account || !nft || !sealedBlobId) return
+    setSealLoading(true)
+    setSealError('')
+    try {
+      const pkg   = network.packageId
+      const net   = network.name
+      const agg   = net === 'mainnet'
+        ? 'https://aggregator.walrus.space'
+        : 'https://aggregator.walrus-testnet.walrus.space'
+
+      // 1. Fetch encrypted bytes from Walrus
+      const res = await fetch(`/api/img?url=${encodeURIComponent(`${agg}/v1/blobs/${sealedBlobId}`)}`)
+      if (!res.ok) throw new Error('Could not fetch encrypted blob from Walrus')
+      const encBuf = await res.arrayBuffer()
+      const encBytes = new Uint8Array(encBuf)
+
+      // 2. Decrypt with Seal — user will be prompted to sign in wallet
+      const decrypted = await sealDecrypt(encBytes, nft.id, pkg)
+      if (!decrypted) throw new Error('Decryption returned empty')
+
+      // 3. Show decrypted content (text for now)
+      const text = new TextDecoder().decode(decrypted)
+      setSealContent(text)
+    } catch (e: any) {
+      setSealError(e?.message || 'Decryption failed')
+    } finally {
+      setSealLoading(false)
     }
   }
 
@@ -162,6 +205,61 @@ export default function NFTDetail() {
                 </div>
               )}
             </div>
+
+            {/* Seal encrypted content */}
+            {sealedBlobId && (
+              <div style={{
+                background: 'rgba(168,85,247,0.06)',
+                border: '1px solid rgba(168,85,247,0.25)',
+                borderRadius: 14, padding: '18px 20px', marginBottom: 16,
+              }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
+                  <div>
+                    <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+                      <span style={{ fontSize:16 }}>🔐</span>
+                      <span style={{ fontSize:13, fontWeight:700, color:'#a855f7', fontFamily:'Space Mono, monospace', textTransform:'uppercase', letterSpacing:'0.1em' }}>
+                        Seal Encrypted
+                      </span>
+                    </div>
+                    <p style={{ fontSize:13, color:'rgba(245,245,247,0.5)', margin:0 }}>
+                      Private content secured with Seal threshold encryption.
+                      {account?.address === nft.creator
+                        ? ' You own this NFT — unlock to reveal.'
+                        : ' Only the NFT owner can unlock this.'}
+                    </p>
+                  </div>
+                  {account?.address === nft.creator && !sealContent && (
+                    <button
+                      onClick={handleSealUnlock}
+                      disabled={sealLoading}
+                      style={{
+                        padding: '10px 20px', borderRadius: 10, fontSize: 14, fontWeight: 700,
+                        background: sealLoading ? 'rgba(168,85,247,0.3)' : '#a855f7',
+                        color: '#fff', border: 'none', cursor: sealLoading ? 'not-allowed' : 'pointer',
+                        transition: 'background 0.15s', whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {sealLoading ? '🔓 Unlocking...' : '🔓 Unlock with Seal'}
+                    </button>
+                  )}
+                </div>
+                {sealError && (
+                  <p style={{ color:'#f87171', fontSize:13, marginTop:10, margin:'10px 0 0' }}>
+                    ⚠ {sealError}
+                  </p>
+                )}
+                {sealContent && (
+                  <div style={{ marginTop:14, padding:'14px 16px', background:'rgba(0,0,0,0.3)', borderRadius:10 }}>
+                    <p style={{ fontSize:11, fontFamily:'Space Mono, monospace', color:'#a855f7', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:8 }}>
+                      🔓 Decrypted Content
+                    </p>
+                    <p style={{ fontSize:14, color:'#f5f5f7', lineHeight:1.7, margin:0, whiteSpace:'pre-wrap' }}>
+                      {sealContent}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Blob info */}
             {nft.blobId && (
