@@ -160,28 +160,15 @@ export default function Marketplace() {
     }
   }, [PACKAGE_ID, network.name])
 
-  /* ── Load marketplace listings ── */
+  /* ── Load marketplace listings via direct RPC endpoint ── */
   const loadListings = useCallback(async () => {
     setLoadingList(true)
     try {
-      // Fetch all event types in parallel
-      const OLD_PKG2 = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
-      const allPkgs = PACKAGE_ID === OLD_PKG2 ? [PACKAGE_ID] : [PACKAGE_ID, OLD_PKG2]
-      const [listedRes, soldRes, delistedRes] = await Promise.all([
-        Promise.all(allPkgs.map(p => client.queryEvents({ query: { MoveEventType: `${p}::tuskr_marketplace::ListedEvent`   }, limit: 200 }).catch(() => ({ data: [] })))).then(rs => ({ data: rs.flatMap(r => r.data) })),
-        Promise.all(allPkgs.map(p => client.queryEvents({ query: { MoveEventType: `${p}::tuskr_marketplace::SoldEvent`     }, limit: 200 }).catch(() => ({ data: [] })))).then(rs => ({ data: rs.flatMap(r => r.data) })),
-        Promise.all(allPkgs.map(p => client.queryEvents({ query: { MoveEventType: `${p}::tuskr_marketplace::DelistedEvent` }, limit: 200 }).catch(() => ({ data: [] })))).then(rs => ({ data: rs.flatMap(r => r.data) })),
-      ])
+      const net = network.name
+      const res = await fetch(`/api/tuskr-nfts?type=listings&network=${net}`)
+      const { activeIds } = await res.json()
 
-      const soldIds     = new Set((soldRes.data     as any[]).map(e => e.parsedJson?.listing_id).filter(Boolean))
-      const delistedIds = new Set((delistedRes.data as any[]).map(e => e.parsedJson?.listing_id).filter(Boolean))
-
-      // Only keep listing IDs that are still active
-      const activeIds = (listedRes.data as any[])
-        .map(e => e.parsedJson?.listing_id)
-        .filter((id: string) => id && !soldIds.has(id) && !delistedIds.has(id))
-
-      console.log('[Listings] total listed:', listedRes.data.length, '| active:', activeIds.length)
+      console.log('[Listings] active:', activeIds?.length ?? 0)
 
       if (!activeIds.length) { setListings([]); return }
 
