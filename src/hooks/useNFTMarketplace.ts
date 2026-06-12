@@ -29,6 +29,7 @@ export interface MintParams {
   blobId: string
   mediaUrl: string
   royaltyBps: number
+  sealedBlobId?: string  // optional — if set, calls mint_with_seal
 }
 
 export interface ListParams {
@@ -49,16 +50,31 @@ export function useNFTMarketplace() {
     if (!params.mediaUrl.trim()) throw new Error('Media URL is required')
 
     const tx = new Transaction()
-    tx.moveCall({
-      target: `${packageId}::tuskr_nft::mint`,
-      arguments: [
-        tx.pure.string(params.name),
-        tx.pure.string(params.description || ''),
-        tx.pure.string(params.blobId),
-        tx.pure.string(params.mediaUrl),
-        tx.pure.u16(params.royaltyBps),
-      ],
-    })
+    if (params.sealedBlobId) {
+      // mint_with_seal: stores Seal-encrypted content blob ID on-chain
+      tx.moveCall({
+        target: `${packageId}::tuskr_nft::mint_with_seal`,
+        arguments: [
+          tx.pure.string(params.name),
+          tx.pure.string(params.description || ''),
+          tx.pure.string(params.blobId),
+          tx.pure.string(params.mediaUrl),
+          tx.pure.string(params.sealedBlobId),
+          tx.pure.u16(params.royaltyBps),
+        ],
+      })
+    } else {
+      tx.moveCall({
+        target: `${packageId}::tuskr_nft::mint`,
+        arguments: [
+          tx.pure.string(params.name),
+          tx.pure.string(params.description || ''),
+          tx.pure.string(params.blobId),
+          tx.pure.string(params.mediaUrl),
+          tx.pure.u16(params.royaltyBps),
+        ],
+      })
+    }
 
     try {
       const result = await signAndExecute({ transaction: tx as never })

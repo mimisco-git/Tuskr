@@ -284,16 +284,37 @@ export default function Profile() {
             )}
             {tab==='listed' && (listed.length===0
               ? <Empty msg="Nothing listed for sale yet." action={owned.length>0 ? <Link to="/list" className="btn btn-outline">List an NFT</Link> : undefined}/>
-              : <div className={s.grid}>{owned.map(n=><NFTCard key={n.objectId} nft={n} badge="FOR SALE"/>)}</div>
+              : <div className={s.grid}>{listed.map((l: any) => (
+                  <NFTCard key={l.listingId} nft={{
+                    objectId: l.nftId || l.listingId,
+                    name:     l.name || 'Tuskr NFT',
+                    mediaUrl: l.blobId
+                      ? `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${l.blobId}`
+                      : '',
+                    blobId:      l.blobId || '',
+                    creator:     '',
+                    description: '',
+                    royaltyBps:  0,
+                  }} badge={`${(Number(l.price)/1e9).toFixed(3)} SUI`}/>
+                ))}</div>
             )}
             {tab==='sold' && (sold.length===0
               ? <Empty msg="No sales recorded yet."/>
               : <div className={s.activityList}>
-                  {sold.map((e,i)=>(
+                  {sold.map((item: any, i: number)=>(
                     <div key={i} className={s.activityRow}>
-                      <span className={s.activityDot}/>
-                      <span className={s.activityText}>NFT sold · {new Date(e.timestampMs??0).toLocaleDateString()}</span>
-                      <span className={s.activityPrice}>{((e.parsedJson as any)?.price??0)/1e9} SUI</span>
+                      <span className={s.activityDot} style={{ background:'#00d4aa' }}/>
+                      <div style={{ flex:1 }}>
+                        <span className={s.activityText}>{item.name || 'Tuskr NFT'} · Sold</span>
+                        {item.buyer && (
+                          <div style={{ fontSize:11, color:'rgba(245,245,247,0.35)', marginTop:2 }}>
+                            To: {item.buyer.slice(0,10)}...{item.buyer.slice(-6)}
+                          </div>
+                        )}
+                      </div>
+                      <span className={s.activityPrice} style={{ color:'#00d4aa' }}>
+                        +{(Number(item.price)/1e9).toFixed(3)} SUI
+                      </span>
                     </div>
                   ))}
                 </div>

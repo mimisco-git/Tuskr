@@ -65,7 +65,22 @@ export default function Mint() {
     setMinting(true)
     setStep('minting')
     try {
-      const r = await mintNFT({ name, description: desc, blobId, mediaUrl, royaltyBps: royalty * 100 })
+      // Optional: Seal-encrypt the description before minting
+      let sealedBlobId = ''
+      if (useSealEncrypt && blobId && desc.trim()) {
+        try {
+          const pkg = import.meta.env.VITE_TESTNET_PACKAGE_ID || import.meta.env.VITE_PACKAGE_ID || ''
+          const textBytes = new TextEncoder().encode(desc)
+          const encrypted = await sealEncrypt(textBytes, blobId, pkg)
+          if (encrypted) {
+            const encFile = new File([new Blob([encrypted as BlobPart])], 'sealed.bin', { type: 'application/octet-stream' })
+            const sealR   = await uploadBlob(encFile, account?.address)
+            if (sealR) sealedBlobId = sealR.blobId
+          }
+        } catch (e) { console.warn('[Seal] Encryption skipped:', e) }
+      }
+
+      const r = await mintNFT({ name, description: desc, blobId, mediaUrl, royaltyBps: royalty * 100, sealedBlobId: sealedBlobId || undefined })
       setTxDigest(r.digest)
       setStep('done')
       if (account) awardXP(account.address, 'mint', `Minted: ${name}`)
