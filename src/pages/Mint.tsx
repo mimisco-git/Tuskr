@@ -280,7 +280,7 @@ export default function Mint() {
                 </div>
 
                 {/* Seal encryption toggle */}
-                {sealAvailable && (
+                {true && (
                   <div style={{
                     display: 'flex', alignItems: 'flex-start', gap: 12,
                     padding: '14px 16px',
@@ -307,8 +307,7 @@ export default function Mint() {
                         </span>
                       </div>
                       <p style={{ fontSize:12, color:'rgba(245,245,247,0.4)', margin:0, lineHeight:1.5 }}>
-                        Your description will be encrypted on Walrus. Only you (the NFT owner) can decrypt and read it.
-                        Powered by Mysten Labs Seal.
+                        Your description will be encrypted on Walrus. Only you (the NFT owner) can decrypt and read it. Powered by Mysten Labs Seal.
                       </p>
                     </div>
                   </div>
