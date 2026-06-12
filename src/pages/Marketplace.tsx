@@ -66,6 +66,12 @@ export default function Marketplace() {
     fetchTrendingCollections(12).then(setTrending).catch(() => {})
   }, [])
 
+  // Trigger data loading when tab changes
+  useEffect(() => {
+    if (tab === 'tuskr')  loadTuskrNfts()
+    if (tab === 'listed') loadListings()
+  }, [tab, network.name])
+
   /* ── Load Tuskr minted NFTs ── */
   const loadTuskrNfts = useCallback(async () => {
     setLoadingTuskr(true)
