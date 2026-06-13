@@ -150,12 +150,31 @@ export function useNFTMarketplace() {
 
   const fetchOwnedNFTs = async (address: string): Promise<SuiObjectData[]> => {
     const { packageId } = getNetworkIds()
-    const objects = await client.getOwnedObjects({
-      owner: address,
-      filter: { StructType: `${packageId}::tuskr_nft::TuskrNFT` },
-      options: { showContent: true, showDisplay: true },
+    const OLD_PKG = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+
+    // Query both new and old package IDs so bought NFTs from either show up
+    const [newObjs, oldObjs] = await Promise.all([
+      client.getOwnedObjects({
+        owner: address,
+        filter: { StructType: `${packageId}::tuskr_nft::TuskrNFT` },
+        options: { showContent: true, showDisplay: true, showOwner: true },
+      }).then(r => r.data.map(o => o.data).filter(Boolean) as SuiObjectData[])
+      .catch(() => [] as SuiObjectData[]),
+      client.getOwnedObjects({
+        owner: address,
+        filter: { StructType: `${OLD_PKG}::tuskr_nft::TuskrNFT` },
+        options: { showContent: true, showDisplay: true, showOwner: true },
+      }).then(r => r.data.map(o => o.data).filter(Boolean) as SuiObjectData[])
+      .catch(() => [] as SuiObjectData[]),
+    ])
+
+    // Deduplicate by objectId
+    const seen = new Set<string>()
+    return [...newObjs, ...oldObjs].filter(o => {
+      if (!o?.objectId || seen.has(o.objectId)) return false
+      seen.add(o.objectId)
+      return true
     })
-    return objects.data.map(o => o.data).filter(Boolean) as SuiObjectData[]
   }
 
   const fetchListedByUser = async (address: string) => {

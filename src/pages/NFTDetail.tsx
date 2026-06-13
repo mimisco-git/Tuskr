@@ -59,6 +59,7 @@ export default function NFTDetail() {
   const [buying,    setBuying]    = useState(false)
   const [showOffer,    setShowOffer]    = useState(false)
   const [sealedBlobId, setSealedBlobId] = useState('')
+  const [nftOwner,     setNftOwner]     = useState('')
   const [sealContent,  setSealContent]  = useState<string|null>(null)
   const [sealLoading,  setSealLoading]  = useState(false)
   const [sealError,    setSealError]    = useState('')
@@ -82,6 +83,14 @@ export default function NFTDetail() {
       const fields  = (obj.data.content as any)?.fields ?? {}
       const display = (obj.data.display as any)?.data ?? {}
 
+      // Get the actual current owner of the NFT object
+      const ownerData = (obj.data as any)?.owner
+      const currentOwner =
+        ownerData?.AddressOwner ||
+        ownerData?.ObjectOwner  ||
+        ownerData?.addressOwner ||
+        ''
+      setNftOwner(currentOwner)
       setSealedBlobId(fields.sealed_blob_id || '')
       setNft({
         id:         objectId,
@@ -223,12 +232,12 @@ export default function NFTDetail() {
                     </div>
                     <p style={{ fontSize:13, color:'rgba(245,245,247,0.5)', margin:0 }}>
                       Private content secured with Seal threshold encryption.
-                      {account?.address === nft.creator
+                      {(account?.address === nft.creator || account?.address === nftOwner)
                         ? ' You own this NFT — unlock to reveal.'
                         : ' Only the NFT owner can unlock this.'}
                     </p>
                   </div>
-                  {account?.address === nft.creator && !sealContent && (
+                  {(account?.address === nft.creator || account?.address === nftOwner) && !sealContent && (
                     <button
                       onClick={handleSealUnlock}
                       disabled={sealLoading}
