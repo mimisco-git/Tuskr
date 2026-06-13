@@ -203,13 +203,12 @@
 @media (min-width: 769px) {
   .statement {
     border-radius: 48px 48px 0 0;
-    /* Pull up 280px into the mascot — no gap on any desktop */
-    margin-top: -280px;
+    margin-top: -40px;
   }
 }
 @media (min-width: 1280px) {
   .statement {
-    margin-top: -320px;
+    margin-top: -40px;
   }
 }
 
