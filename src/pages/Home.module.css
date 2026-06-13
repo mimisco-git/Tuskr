@@ -124,17 +124,17 @@
   }
 
   .mascotWrap {
-    width: 148%;
-    margin-left: -24%;
-    overflow: visible;
+    width: 100%;
+    margin-left: 0;
+    overflow: hidden;
     margin-top: -10px;
   }
 
   .mascot {
     height: auto;
-    max-width: none;
-    object-fit: unset;
-    object-position: unset;
+    max-width: 100%;
+    object-fit: cover;
+    object-position: center top;
   }
 }
 
