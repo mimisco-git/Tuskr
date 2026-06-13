@@ -55,9 +55,9 @@ export function useSeal() {
    * Only the NFT owner will be able to decrypt it.
    */
   const encrypt = useCallback(async (
-    data:      Uint8Array,
-    nftId:     string,
-    packageId: string,
+    data:           Uint8Array,
+    creatorAddress: string,   // Encrypt for creator — only creator can decrypt
+    packageId:      string,
   ): Promise<Uint8Array | null> => {
     const seal = sealRef.current
     if (!seal) return null
@@ -65,7 +65,7 @@ export function useSeal() {
       const { encryptedObject } = await seal.encrypt({
         threshold: 1,
         packageId,
-        id:        nftId,
+        id:        creatorAddress,  // Use creator address as Seal identity
         data,
       })
       return encryptedObject
@@ -84,9 +84,10 @@ export function useSeal() {
    *  4. SealClient.decrypt fetches key shares and decrypts
    */
   const decrypt = useCallback(async (
-    encryptedBytes: Uint8Array,
-    nftId:          string,
-    packageId:      string,
+    encryptedBytes:   Uint8Array,
+    creatorAddress:   string,  // Must match the address used during encryption
+    packageId:        string,
+    nftId:            string,  // The NFT object to pass to seal_approve
   ): Promise<Uint8Array | null> => {
     if (!account) throw new Error('No wallet connected')
     const seal = sealRef.current
@@ -108,14 +109,15 @@ export function useSeal() {
     // 3. Build seal_approve transaction
     // The Move function: seal_approve(id: vector<u8>, nft: &TuskrNFT, ctx: &TxContext)
     // id = hex-decoded NFT object ID bytes
-    const idBytes = Array.from(
-      nftId.replace('0x', '').match(/../g)!.map((b: string) => parseInt(b, 16))
+    // id = BCS-encoded creator address (matches seal_approve logic)
+    const addrBytes = Array.from(
+      creatorAddress.replace('0x', '').match(/../g)!.map((b: string) => parseInt(b, 16))
     )
     const tx = new Transaction()
     tx.moveCall({
       target:    `${packageId}::tuskr_nft::seal_approve`,
       arguments: [
-        tx.pure.vector('u8', idBytes),
+        tx.pure.vector('u8', addrBytes),
         tx.object(nftId),
       ],
     })

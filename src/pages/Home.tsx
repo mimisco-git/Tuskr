@@ -332,6 +332,31 @@ export default function Home() {
             <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
               Start discovering <Arrow/>
             </Link>
+
+            {/* Live stats — visible immediately in hero */}
+            <div style={{
+              display: 'flex', gap: 'clamp(16px,4vw,40px)', flexWrap: 'wrap',
+              marginTop: 32, padding: '16px 20px',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 16,
+            }}>
+              {[
+                { icon:'🖼', value: liveStats.minted || '...', label:'NFTs Minted' },
+                { icon:'🌊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '...', label:'On Walrus' },
+                { icon:'🏷', value: liveStats.listed  || '...', label:'Listed' },
+                { icon:'⚡', value: '60+', label:'Collections' },
+              ].map(s => (
+                <div key={s.label} style={{ textAlign:'center', minWidth:60 }}>
+                  <div style={{ fontSize:'clamp(18px,2.5vw,24px)', fontWeight:800, color:'#fff', lineHeight:1.1 }}>
+                    {s.icon} {s.value}
+                  </div>
+                  <div style={{ fontSize:9, color:'rgba(245,245,247,0.35)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.14em', marginTop:4 }}>
+                    {s.label}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Mascot — in flow on mobile, absolute on desktop via CSS */}
@@ -346,53 +371,6 @@ export default function Home() {
         </div>
 
       </section>
-
-      {/* ════ LIVE STATS BAR ════ */}
-      <div style={{
-        background: 'rgba(0,0,0,0.7)',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        backdropFilter: 'blur(12px)',
-        padding: '18px 0',
-      }}>
-        <div className="container">
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'center',
-            gap: 'clamp(24px,6vw,72px)',
-            flexWrap: 'wrap',
-          }}>
-            {[
-              { icon: '🖼', value: liveStats.minted || '—', suffix: '', label: 'NFTs Minted' },
-              { icon: '🌊', value: liveStats.walrusMB || '—', suffix: ' MB', label: 'Stored on Walrus' },
-              { icon: '🏷', value: liveStats.listed || '—', suffix: '', label: 'Active Listings' },
-              { icon: '⚡', value: 60, suffix: '+', label: 'Sui Collections' },
-            ].map(stat => (
-              <div key={stat.label} style={{ textAlign: 'center' }}>
-                <div style={{
-                  fontSize: 'clamp(20px,3vw,30px)',
-                  fontWeight: 800,
-                  color: '#fff',
-                  letterSpacing: '-0.03em',
-                  lineHeight: 1.1,
-                }}>
-                  {stat.icon} {stat.value}{stat.suffix}
-                </div>
-                <div style={{
-                  fontSize: 10,
-                  color: 'rgba(245,245,247,0.35)',
-                  fontFamily: 'Space Mono, monospace',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.14em',
-                  marginTop: 5,
-                }}>
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* ════ INTELLIGENCE STATEMENT ════ */}
       <section className={s.statement}>

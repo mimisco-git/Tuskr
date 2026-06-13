@@ -71,7 +71,8 @@ export default function Mint() {
         try {
           const pkg = import.meta.env.VITE_TESTNET_PACKAGE_ID || import.meta.env.VITE_PACKAGE_ID || ''
           const textBytes = new TextEncoder().encode(desc)
-          const encrypted = await sealEncrypt(textBytes, blobId, pkg)
+          // Encrypt using creator address as Seal identity
+          const encrypted = await sealEncrypt(textBytes, account?.address || '', pkg)
           if (encrypted) {
             const encFile = new File([new Blob([encrypted as BlobPart])], 'sealed.bin', { type: 'application/octet-stream' })
             const sealR   = await uploadBlob(encFile, account?.address)

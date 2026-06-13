@@ -104,19 +104,21 @@ module tuskr::tuskr_nft {
     }
 
     /// ── Seal approval function ──────────────────────────────────────────
-    /// Called by Seal key servers to verify the caller owns this NFT
-    /// and is authorized to decrypt content encrypted for it.
+    /// Called by Seal key servers to verify the caller is the NFT creator.
+    /// Only the original creator can decrypt Seal-encrypted content.
     ///
-    /// id:  The NFT's object ID as raw bytes (used as Seal encryption identity)
-    /// nft: The NFT object — only the owner can pass an owned object in a tx
+    /// id:  The creator's address as BCS bytes (used as Seal encryption identity)
+    /// nft: The NFT object passed to prove creator relationship
     ///
     /// If this function succeeds, Seal releases decryption key shares.
-    public fun seal_approve(id: vector<u8>, nft: &TuskrNFT, _ctx: &TxContext) {
-        // Get the NFT's object ID as bytes
-        let nft_addr  = object::uid_to_address(&nft.id);
-        let nft_bytes = bcs::to_bytes(&nft_addr);
-        // Verify the encryption identity matches this NFT
-        assert!(nft_bytes == id, 0);
+    public fun seal_approve(id: vector<u8>, nft: &TuskrNFT, ctx: &TxContext) {
+        // The caller must be the NFT creator
+        let caller        = tx_context::sender(ctx);
+        let creator_bytes = bcs::to_bytes(&caller);
+        // Verify the encryption identity matches the caller's address
+        assert!(creator_bytes == id, 0);
+        // Also verify this NFT actually has sealed content
+        assert!(std::string::length(&nft.sealed_blob_id) > 0, 1);
     }
 
     // ── Accessors ──────────────────────────────────────────────────────

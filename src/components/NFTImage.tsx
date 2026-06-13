@@ -33,6 +33,7 @@ export default function NFTImage({ src, alt, className, style }: Props) {
   const resolved = resolveMediaUrl(src)
   const [failed, setFailed] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [isVideo, setIsVideo] = useState(false)
 
   const initials = (alt || '?').slice(0, 2).toUpperCase()
   const bg       = gradient(alt || 'nft')
@@ -83,19 +84,18 @@ export default function NFTImage({ src, alt, className, style }: Props) {
     )
   }
 
-  // Detect video by file type or extension
-  const isVideo = resolved.includes('.mp4') || resolved.includes('.webm') || resolved.includes('.mov')
 
-  if (isVideo) {
+
+  // Video render — triggered when img fails on a Walrus video blob
+  if (isVideo && !failed) {
     return (
       <div className={className} style={{ position: 'relative', ...style }}>
-        {!loaded && Placeholder}
         <video
           src={imgSrc}
           autoPlay loop muted playsInline
           onLoadedData={() => setLoaded(true)}
           onError={() => setFailed(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: loaded ? 'block' : 'none' }}
+          style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
         />
       </div>
     )
@@ -108,7 +108,14 @@ export default function NFTImage({ src, alt, className, style }: Props) {
         src={imgSrc}
         alt={alt}
         onLoad={()  => setLoaded(true)}
-        onError={() => setFailed(true)}
+        onError={() => {
+          // Walrus blobs might be video — try video player before giving up
+          if (resolved.includes('walrus') && !isVideo) {
+            setIsVideo(true)
+          } else {
+            setFailed(true)
+          }
+        }}
         style={{
           width: '100%', height: '100%', objectFit: 'cover', display: 'block',
           opacity: loaded ? 1 : 0, transition: 'opacity 0.3s ease',

@@ -121,7 +121,7 @@ export default function NFTDetail() {
       const encBytes = new Uint8Array(encBuf)
 
       // 2. Decrypt with Seal — user will be prompted to sign in wallet
-      const decrypted = await sealDecrypt(encBytes, nft.id, pkg)
+      const decrypted = await sealDecrypt(encBytes, nft.creator, pkg, nft.id)
       if (!decrypted) throw new Error('Decryption returned empty')
 
       // 3. Show decrypted content (text for now)

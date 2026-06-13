@@ -1,19 +1,17 @@
 import https from 'https'
 
-const TESTNET_RPC = 'https://fullnode.testnet.sui.io:443'
-const MAINNET_RPC = 'https://fullnode.mainnet.sui.io:443'
+const TESTNET = 'https://fullnode.testnet.sui.io:443'
+const MAINNET = 'https://fullnode.mainnet.sui.io:443'
 const OLD_PKG = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
-const OLD_MKT = '0xd1a40986e214e59d9882b3e47c861eea3b732367958d27c03e9fc3b1f747a3b2'
 const NEW_PKG = '0xe2a80cf865bb40a9b4c7a63e2e82da841d8eb80455091947c394b13ae6d3dc56'
-const NEW_MKT = '0x194b2610a10950958e6bfbb4e36e9b9f5c278e02d740d6d8013b2d60934a5002'
 
 function rpc(network, method, params) {
-  const url  = network === 'mainnet' ? MAINNET_RPC : TESTNET_RPC
-  const body = JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+  const url  = network === 'mainnet' ? MAINNET : TESTNET
+  const body = JSON.stringify({ jsonrpc:'2.0', id:1, method, params })
   return new Promise((resolve, reject) => {
     const req = https.request(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+      headers: { 'Content-Type':'application/json', 'Content-Length': Buffer.byteLength(body) },
       timeout: 20000,
     }, res => {
       let out = ''
@@ -26,13 +24,34 @@ function rpc(network, method, params) {
   })
 }
 
-async function queryBothPkgs(network, eventSuffix, limit = 200) {
+async function queryBoth(network, suffix, limit = 200) {
   const results = await Promise.all([NEW_PKG, OLD_PKG].map(pkg =>
     rpc(network, 'suix_queryEvents', [
-      { MoveEventType: `${pkg}::${eventSuffix}` }, null, limit, false
+      { MoveEventType: `${pkg}::${suffix}` }, null, limit, false
     ]).then(r => r.result?.data || []).catch(() => [])
   ))
   return results.flat()
+}
+
+// Fetch NFT objects and return name + blob_id + media_url
+async function fetchNFTData(network, ids) {
+  if (!ids.length) return {}
+  const res = await rpc(network, 'sui_multiGetObjects', [
+    ids, { showContent: true, showDisplay: true }
+  ])
+  const map = {}
+  for (const o of (res.result || [])) {
+    if (!o.data) continue
+    const f  = o.data.content?.fields ?? {}
+    const d  = o.data.display?.data   ?? {}
+    const id = o.data.objectId
+    map[id] = {
+      name:     f.name    || d.name     || 'Tuskr NFT',
+      blobId:   f.blob_id || d.blob_id  || '',
+      mediaUrl: f.media_url?.url || f.media_url || d.image_url || '',
+    }
+  }
+  return map
 }
 
 export default async function handler(req, res) {
@@ -42,22 +61,23 @@ export default async function handler(req, res) {
   const address = req.query.address || ''
 
   try {
-    // ── Minted NFTs ──────────────────────────────────────────
+    // ── MINTED NFTs ──────────────────────────────────────────
     if (type === 'minted') {
-      const events = await queryBothPkgs(network, 'tuskr_nft::MintedEvent')
-      const nfts = events
-        .map(e => e.parsedJson)
-        .filter(e => e?.nft_id)
-        .map(e => ({ objectId: e.nft_id, name: e.name || 'Tuskr NFT', blobId: e.blob_id || '' }))
+      const events = await queryBoth(network, 'tuskr_nft::MintedEvent')
+      const nfts = events.map(e => ({
+        objectId: e.parsedJson?.nft_id,
+        name:     e.parsedJson?.name    || 'Tuskr NFT',
+        blobId:   e.parsedJson?.blob_id || '',
+      })).filter(n => n.objectId)
       return res.json({ nfts })
     }
 
-    // ── Active listings ──────────────────────────────────────
+    // ── ACTIVE LISTINGS ──────────────────────────────────────
     if (type === 'listings') {
       const [listed, sold, delisted] = await Promise.all([
-        queryBothPkgs(network, 'tuskr_marketplace::ListedEvent'),
-        queryBothPkgs(network, 'tuskr_marketplace::SoldEvent'),
-        queryBothPkgs(network, 'tuskr_marketplace::DelistedEvent'),
+        queryBoth(network, 'tuskr_marketplace::ListedEvent'),
+        queryBoth(network, 'tuskr_marketplace::SoldEvent'),
+        queryBoth(network, 'tuskr_marketplace::DelistedEvent'),
       ])
       const soldIds     = new Set(sold.map(e => e.parsedJson?.listing_id).filter(Boolean))
       const delistedIds = new Set(delisted.map(e => e.parsedJson?.listing_id).filter(Boolean))
@@ -67,51 +87,73 @@ export default async function handler(req, res) {
       return res.json({ activeIds })
     }
 
-    // ── User listed NFTs (for Profile) ───────────────────────
+    // ── USER LISTINGS (Profile tab) ──────────────────────────
     if (type === 'user_listings') {
       if (!address) return res.json({ listings: [] })
       const [listed, sold, delisted] = await Promise.all([
-        queryBothPkgs(network, 'tuskr_marketplace::ListedEvent'),
-        queryBothPkgs(network, 'tuskr_marketplace::SoldEvent'),
-        queryBothPkgs(network, 'tuskr_marketplace::DelistedEvent'),
+        queryBoth(network, 'tuskr_marketplace::ListedEvent'),
+        queryBoth(network, 'tuskr_marketplace::SoldEvent'),
+        queryBoth(network, 'tuskr_marketplace::DelistedEvent'),
       ])
       const soldIds     = new Set(sold.map(e => e.parsedJson?.listing_id).filter(Boolean))
       const delistedIds = new Set(delisted.map(e => e.parsedJson?.listing_id).filter(Boolean))
-      const listings = listed
-        .filter(e => {
-          const pj = e.parsedJson
-          return (pj?.seller === address || e.sender === address)
-            && pj?.listing_id
-            && !soldIds.has(pj.listing_id)
-            && !delistedIds.has(pj.listing_id)
-        })
-        .map(e => ({
-          listingId: e.parsedJson.listing_id,
-          nftId:     e.parsedJson.nft_id,
-          name:      e.parsedJson.name || 'Tuskr NFT',
-          price:     e.parsedJson.price || '0',
-          blobId:    e.parsedJson.blob_id || '',
-        }))
+      const mine = listed.filter(e => {
+        const pj = e.parsedJson
+        return (pj?.seller === address || e.sender === address)
+          && pj?.listing_id
+          && !soldIds.has(pj.listing_id)
+          && !delistedIds.has(pj.listing_id)
+      })
+
+      // Fetch NFT objects to get names + images
+      const nftIds  = mine.map(e => {
+        const id = e.parsedJson?.nft_id
+        return id ? `0x${id.replace(/^0x/,'')}` : null
+      }).filter(Boolean)
+      const nftData = await fetchNFTData(network, nftIds)
+
+      const listings = mine.map(e => {
+        const pj    = e.parsedJson
+        const nftId = `0x${(pj.nft_id||'').replace(/^0x/,'')}`
+        const info  = nftData[nftId] || {}
+        return {
+          listingId: pj.listing_id,
+          nftId,
+          name:     info.name     || 'Tuskr NFT',
+          blobId:   info.blobId   || '',
+          mediaUrl: info.mediaUrl || '',
+          price:    pj.price      || '0',
+        }
+      })
       return res.json({ listings })
     }
 
-    // ── User sold NFTs (for Profile) ─────────────────────────
+    // ── USER SOLD (Profile tab) ──────────────────────────────
     if (type === 'user_sold') {
       if (!address) return res.json({ sold: [] })
-      const events = await queryBothPkgs(network, 'tuskr_marketplace::SoldEvent')
-      const sold = events
-        .filter(e => {
-          const pj = e.parsedJson
-          return pj?.seller === address || e.sender === address
-        })
-        .map(e => ({
-          listingId: e.parsedJson.listing_id,
-          nftId:     e.parsedJson.nft_id,
-          name:      e.parsedJson.name || 'Tuskr NFT',
-          price:     e.parsedJson.price || '0',
-          blobId:    e.parsedJson.blob_id || '',
-          buyer:     e.parsedJson.buyer || '',
-        }))
+      const events = await queryBoth(network, 'tuskr_marketplace::SoldEvent')
+      const mine   = events.filter(e =>
+        e.parsedJson?.seller === address || e.sender === address
+      )
+      const nftIds  = mine.map(e => {
+        const id = e.parsedJson?.nft_id
+        return id ? `0x${id.replace(/^0x/,'')}` : null
+      }).filter(Boolean)
+      const nftData = await fetchNFTData(network, nftIds)
+
+      const sold = mine.map(e => {
+        const pj    = e.parsedJson
+        const nftId = `0x${(pj.nft_id||'').replace(/^0x/,'')}`
+        const info  = nftData[nftId] || {}
+        return {
+          listingId: pj.listing_id,
+          nftId,
+          name:     info.name     || 'Tuskr NFT',
+          blobId:   info.blobId   || '',
+          price:    pj.price      || '0',
+          buyer:    pj.buyer      || '',
+        }
+      })
       return res.json({ sold })
     }
 
