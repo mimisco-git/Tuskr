@@ -352,7 +352,7 @@ export default function Home() {
               ].map((s, i) => (
                 <div key={s.label} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: 'clamp(10px,1.5vh,14px) 8px',
+                  padding: '8px 8px',
                   borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   gap: 6,
                 }}>
