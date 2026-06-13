@@ -106,6 +106,7 @@ const LINKS = [
 export default function Navbar() {
   const location = useLocation()
   const wallet   = useCurrentAccount()
+  const [copied, setCopied] = useState(false)
   const google   = useGoogleUser()
   const { mutate: disconnect } = useDisconnectWallet()
 
@@ -146,6 +147,13 @@ export default function Navbar() {
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
+
+  const copyAddress = () => {
+    if (!wallet?.address) return
+    navigator.clipboard.writeText(wallet.address)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   const isSignedIn = !!wallet
 
@@ -223,9 +231,35 @@ export default function Navbar() {
                     {wallet ? (
                       <div className={s.acctRow}>
                         <span className={s.acctRowDot} />
-                        <div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
                           <div className={s.acctRowLabel}>Sui Wallet</div>
-                          <div className={s.acctRowVal}>{wallet.address.slice(0,10)}...{wallet.address.slice(-6)}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div className={s.acctRowVal}>{wallet.address.slice(0,10)}...{wallet.address.slice(-6)}</div>
+                            <button
+                              onClick={copyAddress}
+                              title={copied ? 'Copied!' : 'Copy full address'}
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer',
+                                padding: '3px 6px', borderRadius: 6, display: 'flex', alignItems: 'center',
+                                color: copied ? '#00d4aa' : 'rgba(245,245,247,0.35)',
+                                transition: 'color 0.2s, background 0.2s',
+                                flexShrink: 0,
+                              }}
+                              onMouseEnter={e => { if(!copied) (e.currentTarget as HTMLButtonElement).style.color = 'rgba(245,245,247,0.7)' }}
+                              onMouseLeave={e => { if(!copied) (e.currentTarget as HTMLButtonElement).style.color = 'rgba(245,245,247,0.35)' }}
+                            >
+                              {copied ? (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                              ) : (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                                </svg>
+                              )}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ) : (
@@ -320,7 +354,32 @@ export default function Navbar() {
                   <span className={s.idIni}>{initials}</span>
                   <div>
                     <div className={s.idName}>{displayName}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <div className={s.idAddr}>{wallet?.address.slice(0,14)}...{wallet?.address.slice(-8)}</div>
+                    <button
+                      onClick={copyAddress}
+                      title={copied ? 'Copied!' : 'Copy address'}
+                      style={{
+                        background: copied ? 'rgba(0,212,170,0.12)' : 'rgba(255,255,255,0.06)',
+                        border: `1px solid ${copied ? 'rgba(0,212,170,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                        borderRadius: 7, cursor: 'pointer', padding: '4px 6px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        color: copied ? '#00d4aa' : 'rgba(245,245,247,0.5)',
+                        transition: 'all 0.2s', flexShrink: 0,
+                      }}
+                    >
+                      {copied ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                      ) : (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                   </div>
                 </div>
               </div>
