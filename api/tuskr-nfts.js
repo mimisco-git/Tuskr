@@ -54,6 +54,18 @@ async function fetchNFTData(network, ids) {
   return map
 }
 
+// Normalize Sui address — lowercase, always with 0x prefix, padded to 64 chars
+function normalizeAddr(addr) {
+  if (!addr) return ''
+  const hex = addr.replace(/^0x/i, '').toLowerCase()
+  return '0x' + hex.padStart(64, '0')
+}
+
+// Match two addresses regardless of format
+function addrMatch(a, b) {
+  return normalizeAddr(a) === normalizeAddr(b)
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   const network = req.query.network || 'testnet'
@@ -99,7 +111,7 @@ export default async function handler(req, res) {
       const delistedIds = new Set(delisted.map(e => e.parsedJson?.listing_id).filter(Boolean))
       const mine = listed.filter(e => {
         const pj = e.parsedJson
-        return (pj?.seller === address || e.sender === address)
+        return (addrMatch(pj?.seller, address) || addrMatch(e.sender, address))
           && pj?.listing_id
           && !soldIds.has(pj.listing_id)
           && !delistedIds.has(pj.listing_id)
@@ -132,8 +144,10 @@ export default async function handler(req, res) {
     if (type === 'user_sold') {
       if (!address) return res.json({ sold: [] })
       const events = await queryBoth(network, 'tuskr_marketplace::SoldEvent')
+      // e.sender = buyer (who called buy()), NOT seller
+      // Only match on parsedJson.seller with normalized address comparison
       const mine   = events.filter(e =>
-        e.parsedJson?.seller === address || e.sender === address
+        addrMatch(e.parsedJson?.seller, address)
       )
       const nftIds  = mine.map(e => {
         const id = e.parsedJson?.nft_id
