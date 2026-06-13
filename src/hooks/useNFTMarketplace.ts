@@ -151,7 +151,7 @@ export function useNFTMarketplace() {
   const fetchOwnedNFTs = async (address: string): Promise<SuiObjectData[]> => {
     const { packageId } = getNetworkIds()
     const OLD_PKG = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
-    const seen = new Set<string>()
+    const seen    = new Set<string>()
     const results: SuiObjectData[] = []
 
     const addObj = (o: any) => {
@@ -161,55 +161,36 @@ export function useNFTMarketplace() {
       }
     }
 
-    // 1. Query by struct type for both packages (catches minted NFTs)
+    // 1. Direct wallet query — finds minted NFTs still in wallet
     await Promise.all([packageId, OLD_PKG].map(pkg =>
       client.getOwnedObjects({
-        owner: address,
-        filter: { StructType: `${pkg}::tuskr_nft::TuskrNFT` },
+        owner:   address,
+        filter:  { StructType: `${pkg}::tuskr_nft::TuskrNFT` },
         options: { showContent: true, showDisplay: true, showOwner: true },
       }).then(r => r.data.forEach(o => o.data && addObj(o.data)))
-      .catch(() => {})
+        .catch(() => {})
     ))
 
-    // 2. Find NFTs bought via marketplace SoldEvent (buyer = address)
-    // This catches bought NFTs that might be missed by struct type filter
+    // 2. API bought lookup — finds purchased NFTs via SoldEvent.buyer
+    // Most reliable: queries on-chain sale records directly
     try {
-      const rpcUrl = 'https://fullnode.testnet.sui.io:443'
-      const buyerEvents = await Promise.all([packageId, OLD_PKG].map(pkg =>
-        fetch(rpcUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0', id: 1,
-            method: 'suix_queryEvents',
-            params: [{ MoveEventType: `${pkg}::tuskr_marketplace::SoldEvent` }, null, 200, false],
-          }),
-        }).then(r => r.json()).then(d => d.result?.data || []).catch(() => [])
-      ))
+      const net = 'testnet'
+      const boughtRes  = await fetch(`/api/tuskr-nfts?type=user_bought&address=${address}&network=${net}`)
+      const boughtData = await boughtRes.json()
+      const boughtIds  = (boughtData.bought || []).map((b: any) => b.nftId).filter(Boolean)
 
-      const boughtNftIds = buyerEvents.flat()
-        .filter((e: any) => {
-          const buyer = e.parsedJson?.buyer || ''
-          return buyer.toLowerCase() === address.toLowerCase() ||
-                 ('0x' + buyer.replace(/^0x/i,'')).toLowerCase() === ('0x' + address.replace(/^0x/i,'')).toLowerCase()
-        })
-        .map((e: any) => {
-          const id = e.parsedJson?.nft_id || ''
-          return id ? '0x' + id.replace(/^0x/i, '') : ''
-        })
-        .filter(Boolean)
-
-      if (boughtNftIds.length > 0) {
-        const nftObjs = await client.multiGetObjects({
-          ids: [...new Set(boughtNftIds)],
+      if (boughtIds.length > 0) {
+        const objs = await client.multiGetObjects({
+          ids:     [...new Set(boughtIds)] as string[],
           options: { showContent: true, showDisplay: true, showOwner: true },
-        }).catch(() => [])
-        ;(nftObjs as any[]).forEach(o => o.data && addObj(o.data))
+        })
+        ;(objs as any[]).forEach(o => o.data && addObj(o.data))
       }
-    } catch { /* buyer event lookup optional */ }
+    } catch { /* optional — direct wallet query above is primary */ }
 
     return results
   }
+
 
   const fetchListedByUser = async (address: string) => {
     const { packageId } = getNetworkIds()

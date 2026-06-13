@@ -52,7 +52,10 @@ export default function Marketplace() {
     setBuying(l.listingId)
     try {
       await buyNFT(l.listingId, BigInt(l.price))
+      // Remove immediately from local state for instant UI feedback
       setListings(prev => prev.filter((x: any) => x.listingId !== l.listingId))
+      // Re-fetch from chain after 3s so sold NFT is gone on next load too
+      setTimeout(() => loadListings(), 3000)
       toastErr(`✅ Bought! "${l.name}" is now yours.`)
     } catch (e: any) {
       toastErr(e?.message?.slice(0,120) || 'Purchase failed')
