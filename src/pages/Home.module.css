@@ -95,6 +95,9 @@
   width: 100%;
   overflow: hidden;
   margin-top: -100px;
+  /* Fade mascot bottom into the glass section */
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
 }
 
 .mascot {
@@ -187,15 +190,16 @@
   /* Premium glass morphism */
   background: linear-gradient(
     180deg,
-    rgba(2, 4, 8, 0.72) 0%,
-    rgba(4, 8, 16, 0.88) 40%,
-    rgba(4, 8, 16, 0.96) 100%
+    transparent 0%,
+    rgba(2, 4, 8, 0.60) 20%,
+    rgba(4, 8, 16, 0.88) 50%,
+    rgba(4, 8, 16, 0.97) 100%
   );
-  backdrop-filter: blur(64px) saturate(180%);
-  -webkit-backdrop-filter: blur(64px) saturate(180%);
-  border-top: 1px solid rgba(255,255,255,0.10);
-  box-shadow: 0 -1px 0 rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06);
-  border-radius: 32px 32px 0 0;
+  backdrop-filter: blur(64px) saturate(160%);
+  -webkit-backdrop-filter: blur(64px) saturate(160%);
+  border-top: none;
+  box-shadow: none;
+  border-radius: 0;
   /* Mobile: ~100px overlap */
   margin-top: clamp(-30px, -3vw, -20px);
   padding: clamp(56px, 8vw, 100px) 0 clamp(60px, 8vw, 100px);

@@ -352,13 +352,13 @@ export default function Home() {
               ].map((s, i) => (
                 <div key={s.label} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '8px 8px',
+                  padding: '5px 8px',
                   borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   gap: 6,
                 }}>
                   <span style={{ fontSize: 'clamp(20px,2.5vw,28px)', lineHeight: 1 }}>{s.icon}</span>
-                  <span style={{ fontSize: 'clamp(18px,2.2vw,26px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</span>
-                  <span style={{ fontSize: 'clamp(8px,0.9vw,10px)', color: 'rgba(245,245,247,0.3)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{s.label}</span>
+                  <span style={{ fontSize: 'clamp(15px,1.8vw,20px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</span>
+                  <span style={{ fontSize: 'clamp(7px,0.75vw,9px)', color: 'rgba(245,245,247,0.3)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{s.label}</span>
                 </div>
               ))}
             </div>
