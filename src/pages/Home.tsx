@@ -347,6 +347,53 @@ export default function Home() {
 
       </section>
 
+      {/* ════ LIVE STATS BAR ════ */}
+      <div style={{
+        background: 'rgba(0,0,0,0.7)',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(12px)',
+        padding: '18px 0',
+      }}>
+        <div className="container">
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            justifyContent: 'center',
+            gap: 'clamp(24px,6vw,72px)',
+            flexWrap: 'wrap',
+          }}>
+            {[
+              { icon: '🖼', value: liveStats.minted || '—', suffix: '', label: 'NFTs Minted' },
+              { icon: '🌊', value: liveStats.walrusMB || '—', suffix: ' MB', label: 'Stored on Walrus' },
+              { icon: '🏷', value: liveStats.listed || '—', suffix: '', label: 'Active Listings' },
+              { icon: '⚡', value: 60, suffix: '+', label: 'Sui Collections' },
+            ].map(stat => (
+              <div key={stat.label} style={{ textAlign: 'center' }}>
+                <div style={{
+                  fontSize: 'clamp(20px,3vw,30px)',
+                  fontWeight: 800,
+                  color: '#fff',
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1.1,
+                }}>
+                  {stat.icon} {stat.value}{stat.suffix}
+                </div>
+                <div style={{
+                  fontSize: 10,
+                  color: 'rgba(245,245,247,0.35)',
+                  fontFamily: 'Space Mono, monospace',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.14em',
+                  marginTop: 5,
+                }}>
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* ════ INTELLIGENCE STATEMENT ════ */}
       <section className={s.statement}>
         <div className="container">

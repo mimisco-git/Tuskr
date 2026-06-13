@@ -83,6 +83,24 @@ export default function NFTImage({ src, alt, className, style }: Props) {
     )
   }
 
+  // Detect video by file type or extension
+  const isVideo = resolved.includes('.mp4') || resolved.includes('.webm') || resolved.includes('.mov')
+
+  if (isVideo) {
+    return (
+      <div className={className} style={{ position: 'relative', ...style }}>
+        {!loaded && Placeholder}
+        <video
+          src={imgSrc}
+          autoPlay loop muted playsInline
+          onLoadedData={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: loaded ? 'block' : 'none' }}
+        />
+      </div>
+    )
+  }
+
   return (
     <div className={className} style={{ position: 'relative', ...style }}>
       {!loaded && Placeholder}

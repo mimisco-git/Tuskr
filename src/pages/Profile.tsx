@@ -114,12 +114,15 @@ export default function Profile() {
     if (!effectiveAddr) { setLoad(false); return }
     setLoad(true)
     try {
-      const [raw, lst, sld] = await Promise.all([
+      const net = localStorage.getItem('tuskr_network') || 'testnet'
+      const [raw, lstRes, sldRes] = await Promise.all([
         fetchOwnedNFTs(effectiveAddr),
-        fetchListedByUser(effectiveAddr),
-        fetchSoldByUser(effectiveAddr),
+        fetch(`/api/tuskr-nfts?type=user_listings&address=${effectiveAddr}&network=${net}`).then(r => r.json()),
+        fetch(`/api/tuskr-nfts?type=user_sold&address=${effectiveAddr}&network=${net}`).then(r => r.json()),
       ])
-      setOwned(raw.map(parseNFT)); setListed(lst); setSold(sld)
+      setOwned(raw.map(parseNFT))
+      setListed(lstRes.listings || [])
+      setSold(sldRes.sold || [])
     } catch { setOwned([]); setListed([]); setSold([]) }
     finally { setLoad(false) }
   }, [effectiveAddr])
