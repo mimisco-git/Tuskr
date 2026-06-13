@@ -333,25 +333,34 @@ export default function Home() {
               Start discovering <Arrow/>
             </Link>
 
-            {/* Live stats — visible immediately in hero */}
+            {/* Live stats — geometric minimal icons */}
             <div style={{
-              display: 'flex', gap: 'clamp(16px,4vw,40px)', flexWrap: 'wrap',
-              marginTop: 32, padding: '16px 20px',
+              display: 'flex', gap: 0, flexWrap: 'wrap',
+              marginTop: 28,
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 16,
+              borderRadius: 14,
+              overflow: 'hidden',
             }}>
               {[
-                { icon:'🖼', value: liveStats.minted || '...', label:'NFTs Minted' },
-                { icon:'🌊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '...', label:'On Walrus' },
-                { icon:'🏷', value: liveStats.listed  || '...', label:'Listed' },
-                { icon:'⚡', value: '60+', label:'Collections' },
-              ].map(s => (
-                <div key={s.label} style={{ textAlign:'center', minWidth:60 }}>
-                  <div style={{ fontSize:'clamp(18px,2.5vw,24px)', fontWeight:800, color:'#fff', lineHeight:1.1 }}>
-                    {s.icon} {s.value}
+                { icon: '🔮', value: liveStats.minted || '—', label: 'NFTs Minted' },
+                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—', label: 'On Walrus' },
+                { icon: '🏷️', value: liveStats.listed  || '—', label: 'Listed' },
+                { icon: '🗂️', value: '60+',              label: 'Collections' },
+              ].map((s, i) => (
+                <div key={s.label} style={{
+                  flex: 1, minWidth: 70,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  padding: '14px 16px',
+                  borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                }}>
+                  <div style={{ fontSize: 26, lineHeight: 1, marginBottom: 6 }}>
+                    {s.icon}
                   </div>
-                  <div style={{ fontSize:9, color:'rgba(245,245,247,0.35)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.14em', marginTop:4 }}>
+                  <div style={{ fontSize:'clamp(16px,2vw,20px)', fontWeight:800, color:'#fff', lineHeight:1, letterSpacing:'-0.02em' }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize:9, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.14em', marginTop:5 }}>
                     {s.label}
                   </div>
                 </div>
