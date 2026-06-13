@@ -65,7 +65,7 @@ export default function Collections() {
                 <span className={s.subStat}>{fmt(totalVol, 0)} SUI</span> total volume
               </p>
             </div>
-            <Link to="/mint" className={s.createBtn}>+ Create Collection</Link>
+            <Link to="/collections/create" className={s.createBtn}>+ Create Collection</Link>
           </div>
         </div>
 
