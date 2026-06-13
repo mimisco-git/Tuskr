@@ -333,36 +333,32 @@ export default function Home() {
               Start discovering <Arrow/>
             </Link>
 
-            {/* Live stats — geometric minimal icons */}
+            {/* Live stats — premium full-width */}
             <div style={{
-              display: 'flex', gap: 0, flexWrap: 'wrap',
-              marginTop: 28,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 14,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4,1fr)',
+              width: '100%',
+              marginTop: 20,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 20,
               overflow: 'hidden',
             }}>
               {[
                 { icon: '🔮', value: liveStats.minted || '—', label: 'NFTs Minted' },
                 { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—', label: 'On Walrus' },
-                { icon: '🏷️', value: liveStats.listed  || '—', label: 'Listed' },
-                { icon: '🗂️', value: '60+',              label: 'Collections' },
+                { icon: '🏷️', value: liveStats.listed || '—', label: 'Listed' },
+                { icon: '🗂️', value: '60+', label: 'Collections' },
               ].map((s, i) => (
                 <div key={s.label} style={{
-                  flex: 1, minWidth: 70,
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '14px 16px',
+                  padding: 'clamp(14px,2.5vh,22px) 8px',
                   borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                  gap: 6,
                 }}>
-                  <div style={{ fontSize: 26, lineHeight: 1, marginBottom: 6 }}>
-                    {s.icon}
-                  </div>
-                  <div style={{ fontSize:'clamp(16px,2vw,20px)', fontWeight:800, color:'#fff', lineHeight:1, letterSpacing:'-0.02em' }}>
-                    {s.value}
-                  </div>
-                  <div style={{ fontSize:9, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.14em', marginTop:5 }}>
-                    {s.label}
-                  </div>
+                  <span style={{ fontSize: 'clamp(20px,2.5vw,28px)', lineHeight: 1 }}>{s.icon}</span>
+                  <span style={{ fontSize: 'clamp(18px,2.2vw,26px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</span>
+                  <span style={{ fontSize: 'clamp(8px,0.9vw,10px)', color: 'rgba(245,245,247,0.3)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{s.label}</span>
                 </div>
               ))}
             </div>

@@ -64,7 +64,7 @@
   max-width: 900px;
   margin: 0 auto;
   /* Top clears navbar. Bottom tight — mascot follows immediately. */
-  padding: clamp(64px, 8svh, 96px) clamp(20px, 5vw, 40px) clamp(20px, 2.5svh, 32px);
+  padding: clamp(40px, 5svh, 64px) clamp(20px, 5vw, 40px) 0;
   gap: clamp(14px, 2vh, 22px);
 }
 
@@ -94,7 +94,7 @@
   z-index: 2;
   width: 100%;
   overflow: hidden;
-  margin-top: -24px;
+  margin-top: -100px;
 }
 
 .mascot {
