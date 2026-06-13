@@ -32,8 +32,15 @@ export default function Collections() {
   const [error,   setError]   = useState<string | null>(null)
   const [sortBy,  setSortBy]  = useState<SortKey>('volume')
   const [search,  setSearch]  = useState('')
+  const [tuskrCol, setTuskrCol] = useState<any>(null)
 
   useEffect(() => {
+    // Fetch Tuskr Genesis collection from our own contract
+    fetch('/api/collections?type=collection')
+      .then(r => r.json())
+      .then(setTuskrCol)
+      .catch(() => {})
+
     fetchSuiCollections(60)
       .then(setCols)
       .catch((e: Error) => setError(e.message))
@@ -93,6 +100,45 @@ export default function Collections() {
         {error && (
           <div className={s.errorBox}>
             <strong>API Error:</strong> {error}. Check VITE_INDEXER_API_KEY in Vercel.
+          </div>
+        )}
+
+        {/* Tuskr Genesis — our own on-chain collection */}
+        {tuskrCol && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(0,212,170,0.08) 0%, rgba(99,102,241,0.06) 100%)',
+            border: '1px solid rgba(0,212,170,0.25)',
+            borderRadius: 20, padding: '20px 24px', marginBottom: 24,
+            display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
+          }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: 14, flexShrink: 0,
+              background: 'rgba(0,212,170,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 28,
+            }}>🐘</div>
+            <div style={{ flex: 1, minWidth: 160 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>{tuskrCol.name}</span>
+                <span style={{ fontSize: 11, background: 'rgba(0,212,170,0.15)', color: '#00d4aa', borderRadius: 6, padding: '2px 8px', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }}>On-Chain</span>
+              </div>
+              <p style={{ fontSize: 13, color: 'rgba(245,245,247,0.45)', margin: 0, lineHeight: 1.5 }}>{tuskrCol.description}</p>
+              <div style={{ display: 'flex', gap: 20, marginTop: 10 }}>
+                <div><span style={{ fontSize: 18, fontWeight: 700, color: '#00d4aa' }}>{tuskrCol.supply}</span><span style={{ fontSize: 11, color: 'rgba(245,245,247,0.3)', marginLeft: 5, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'Space Mono,monospace' }}>Minted</span></div>
+                <div><span style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{tuskrCol.royaltyBps / 100}%</span><span style={{ fontSize: 11, color: 'rgba(245,245,247,0.3)', marginLeft: 5, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'Space Mono,monospace' }}>Royalty</span></div>
+                {tuskrCol.maxSupply > 0 && <div><span style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{tuskrCol.maxSupply}</span><span style={{ fontSize: 11, color: 'rgba(245,245,247,0.3)', marginLeft: 5, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'Space Mono,monospace' }}>Max Supply</span></div>}
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+              <a href={tuskrCol.suiscanUrl} target="_blank" rel="noopener noreferrer"
+                style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(0,212,170,0.12)', border: '1px solid rgba(0,212,170,0.3)', color: '#00d4aa', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                View on Suiscan ↗
+              </a>
+              <Link to="/collections/genesis"
+                style={{ padding: '8px 16px', borderRadius: 10, background: '#00d4aa', color: '#000', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+                Browse NFTs →
+              </Link>
+            </div>
           </div>
         )}
 
