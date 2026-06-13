@@ -49,6 +49,10 @@ export function useActivityFeed() {
         `${PACKAGE_ID}::tuskr_nft::MintedEvent`,
         `${PACKAGE_ID}::tuskr_marketplace::DelistedEvent`,
         `${PACKAGE_ID}::tuskr_auction::BidEvent`,
+        // Old package — so secondary sales of legacy NFTs appear in feed
+        '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d::tuskr_marketplace::SoldEvent',
+        '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d::tuskr_marketplace::ListedEvent',
+        '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d::tuskr_nft::MintedEvent',
       ]
 
       const results = await Promise.allSettled(

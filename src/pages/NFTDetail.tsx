@@ -92,6 +92,34 @@ export default function NFTDetail() {
         ''
       setNftOwner(currentOwner)
       setSealedBlobId(fields.sealed_blob_id || '')
+      // Check if this NFT is currently listed for sale
+      let listingPrice = '0'
+      let isListed     = false
+      let listingId    = ''
+      try {
+        const listRes = await fetch('/api/tuskr-nfts?type=listings&network=testnet')
+        const listData = await listRes.json()
+        const activeIds: string[] = listData.activeIds || []
+
+        if (activeIds.length > 0) {
+          // Fetch listing objects to find one containing this NFT
+          const listObjs = await (client as any).multiGetObjects({
+            ids: activeIds.slice(0, 50),
+            options: { showContent: true },
+          }).catch(() => [])
+          const match = (listObjs as any[]).find((o: any) => {
+            const f = o?.data?.content?.fields
+            return f?.nft_id === objectId || f?.nft?.fields?.id?.id === objectId
+          })
+          if (match) {
+            const f = match.data.content.fields
+            isListed     = true
+            listingPrice = String(Number(f.price ?? 0) / 1e9)
+            listingId    = match.data.objectId
+          }
+        }
+      } catch { /* listing check optional */ }
+
       setNft({
         id:         objectId,
         name:       fields.name        || display.name       || 'Tuskr NFT',
@@ -101,8 +129,8 @@ export default function NFTDetail() {
         sealedBlobId: fields.sealed_blob_id || '',
         creator:    fields.creator     || '',
         royaltyBps: Number(fields.royalty_bps ?? 0),
-        price:      '0',
-        listed:     false,
+        price:      listingPrice,
+        listed:     isListed,
       })
     } catch {
       setNotFound(true)
