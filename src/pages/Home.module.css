@@ -96,8 +96,8 @@
   overflow: hidden;
   margin-top: -100px;
   /* Fade mascot bottom into the glass section */
-  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.5) 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.5) 75%, transparent 100%);
 }
 
 .mascot {
@@ -135,6 +135,8 @@
     max-width: 100%;
     object-fit: cover;
     object-position: center top;
+    transform: translateX(-6%);
+    width: 112%;
   }
 }
 
@@ -191,8 +193,9 @@
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(2, 4, 8, 0.60) 20%,
-    rgba(4, 8, 16, 0.88) 50%,
+    transparent 10%,
+    rgba(2, 4, 8, 0.50) 30%,
+    rgba(4, 8, 16, 0.90) 60%,
     rgba(4, 8, 16, 0.97) 100%
   );
   backdrop-filter: blur(64px) saturate(160%);
