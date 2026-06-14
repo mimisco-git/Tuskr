@@ -1,3 +1,4 @@
+import { useUserProfile } from '../hooks/useUserProfile'
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ConnectButton, useCurrentAccount, useDisconnectWallet } from '@mysten/dapp-kit'
@@ -159,8 +160,12 @@ export default function Navbar() {
   const isSignedIn = !!wallet
 
   /* best display name */
-  const displayName = wallet ? wallet.address.slice(0,8)+'...' : ''
-  const initials    = displayName.slice(0,2).toUpperCase() || '?'
+  const rawDisplay  = wallet ? wallet.address.slice(0,8)+'...' : ''
+  const initials    = rawDisplay.slice(0,2).toUpperCase() || '?'
+
+  // Load Walrus profile for this wallet — gives us username + avatar
+  const { profile: walrusProfile, avatarUrl } = useUserProfile(wallet?.address)
+  const displayName = walrusProfile?.username || rawDisplay
 
   return (
     <>
@@ -209,7 +214,10 @@ export default function Navbar() {
             {isSignedIn ? (
               <div ref={acctRef} style={{ position:'relative' }}>
                 <button className={s.pill} onClick={() => setAcctOpen(v => !v)}>
-                  <span className={s.pillIni}>{initials}</span>
+                  {avatarUrl
+                    ? <img src={avatarUrl} style={{ width:28, height:28, borderRadius:'50%', objectFit:'cover', flexShrink:0 }} alt="avatar"/>
+                    : <span className={s.pillIni}>{initials}</span>
+                  }
                   <span className={s.pillName}>{displayName}</span>
                   <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity:.5, transition:'transform .2s', transform: acctOpen?'rotate(180deg)':'none' }}>
                     <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -220,7 +228,10 @@ export default function Navbar() {
                   <div className={s.acctDrop}>
                     {/* header */}
                     <div className={s.acctHead}>
-                      <span className={s.acctIni}>{initials}</span>
+                      {avatarUrl
+                        ? <img src={avatarUrl} style={{ width:38, height:38, borderRadius:'50%', objectFit:'cover', flexShrink:0, border:'2px solid rgba(0,212,170,0.25)' }} alt="avatar"/>
+                        : <span className={s.acctIni}>{initials}</span>
+                      }
                       <div>
                         <div className={s.acctName}>{displayName}</div>
 
@@ -352,7 +363,10 @@ export default function Navbar() {
             {isSignedIn ? (
               <div className={s.idCard}>
                 <div className={s.idRow}>
-                  <span className={s.idIni}>{initials}</span>
+                  {avatarUrl
+                    ? <img src={avatarUrl} style={{ width:40, height:40, borderRadius:'50%', objectFit:'cover', flexShrink:0, border:'2px solid rgba(0,212,170,0.2)' }} alt="avatar"/>
+                    : <span className={s.idIni}>{initials}</span>
+                  }
                   <div>
                     <div className={s.idName}>{displayName}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>

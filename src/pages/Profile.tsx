@@ -107,9 +107,10 @@ export default function Profile() {
   const [sold,    setSold]   = useState<any[]>([])
   const [loading, setLoad]   = useState(true)
   const [copied,  setCopied] = useState(false)
-  const [editing, setEditing] = useState(false)
-  const [editName, setEditName] = useState('')
-  const [editBio,  setEditBio]  = useState('')
+  const [editing,       setEditing]       = useState(false)
+  const [editName,      setEditName]      = useState('')
+  const [editBio,       setEditBio]       = useState('')
+  const [savedFeedback, setSavedFeedback] = useState(false)
 
 
   const effectiveAddr = account?.address ?? googleUser?.address ?? null
@@ -222,8 +223,12 @@ export default function Profile() {
               <button
                 onClick={async () => {
                   if (editing) {
-                    await saveProfile({ username: editName, bio: editBio })
+                    const ok = await saveProfile({ username: editName, bio: editBio })
                     setEditing(false)
+                    if (ok !== false) {
+                      setSavedFeedback(true)
+                      setTimeout(() => setSavedFeedback(false), 2500)
+                    }
                   } else {
                     setEditName(profile?.username || '')
                     setEditBio(profile?.bio || '')
@@ -232,7 +237,7 @@ export default function Profile() {
                 }}
                 style={{ padding:'4px 12px', borderRadius:8, fontSize:12, fontWeight:600, border:`1px solid ${editing ? 'rgba(0,212,170,0.5)' : 'rgba(255,255,255,0.15)'}`, background: editing ? 'rgba(0,212,170,0.12)' : 'rgba(255,255,255,0.06)', color: editing ? '#00d4aa' : 'rgba(245,245,247,0.5)', cursor:'pointer' }}
               >
-                {profileSaving ? 'Saving to Walrus...' : editing ? '✓ Save' : '✏️ Edit'}
+                {profileSaving ? 'Saving...' : savedFeedback ? '✓ Saved to Walrus' : editing ? '✓ Save' : '✏️ Edit'}
               </button>
             </div>
             {/* Bio */}
