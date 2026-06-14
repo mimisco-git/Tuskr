@@ -37,6 +37,10 @@
     "api/collections.js": {
       "memory": 512,
       "maxDuration": 15
+    },
+    "api/deepbook-price.js": {
+      "memory": 256,
+      "maxDuration": 10
     }
   }
 }

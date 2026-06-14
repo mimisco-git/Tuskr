@@ -1,3 +1,4 @@
+import { useDeepBookPrice, suiToUsd } from '../hooks/useDeepBookPrice'
 import { Link } from 'react-router-dom'
 import LazyImage from './LazyImage'
 import s from './NFTCard.module.css'
@@ -11,6 +12,11 @@ export interface NFT {
 interface Props { nft: NFT; delay?: number; onBuy?: (nft: NFT) => void }
 
 export default function NFTCard({ nft, delay = 0, onBuy }: Props) {
+  const { price: suiPrice } = useDeepBookPrice()
+  const usdStr = nft.price && nft.price !== '0'
+    ? suiToUsd(Number(nft.price), suiPrice)
+    : ''
+
   return (
     <div className={s.card} style={{ animationDelay: `${delay}s` }}>
       <Link to={`/nft/${nft.id}`} className={s.imgWrap}>
@@ -33,6 +39,7 @@ export default function NFTCard({ nft, delay = 0, onBuy }: Props) {
           <div>
             <p className={s.priceLabel}>Price</p>
             <p className={s.price}>{nft.price}<span className={s.priceSuf}>{nft.currency}</span></p>
+            {usdStr && <p style={{ fontSize:11, color:'rgba(245,245,247,0.35)', margin:'-2px 0 0', fontFamily:'Space Mono,monospace' }}>{usdStr}</p>}
           </div>
         </div>
       </div>
