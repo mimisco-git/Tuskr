@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link }     from 'react-router-dom'
 import { useCurrentAccount } from '@mysten/dapp-kit'
 import { Transaction } from '@mysten/sui/transactions'
-import { useAgentCommands } from '../hooks/useAgentCommands'
+import { useAgentCommands, type CommandResult } from '../hooks/useAgentCommands'
 import { useAgentWallet }    from '../hooks/useAgentWallet'
 import usePageTitle          from '../hooks/usePageTitle'
 
@@ -23,11 +23,7 @@ export default function AgentWallet() {
   const [copied,    setCopied]    = useState(false)
   const [testing,   setTesting]   = useState(false)
   const [testMsg,   setTestMsg]   = useState('')
-  const [mintPrompt, setMintPrompt] = useState('')
-  const [buyMax,     setBuyMax]     = useState('1')
-  const [listNftId,  setListNftId]  = useState('')
-  const [listPrice,  setListPrice]  = useState('2')
-  const [activeCmd,  setActiveCmd]  = useState<'mint'|'buy'|'list'|null>(null)
+  const [cmdInput,   setCmdInput]   = useState('')
 
   const handleCreate = () => {
     setCreating(true)
@@ -81,7 +77,7 @@ export default function AgentWallet() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const { agentMint, agentBuy, agentList, logs: cmdLogs, running: cmdRunning } =
+  const { runCommand, result: cmdResult, running: cmdRunning } =
     useAgentCommands(agentAddr, policy, executeAutonomously)
 
   const statusColor = policy.revoked ? '#f87171' : isExpired ? '#f59e0b' : policy.active ? '#00d4aa' : 'rgba(245,245,247,0.3)'
@@ -278,128 +274,91 @@ export default function AgentWallet() {
 
         {/* ── AGENT COMMAND PANEL ─────────────────────────────────── */}
         {agentAddr && policy.active && (
-          <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'20px', marginBottom:20 }}>
-            <div style={{ fontSize:14, fontWeight:700, color:'#fff', marginBottom:4, letterSpacing:'-0.01em' }}>
-              Give the Agent a Command
-            </div>
-            <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)', marginBottom:16 }}>
-              The agent executes autonomously within its {policy.maxSpendSui} SUI budget. No wallet popup.
+          <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'20px', marginBottom:20 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:'#fff', marginBottom:4 }}>Command the Agent</div>
+            <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)', marginBottom:14, lineHeight:1.6 }}>
+              Type what you want in plain English. The agent figures out the rest and executes autonomously.
             </div>
 
-            {/* Command Tabs */}
-            <div style={{ display:'flex', gap:8, marginBottom:16 }}>
-              {(['mint','buy','list'] as const).map(cmd => (
-                <button key={cmd} onClick={() => setActiveCmd(activeCmd===cmd ? null : cmd)} style={{
-                  padding:'7px 16px', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer',
-                  background: activeCmd===cmd ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${activeCmd===cmd ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.1)'}`,
-                  color: activeCmd===cmd ? '#a5b4fc' : 'rgba(245,245,247,0.5)',
+            {/* Examples */}
+            <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:14 }}>
+              {[
+                'mint a cyberpunk elephant NFT',
+                'buy cheapest NFT under 2 SUI',
+                'mint a glowing ocean sunset',
+              ].map(ex => (
+                <button key={ex} onClick={() => setCmdInput(ex)} style={{
+                  padding:'5px 12px', borderRadius:20, fontSize:11, cursor:'pointer',
+                  background:'rgba(99,102,241,0.08)', border:'1px solid rgba(99,102,241,0.2)',
+                  color:'rgba(165,180,252,0.8)', fontFamily:'Space Mono,monospace',
                 }}>
-                  {cmd === 'mint' ? 'Mint NFT' : cmd === 'buy' ? 'Buy NFT' : 'List for Sale'}
+                  {ex}
                 </button>
               ))}
             </div>
 
-            {/* MINT */}
-            {activeCmd === 'mint' && (
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)' }}>
-                  The agent calls Groq AI for the concept, generates artwork, uploads to Walrus, then mints on Sui.
-                </div>
-                <input
-                  value={mintPrompt} onChange={e => setMintPrompt(e.target.value)}
-                  placeholder="Describe the NFT e.g. glowing elephant in cyberpunk city"
-                  style={{ padding:'10px 12px', borderRadius:9, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', fontSize:13, outline:'none', fontFamily:'inherit' }}
-                />
-                <button
-                  disabled={cmdRunning || !mintPrompt.trim()}
-                  onClick={async () => { try { await agentMint(mintPrompt) } catch(e:any) { console.error(e) } }}
-                  style={{ padding:'11px', borderRadius:10, background: cmdRunning ? 'rgba(99,102,241,0.2)' : '#6366f1', color:'#fff', fontSize:14, fontWeight:700, border:'none', cursor: cmdRunning ? 'not-allowed' : 'pointer' }}
-                >
-                  {cmdRunning ? 'Agent minting...' : 'Agent: Mint this NFT'}
-                </button>
-              </div>
-            )}
+            {/* Input + button */}
+            <div style={{ display:'flex', gap:10 }}>
+              <input
+                value={cmdInput}
+                onChange={e => setCmdInput(e.target.value)}
+                onKeyDown={e => { if (e.key==='Enter' && !cmdRunning) runCommand(cmdInput) }}
+                placeholder="mint a neon tiger NFT  /  buy cheapest under 1 SUI  /  list NFT 0x... at 2 SUI"
+                disabled={cmdRunning}
+                style={{
+                  flex:1, padding:'11px 14px', borderRadius:10,
+                  background:'rgba(255,255,255,0.05)',
+                  border:`1px solid ${cmdRunning ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.12)'}`,
+                  color:'#fff', fontSize:13, outline:'none', fontFamily:'inherit',
+                }}
+              />
+              <button
+                onClick={() => runCommand(cmdInput)}
+                disabled={cmdRunning || !cmdInput.trim()}
+                style={{
+                  padding:'11px 20px', borderRadius:10, border:'none',
+                  background: cmdRunning ? 'rgba(99,102,241,0.3)' : '#6366f1',
+                  color:'#fff', fontSize:13, fontWeight:700,
+                  cursor: cmdRunning ? 'not-allowed' : 'pointer', whiteSpace:'nowrap',
+                }}
+              >
+                {cmdRunning ? 'Running...' : 'Run'}
+              </button>
+            </div>
 
-            {/* BUY */}
-            {activeCmd === 'buy' && (
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)' }}>
-                  The agent scans the marketplace, finds the cheapest listing under your price limit, and buys it.
+            {/* Result */}
+            {cmdResult && (
+              <div style={{
+                marginTop:14, padding:'14px 16px', borderRadius:12,
+                background: cmdResult.status==='done' ? 'rgba(0,212,170,0.07)' : cmdResult.status==='failed' ? 'rgba(239,68,68,0.07)' : 'rgba(99,102,241,0.07)',
+                border: `1px solid ${cmdResult.status==='done' ? 'rgba(0,212,170,0.25)' : cmdResult.status==='failed' ? 'rgba(239,68,68,0.25)' : 'rgba(99,102,241,0.25)'}`,
+              }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+                  {cmdResult.status === 'done'
+                    ? <span style={{ width:8, height:8, borderRadius:'50%', background:'#00d4aa', display:'inline-block', boxShadow:'0 0 6px #00d4aa' }}/>
+                    : cmdResult.status === 'failed'
+                      ? <span style={{ width:8, height:8, borderRadius:'50%', background:'#f87171', display:'inline-block' }}/>
+                      : <span style={{ width:8, height:8, borderRadius:'50%', background:'#a5b4fc', display:'inline-block', animation:'pulse 1s infinite' }}/>
+                  }
+                  <span style={{ fontSize:12, fontWeight:700, color:'rgba(245,245,247,0.7)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.06em' }}>
+                    {cmdResult.status}
+                  </span>
                 </div>
-                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                  <span style={{ fontSize:13, color:'rgba(245,245,247,0.6)', whiteSpace:'nowrap' }}>Max price (SUI):</span>
-                  <input
-                    type="number" min="0.1" step="0.1" value={buyMax} onChange={e => setBuyMax(e.target.value)}
-                    style={{ flex:1, padding:'10px 12px', borderRadius:9, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', fontSize:13, outline:'none' }}
-                  />
+                <div style={{ fontSize:13, color:'rgba(245,245,247,0.75)', lineHeight:1.6 }}>
+                  {cmdResult.message}
                 </div>
-                <button
-                  disabled={cmdRunning}
-                  onClick={async () => { try { await agentBuy(parseFloat(buyMax) || 1) } catch(e:any) { console.error(e) } }}
-                  style={{ padding:'11px', borderRadius:10, background: cmdRunning ? 'rgba(99,102,241,0.2)' : '#6366f1', color:'#fff', fontSize:14, fontWeight:700, border:'none', cursor: cmdRunning ? 'not-allowed' : 'pointer' }}
-                >
-                  {cmdRunning ? 'Agent buying...' : `Agent: Buy cheapest NFT under ${buyMax} SUI`}
-                </button>
-              </div>
-            )}
-
-            {/* LIST */}
-            {activeCmd === 'list' && (
-              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)' }}>
-                  The agent lists an NFT it owns on the marketplace. Find an NFT ID from the agent wallet address on Suiscan.
-                </div>
-                <input
-                  value={listNftId} onChange={e => setListNftId(e.target.value)}
-                  placeholder="NFT Object ID (0x...)"
-                  style={{ padding:'10px 12px', borderRadius:9, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', fontSize:12, outline:'none', fontFamily:'Space Mono,monospace' }}
-                />
-                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-                  <span style={{ fontSize:13, color:'rgba(245,245,247,0.6)', whiteSpace:'nowrap' }}>List price (SUI):</span>
-                  <input
-                    type="number" min="0.1" step="0.1" value={listPrice} onChange={e => setListPrice(e.target.value)}
-                    style={{ flex:1, padding:'10px 12px', borderRadius:9, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', fontSize:13, outline:'none' }}
-                  />
-                </div>
-                <button
-                  disabled={cmdRunning || !listNftId.trim()}
-                  onClick={async () => { try { await agentList(listNftId, parseFloat(listPrice) || 2) } catch(e:any) { console.error(e) } }}
-                  style={{ padding:'11px', borderRadius:10, background: cmdRunning ? 'rgba(99,102,241,0.2)' : '#6366f1', color:'#fff', fontSize:14, fontWeight:700, border:'none', cursor: cmdRunning ? 'not-allowed' : 'pointer' }}
-                >
-                  {cmdRunning ? 'Agent listing...' : `Agent: List at ${listPrice} SUI`}
-                </button>
-              </div>
-            )}
-
-            {/* Command Logs */}
-            {cmdLogs.length > 0 && (
-              <div style={{ marginTop:16, display:'flex', flexDirection:'column', gap:8 }}>
-                <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.1em' }}>Command output</div>
-                {cmdLogs.slice(0,5).map(log => (
-                  <div key={log.id} style={{
-                    padding:'10px 12px', borderRadius:10,
-                    background: log.status==='done' ? 'rgba(0,212,170,0.06)' : log.status==='failed' ? 'rgba(239,68,68,0.06)' : 'rgba(99,102,241,0.06)',
-                    border: `1px solid ${log.status==='done' ? 'rgba(0,212,170,0.2)' : log.status==='failed' ? 'rgba(239,68,68,0.2)' : 'rgba(99,102,241,0.2)'}`,
-                  }}>
-                    <div style={{ fontSize:12, fontWeight:700, color: log.status==='done'?'#00d4aa':log.status==='failed'?'#f87171':'#a5b4fc', marginBottom:4 }}>
-                      {log.status==='running'?'Running: ':log.status==='done'?'Done: ':'Failed: '}{log.cmd}
-                    </div>
-                    <div style={{ fontSize:11, color:'rgba(245,245,247,0.55)', lineHeight:1.5, fontFamily:'Space Mono,monospace' }}>{log.detail}</div>
-                    {log.txDigest && (
-                      <a href={`https://suiscan.xyz/testnet/tx/${log.txDigest}`} target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize:11, color:'#6366f1', textDecoration:'none', display:'block', marginTop:4 }}>
-                        View on Suiscan: {log.txDigest.slice(0,20)}...
-                      </a>
-                    )}
-                  </div>
-                ))}
+                {cmdResult.txDigest && (
+                  <a href={`https://suiscan.xyz/testnet/tx/${cmdResult.txDigest}`} target="_blank" rel="noopener noreferrer"
+                    style={{ display:'block', marginTop:8, fontSize:11, color:'#6366f1', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
+                    Tx on Suiscan: {cmdResult.txDigest.slice(0,24)}...
+                  </a>
+                )}
               </div>
             )}
           </div>
         )}
 
-        {/* Activity Log */}
+        {/* Activity Log */}        {/* Activity Log */}
         {log.length > 0 && (
           <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'20px' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
