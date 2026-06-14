@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useWalrus } from '../hooks/useWalrus'
+import { useAgentMemory } from '../hooks/useAgentMemory'
 import { useAIGenerator } from '../hooks/useAIGenerator'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useCurrentAccount } from '@mysten/dapp-kit'
@@ -33,6 +34,7 @@ export default function AIGenerator() {
   const { uploadBlob, uploading } = useWalrus()
   const { mintNFT } = useNFTMarketplace()
   const { generateNFTConcept, generating } = useAIGenerator()
+  const { memory, loading: memLoading, saving: memSaving, blobId: memBlobId, recordMint, suggestions, topStyle, isFirstVisit } = useAgentMemory(account?.address)
 
   const [userPrompt,    setUserPrompt]    = useState('')
   const [style,         setStyle]         = useState(STYLE_PRESETS[0])
@@ -95,6 +97,14 @@ export default function AIGenerator() {
       })
       setTxDigest(result.digest)
       success('NFT minted successfully!')
+      // Write to agent memory on Walrus
+      await recordMint({
+        name:   concept?.name || 'Tuskr NFT',
+        prompt: userPrompt,
+        style:  style.label,
+        blobId: uploaded.blobId,
+        ts:     new Date().toISOString(),
+      })
       setStep('done')
     } catch (err: any) {
       const msg = err?.message || 'Mint failed'
@@ -123,6 +133,61 @@ export default function AIGenerator() {
           </div>
           <h1 className={s.title}>NFT Generator</h1>
           <p className={s.sub}>Describe your idea. Groq AI builds the concept and traits. You generate the art. Tuskr mints it on Sui with media on Walrus.</p>
+
+          {/* ── Agent Memory Panel ── */}
+          {account && !memLoading && (
+            <div style={{
+              margin: '20px 0',
+              background: isFirstVisit ? 'rgba(0,212,170,0.05)' : 'rgba(99,102,241,0.06)',
+              border: `1px solid ${isFirstVisit ? 'rgba(0,212,170,0.2)' : 'rgba(99,102,241,0.2)'}`,
+              borderRadius: 16, padding: '16px 18px',
+            }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+                <span style={{ fontSize:20 }}>🧠</span>
+                <div>
+                  <div style={{ fontSize:13, fontWeight:700, color:'#fff' }}>
+                    {isFirstVisit ? 'Agent Memory Initialised' : `Agent Memory · Session ${memory?.totalSessions ?? 1}`}
+                  </div>
+                  <div style={{ fontSize:11, color:'rgba(245,245,247,0.35)', fontFamily:'Space Mono,monospace' }}>
+                    {isFirstVisit
+                      ? 'Your creative history will be stored permanently on Walrus after first mint'
+                      : `${memory?.totalMinted ?? 0} NFTs minted · Stored on Walrus${memBlobId ? ` · ${memBlobId.slice(0,12)}...` : ''}`
+                    }
+                  </div>
+                </div>
+                {memSaving && <span style={{ marginLeft:'auto', fontSize:11, color:'#00d4aa', fontFamily:'Space Mono,monospace' }}>Saving to Walrus...</span>}
+              </div>
+
+              {/* Personalised suggestions */}
+              {!isFirstVisit && (
+                <div>
+                  {topStyle && (
+                    <div style={{ fontSize:12, color:'rgba(245,245,247,0.45)', marginBottom:8 }}>
+                      Your favourite style: <span style={{ color:'#a855f7', fontWeight:700 }}>{topStyle}</span>
+                    </div>
+                  )}
+                  {suggestions.length > 0 && (
+                    <div>
+                      <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.1em', fontFamily:'Space Mono,monospace' }}>
+                        Continue a past idea:
+                      </div>
+                      <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                        {suggestions.map((s: string) => (
+                          <button
+                            key={s}
+                            onClick={() => setUserPrompt(s)}
+                            style={{ fontSize:12, padding:'5px 12px', borderRadius:8, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(245,245,247,0.7)', cursor:'pointer', fontFamily:'inherit' }}
+                          >
+                            {s.length > 40 ? s.slice(0, 40) + '…' : s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Step indicators */}
