@@ -1,3 +1,4 @@
+import { useUserProfile } from '../hooks/useUserProfile'
 import { useEffect, useState, useCallback } from 'react'
 import { useCurrentAccount } from '@mysten/dapp-kit'
 import { Link } from 'react-router-dom'
@@ -106,8 +107,14 @@ export default function Profile() {
   const [sold,    setSold]   = useState<any[]>([])
   const [loading, setLoad]   = useState(true)
   const [copied,  setCopied] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editBio,  setEditBio]  = useState('')
+
 
   const effectiveAddr = account?.address ?? googleUser?.address ?? null
+  const { profile, saving: profileSaving, blobId: profileBlobId,
+          saveProfile, uploadAvatar, avatarUrl } = useUserProfile(effectiveAddr ?? undefined)
   const bothLinked    = !!(account && googleUser)
 
   const load = useCallback(async () => {
@@ -172,16 +179,80 @@ export default function Profile() {
 
         {/* ── PROFILE HEADER ── */}
         <div className={s.header}>
-          <div className={s.avatarWrap}>
-            {googleUser?.picture
-              ? <img src={googleUser.picture} alt={displayName} className={s.avatar}/>
-              : <div className={s.avatarFallback}>{initials}</div>
+          {/* Avatar — custom Walrus photo or Google photo */}
+          <div className={s.avatarWrap} style={{ position:'relative' }}>
+            {avatarUrl
+              ? <img src={avatarUrl} alt="Profile" className={s.avatar} style={{ objectFit:'cover' }}/>
+              : googleUser?.picture
+                ? <img src={googleUser.picture} alt={displayName} className={s.avatar}/>
+                : <div className={s.avatarFallback}>{initials}</div>
             }
             {bothLinked && <span className={s.linkedBadge} title="Google + Wallet linked">⬡</span>}
+            {/* Edit avatar overlay */}
+            <label style={{
+              position:'absolute', inset:0, borderRadius:'50%', cursor:'pointer',
+              background:'rgba(0,0,0,0)', display:'flex', alignItems:'center',
+              justifyContent:'center', opacity:0, transition:'opacity 0.2s',
+            }}
+              onMouseEnter={e=>(e.currentTarget.style.opacity='1')}
+              onMouseLeave={e=>(e.currentTarget.style.opacity='0')}
+            >
+              <span style={{ color:'#fff', fontSize:22, background:'rgba(0,0,0,0.6)', borderRadius:'50%', width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center' }}>📷</span>
+              <input type="file" accept="image/*" style={{ display:'none' }} onChange={async e => {
+                const file = e.target.files?.[0]
+                if (!file) return
+                const bid = await uploadAvatar(file)
+                if (bid) await saveProfile({ avatarBlobId: bid })
+              }}/>
+            </label>
           </div>
 
           <div className={s.headerInfo}>
-            <h1 className={s.name}>{displayName}</h1>
+            {/* Name + edit toggle */}
+            <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+              {editing ? (
+                <input
+                  value={editName} onChange={e => setEditName(e.target.value)}
+                  placeholder="Your username"
+                  style={{ fontSize:24, fontWeight:800, color:'#fff', background:'rgba(255,255,255,0.08)', border:'1px solid rgba(0,212,170,0.4)', borderRadius:8, padding:'4px 10px', outline:'none', maxWidth:240 }}
+                />
+              ) : (
+                <h1 className={s.name}>{profile?.username || displayName}</h1>
+              )}
+              <button
+                onClick={async () => {
+                  if (editing) {
+                    await saveProfile({ username: editName, bio: editBio })
+                    setEditing(false)
+                  } else {
+                    setEditName(profile?.username || '')
+                    setEditBio(profile?.bio || '')
+                    setEditing(true)
+                  }
+                }}
+                style={{ padding:'4px 12px', borderRadius:8, fontSize:12, fontWeight:600, border:`1px solid ${editing ? 'rgba(0,212,170,0.5)' : 'rgba(255,255,255,0.15)'}`, background: editing ? 'rgba(0,212,170,0.12)' : 'rgba(255,255,255,0.06)', color: editing ? '#00d4aa' : 'rgba(245,245,247,0.5)', cursor:'pointer' }}
+              >
+                {profileSaving ? 'Saving to Walrus...' : editing ? '✓ Save' : '✏️ Edit'}
+              </button>
+            </div>
+            {/* Bio */}
+            {editing ? (
+              <textarea
+                value={editBio} onChange={e => setEditBio(e.target.value)}
+                placeholder="Short bio — who are you as a creator?"
+                rows={2}
+                style={{ marginTop:6, width:'100%', maxWidth:380, fontSize:13, color:'rgba(245,245,247,0.7)', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'6px 10px', outline:'none', resize:'none', fontFamily:'inherit' }}
+              />
+            ) : profile?.bio ? (
+              <p style={{ fontSize:14, color:'rgba(245,245,247,0.5)', marginTop:4, maxWidth:380 }}>{profile.bio}</p>
+            ) : null}
+            {profileBlobId && !editing && (
+              <div style={{ marginTop:4 }}>
+                <a href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${profileBlobId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:'rgba(0,212,170,0.6)', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
+                  🌊 Profile stored on Walrus
+                </a>
+              </div>
+            )}
 
             {/* Account rows */}
             <div className={s.accountList}>
