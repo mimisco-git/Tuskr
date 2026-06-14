@@ -1,3 +1,4 @@
+import { useSuiClient } from '@mysten/dapp-kit'
 /**
  * useAgentWallet — Autonomous AI agent with capped budget on Sui
  *
@@ -56,6 +57,7 @@ const DEFAULT_POLICY: AgentPolicy = {
 }
 
 export function useAgentWallet(ownerAddress: string | undefined) {
+  const suiClient = useSuiClient()
   const [keypair,   setKeypair]   = useState<Ed25519Keypair | null>(null)
   const [policy,    setPolicy]    = useState<AgentPolicy>(DEFAULT_POLICY)
   const [log,       setLog]       = useState<AgentAction[]>([])
@@ -169,7 +171,7 @@ export function useAgentWallet(ownerAddress: string | undefined) {
     try {
       // Agent signs transaction autonomously — no wallet popup needed
       tx.setSender(agentAddr)
-      const { bytes, signature } = await tx.sign({ signer: keypair })
+      const { bytes, signature } = await tx.sign({ signer: keypair, client: suiClient as any })
       // Execute via Sui RPC directly
       const rpcRes = await fetch('https://fullnode.testnet.sui.io:443', {
         method: 'POST',

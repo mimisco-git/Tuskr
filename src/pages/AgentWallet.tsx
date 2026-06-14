@@ -96,7 +96,7 @@ export default function AgentWallet() {
         <Link to="/" style={{ fontSize:13, color:'rgba(245,245,247,0.4)', textDecoration:'none', display:'block', marginBottom:20 }}>← Home</Link>
         <div style={{ marginBottom:32 }}>
           <h1 style={{ fontSize:'clamp(28px,4vw,40px)', fontWeight:800, color:'#fff', letterSpacing:'-0.03em', marginBottom:8 }}>
-            🤖 Agent Wallet
+            Agent Wallet
           </h1>
           <p style={{ fontSize:15, color:'rgba(245,245,247,0.4)', lineHeight:1.6 }}>
             Your AI agent gets its own Sui wallet with a strict spending policy. It signs transactions autonomously within the budget — no wallet popup. Every action is logged on Walrus. You can revoke it instantly.
@@ -192,7 +192,7 @@ export default function AgentWallet() {
               </div>
               {policy.active && !policy.revoked && (
                 <button onClick={revoke} style={{ padding:'7px 16px', borderRadius:8, background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', color:'#f87171', fontSize:13, fontWeight:600, cursor:'pointer' }}>
-                  🚫 Revoke Agent
+                  Revoke Agent
                 </button>
               )}
             </div>
@@ -231,15 +231,16 @@ export default function AgentWallet() {
             <div style={{ background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.2)', borderRadius:12, padding:'14px 16px', marginBottom:14 }}>
               <div style={{ fontSize:12, fontWeight:700, color:'#a5b4fc', marginBottom:8 }}>What the agent does autonomously:</div>
               <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
-                {[
-                  '🔐 Signs Sui transactions using its own Ed25519 keypair — no wallet popup',
-                  '💰 Enforces the 0.5 SUI budget ceiling before every action',
-                  '📝 Logs every action (success/blocked/failed) permanently to Walrus',
-                  '⏱️ Respects the 24h expiry — all actions blocked after timeout',
-                  '🚫 Instantly disabled when you click Revoke Agent',
-                ].map((item, i) => (
-                  <div key={i} style={{ fontSize:12, color:'rgba(245,245,247,0.55)', display:'flex', gap:8 }}>
-                    <span>{item}</span>
+                {([
+                  { c:'#a5b4fc', text:'Signs Sui transactions using its own Ed25519 keypair — no wallet popup' },
+                  { c:'#a5b4fc', text:'Enforces the 0.5 SUI budget ceiling before every action' },
+                  { c:'#a5b4fc', text:'Logs every action permanently to Walrus — verifiable on-chain' },
+                  { c:'#a5b4fc', text:'Respects the 24h expiry — all actions blocked after timeout' },
+                  { c:'#f87171', text:'Instantly disabled when you click Revoke Agent' },
+                ] as {c:string,text:string}[]).map((item, i) => (
+                  <div key={i} style={{ fontSize:12, color:'rgba(245,245,247,0.6)', display:'flex', alignItems:'flex-start', gap:8 }}>
+                    <span style={{ flexShrink:0, marginTop:3, width:5, height:5, borderRadius:'50%', background:item.c, display:'inline-block' }}/>
+                    <span>{item.text}</span>
                   </div>
                 ))}
               </div>
@@ -252,7 +253,7 @@ export default function AgentWallet() {
                 disabled={testing || !policy.active}
                 style={{ width:'100%', padding:'11px', borderRadius:10, background: testing ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.3)', color:'#a5b4fc', fontSize:13, fontWeight:700, cursor: testing ? 'not-allowed' : 'pointer' }}
               >
-                {testing ? '⏳ Agent signing transaction...' : '⚡ Test Agent — Fire a Real Transaction'}
+                {testing ? 'Signing transaction...' : 'Test Agent — Fire a Real Transaction'}
               </button>
               {testMsg && (
                 <div style={{ marginTop:10, padding:'10px 14px', background: testMsg.startsWith('✅') ? 'rgba(0,212,170,0.08)' : testMsg.startsWith('❌') ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.04)', border:`1px solid ${testMsg.startsWith('✅') ? 'rgba(0,212,170,0.25)' : testMsg.startsWith('❌') ? 'rgba(239,68,68,0.25)' : 'rgba(255,255,255,0.08)'}`, borderRadius:10, fontSize:12, color:'rgba(245,245,247,0.7)', lineHeight:1.5, fontFamily:'Space Mono,monospace' }}>
@@ -270,19 +271,24 @@ export default function AgentWallet() {
         {log.length > 0 && (
           <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'20px' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
-              <div style={{ fontSize:14, fontWeight:700, color:'#fff' }}>📋 On-Chain Activity Log</div>
+              <div style={{ fontSize:14, fontWeight:700, color:'#fff' }}>On-Chain Activity Log</div>
               {logBlobId && (
                 <a href={`${AGGREGATOR}/v1/blobs/${logBlobId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:'#00d4aa', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
-                  🌊 View on Walrus ↗
+                  View on Walrus ↗
                 </a>
               )}
-              {saving && <span style={{ fontSize:11, color:'rgba(245,245,247,0.4)', fontFamily:'Space Mono,monospace' }}>Saving to Walrus...</span>}
+              {saving && <span style={{ fontSize:11, color:'rgba(245,245,247,0.4)', fontFamily:'Space Mono,monospace' }}>Saving...</span>}
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               {log.slice(0, 10).map(action => (
                 <div key={action.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 12px', background:'rgba(0,0,0,0.2)', borderRadius:10, borderLeft:`3px solid ${action.status==='success'?'#00d4aa':action.status==='blocked'?'#f59e0b':'#f87171'}` }}>
-                  <span style={{ fontSize:16 }}>
-                    {action.status==='success' ? '✅' : action.status==='blocked' ? '⛔' : '❌'}
+                  <span style={{
+                    width:20, height:20, borderRadius:'50%', flexShrink:0,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                    background: action.status==='success' ? 'rgba(0,212,170,0.15)' : action.status==='blocked' ? 'rgba(245,158,11,0.12)' : 'rgba(239,68,68,0.12)',
+                    border: `1px solid ${action.status==='success' ? 'rgba(0,212,170,0.35)' : action.status==='blocked' ? 'rgba(245,158,11,0.35)' : 'rgba(239,68,68,0.35)'}`,
+                  }}>
+                    <span style={{ width:6, height:6, borderRadius:'50%', background: action.status==='success' ? '#00d4aa' : action.status==='blocked' ? '#f59e0b' : '#f87171' }}/>
                   </span>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontSize:13, fontWeight:600, color:'#fff' }}>{action.type} · {action.nftName}</div>
