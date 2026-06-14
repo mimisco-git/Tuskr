@@ -63,9 +63,9 @@
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
-  /* Top clears navbar. Bottom tight — mascot follows immediately. */
-  padding: clamp(40px, 5svh, 64px) clamp(20px, 5vw, 40px) 0;
-  gap: clamp(14px, 2vh, 22px);
+  /* Top clears navbar. Bottom gives stats room above mascot hair. */
+  padding: clamp(40px, 5svh, 64px) clamp(20px, 5vw, 40px) clamp(14px, 2vh, 20px);
+  gap: clamp(10px, 1.5vh, 16px);
 }
 
 /* ── CTA BUTTON ── */
@@ -94,7 +94,7 @@
   z-index: 2;
   width: 100%;
   overflow: hidden;
-  margin-top: -100px;
+  margin-top: -72px;
   /* Fade mascot bottom into the glass section */
   -webkit-mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.5) 75%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.5) 75%, transparent 100%);
