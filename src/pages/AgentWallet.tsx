@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link }     from 'react-router-dom'
 import { useCurrentAccount } from '@mysten/dapp-kit'
+import { Transaction } from '@mysten/sui/transactions'
 import { useAgentWallet }    from '../hooks/useAgentWallet'
 import usePageTitle          from '../hooks/usePageTitle'
 
@@ -11,7 +12,7 @@ export default function AgentWallet() {
   const account = useCurrentAccount()
   const {
     agentAddr, policy, log, saving, remainingBudget, budgetPct,
-    isExpired, logBlobId, createAgent, activatePolicy, revoke,
+    isExpired, logBlobId, createAgent, activatePolicy, revoke, executeAutonomously,
   } = useAgentWallet(account?.address)
 
   const [maxSpend,  setMaxSpend]  = useState('0.5')
@@ -19,6 +20,8 @@ export default function AgentWallet() {
   const [scope,     setScope]     = useState('tuskr_nft_only')
   const [creating,  setCreating]  = useState(false)
   const [copied,    setCopied]    = useState(false)
+  const [testing,   setTesting]   = useState(false)
+  const [testMsg,   setTestMsg]   = useState('')
 
   const handleCreate = () => {
     setCreating(true)
@@ -33,6 +36,37 @@ export default function AgentWallet() {
       scope,
       expiresAt:    Date.now() + parseFloat(expHours) * 3600 * 1000,
     })
+  }
+
+  const handleTest = async () => {
+    if (!agentAddr || !policy.active) {
+      setTestMsg('Activate the agent policy first.')
+      return
+    }
+    setTesting(true)
+    setTestMsg('Agent is signing a test transaction...')
+    try {
+      // Agent sends 1 MIST to owner address — proves autonomous signing works
+      const tx = new Transaction()
+      tx.setSender(agentAddr)
+      const [coin] = tx.splitCoins(tx.gas, [1n])
+      tx.transferObjects([coin], tx.pure.address(account?.address || agentAddr))
+      const result = await executeAutonomously(tx, 0.000000001, {
+        type: 'test', nftName: 'Agent Test Transaction',
+      })
+      if (result) {
+        setTestMsg(`✅ Agent executed successfully! Tx: ${result.digest.slice(0,16)}... — check activity log.`)
+      } else {
+        setTestMsg('❌ Agent needs testnet SUI. Copy the agent address and use the Sui faucet.')
+      }
+    } catch (e: any) {
+      const msg = e?.message || ''
+      if (msg.includes('insufficient') || msg.includes('gas')) {
+        setTestMsg('❌ Agent needs testnet SUI. Fund the agent address from the Sui faucet, then test again.')
+      } else {
+        setTestMsg(`❌ ${msg.slice(0, 120)}`)
+      }
+    } finally { setTesting(false) }
   }
 
   const copyAddr = () => {
@@ -65,7 +99,7 @@ export default function AgentWallet() {
             🤖 Agent Wallet
           </h1>
           <p style={{ fontSize:15, color:'rgba(245,245,247,0.4)', lineHeight:1.6 }}>
-            Give your AI agent a capped budget and let it mint NFTs autonomously — no wallet popup for every action. Owner can revoke at any time.
+            Your AI agent gets its own Sui wallet with a strict spending policy. It signs transactions autonomously within the budget — no wallet popup. Every action is logged on Walrus. You can revoke it instantly.
           </p>
         </div>
 
@@ -180,7 +214,7 @@ export default function AgentWallet() {
             </div>
 
             {/* Policy grid */}
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:14 }}>
               {[
                 { label:'Total Budget', value:`${policy.maxSpendSui} SUI` },
                 { label:'Actions Taken', value: log.filter(l => l.status==='success').length },
@@ -191,6 +225,43 @@ export default function AgentWallet() {
                   <div style={{ fontSize:10, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.1em', marginTop:3 }}>{s.label}</div>
                 </div>
               ))}
+            </div>
+
+            {/* What does the agent do? */}
+            <div style={{ background:'rgba(99,102,241,0.06)', border:'1px solid rgba(99,102,241,0.2)', borderRadius:12, padding:'14px 16px', marginBottom:14 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:'#a5b4fc', marginBottom:8 }}>What the agent does autonomously:</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                {[
+                  '🔐 Signs Sui transactions using its own Ed25519 keypair — no wallet popup',
+                  '💰 Enforces the 0.5 SUI budget ceiling before every action',
+                  '📝 Logs every action (success/blocked/failed) permanently to Walrus',
+                  '⏱️ Respects the 24h expiry — all actions blocked after timeout',
+                  '🚫 Instantly disabled when you click Revoke Agent',
+                ].map((item, i) => (
+                  <div key={i} style={{ fontSize:12, color:'rgba(245,245,247,0.55)', display:'flex', gap:8 }}>
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Test button */}
+            <div>
+              <button
+                onClick={handleTest}
+                disabled={testing || !policy.active}
+                style={{ width:'100%', padding:'11px', borderRadius:10, background: testing ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.3)', color:'#a5b4fc', fontSize:13, fontWeight:700, cursor: testing ? 'not-allowed' : 'pointer' }}
+              >
+                {testing ? '⏳ Agent signing transaction...' : '⚡ Test Agent — Fire a Real Transaction'}
+              </button>
+              {testMsg && (
+                <div style={{ marginTop:10, padding:'10px 14px', background: testMsg.startsWith('✅') ? 'rgba(0,212,170,0.08)' : testMsg.startsWith('❌') ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.04)', border:`1px solid ${testMsg.startsWith('✅') ? 'rgba(0,212,170,0.25)' : testMsg.startsWith('❌') ? 'rgba(239,68,68,0.25)' : 'rgba(255,255,255,0.08)'}`, borderRadius:10, fontSize:12, color:'rgba(245,245,247,0.7)', lineHeight:1.5, fontFamily:'Space Mono,monospace' }}>
+                  {testMsg}
+                </div>
+              )}
+              <div style={{ marginTop:8, fontSize:11, color:'rgba(245,245,247,0.25)', fontFamily:'Space Mono,monospace' }}>
+                Agent sends 1 MIST to your wallet autonomously. Requires agent address to have testnet SUI for gas.
+              </div>
             </div>
           </div>
         )}
