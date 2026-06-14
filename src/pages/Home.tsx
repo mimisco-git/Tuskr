@@ -450,7 +450,7 @@ export default function Home() {
               ].map((s, i) => (
                 <div key={s.label} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '5px 4px',
+                  padding: '8px 4px',
                   borderLeft: i % 3 !== 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   borderTop: i >= 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   gap: 2,
