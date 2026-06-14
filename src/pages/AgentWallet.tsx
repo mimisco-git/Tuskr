@@ -12,26 +12,20 @@ export default function AgentWallet() {
   usePageTitle('Agent Wallet')
   const account = useCurrentAccount()
   const {
-    agentAddr, policy, log, saving, remainingBudget, budgetPct,
-    isExpired, logBlobId, createAgent, activatePolicy, revoke, executeAutonomously,
+    agentAddr, derived, deriving, policy, log, saving,
+    remainingBudget, budgetPct, isExpired, logBlobId,
+    deriveKeypair, activatePolicy, revoke, executeAutonomously,
   } = useAgentWallet(account?.address)
 
   const [maxSpend,  setMaxSpend]  = useState('0.5')
   const [expHours,  setExpHours]  = useState('24')
   const [scope,     setScope]     = useState('tuskr_nft_only')
-  const [creating,  setCreating]  = useState(false)
   const [copied,    setCopied]    = useState(false)
   const [testing,   setTesting]   = useState(false)
   const [testMsg,   setTestMsg]   = useState('')
   const [cmdInput,   setCmdInput]   = useState('')
 
-  const handleCreate = () => {
-    setCreating(true)
-    createAgent()
-    setCreating(false)
-  }
-
-  const handleActivate = () => {
+const handleActivate = () => {
     activatePolicy({
       maxSpendSui:  parseFloat(maxSpend) || 0.5,
       spentSui:     0,
@@ -110,36 +104,43 @@ export default function AgentWallet() {
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
 
-          {/* Step 1: Create Agent */}
+          {/* Step 1: Activate Agent Key */}
           <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'20px' }}>
-            <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:12 }}>
-              Step 1: Create Agent
+            <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:8 }}>
+              Step 1: Activate Agent Key
             </div>
-            {agentAddr ? (
+            <p style={{ fontSize:12, color:'rgba(245,245,247,0.4)', marginBottom:12, lineHeight:1.6 }}>
+              Your agent key is derived from your wallet signature. Never stored anywhere. Same wallet always produces the same agent address.
+            </p>
+            {derived && agentAddr ? (
               <div>
-                <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)', marginBottom:8 }}>Agent Address</div>
-                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                  <code style={{ fontSize:11, color:'#00d4aa', fontFamily:'Space Mono,monospace', wordBreak:'break-all', flex:1 }}>
-                    {agentAddr.slice(0,20)}...{agentAddr.slice(-8)}
+                <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:8 }}>
+                  <span style={{ width:7, height:7, borderRadius:'50%', background:'#00d4aa', display:'inline-block' }}/>
+                  <span style={{ fontSize:12, fontWeight:700, color:'#00d4aa' }}>Agent key active this session</span>
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+                  <code style={{ fontSize:11, color:'rgba(245,245,247,0.7)', fontFamily:'Space Mono,monospace', wordBreak:'break-all', flex:1 }}>
+                    {agentAddr.slice(0,22)}...{agentAddr.slice(-8)}
                   </code>
-                  <button onClick={copyAddr} style={{ padding:'4px 8px', borderRadius:6, background:'rgba(0,212,170,0.1)', border:'1px solid rgba(0,212,170,0.2)', color:'#00d4aa', fontSize:11, cursor:'pointer' }}>
+                  <button onClick={copyAddr} style={{ padding:'4px 8px', borderRadius:6, background:'rgba(0,212,170,0.1)', border:'1px solid rgba(0,212,170,0.2)', color:'#00d4aa', fontSize:11, cursor:'pointer', flexShrink:0 }}>
                     {copied ? '✓' : 'Copy'}
                   </button>
                 </div>
+                <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+                  <a href={`https://suiscan.xyz/testnet/address/${agentAddr}`} target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:'#00d4aa', textDecoration:'none' }}>View on Suiscan ↗</a>
+                  <a href="https://faucet.testnet.sui.io" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:'rgba(245,245,247,0.4)', textDecoration:'none' }}>Get testnet SUI ↗</a>
+                </div>
                 <p style={{ fontSize:11, color:'rgba(245,245,247,0.3)', marginTop:10, lineHeight:1.5 }}>
-                  ⚠ Fund this address with testnet SUI so the agent can pay gas. Use the faucet.
+                  Send 0.05 SUI to the agent address above for gas. Re-activate after each page refresh.
                 </p>
-                <a href={`https://suiscan.xyz/testnet/address/${agentAddr}`} target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:'#00d4aa', textDecoration:'none' }}>
-                  View on Suiscan ↗
-                </a>
               </div>
             ) : (
               <button
-                onClick={handleCreate}
-                disabled={creating}
-                style={{ width:'100%', padding:'12px', borderRadius:10, background:'#00d4aa', color:'#000', fontWeight:700, fontSize:14, border:'none', cursor:'pointer' }}
+                onClick={async () => { try { await deriveKeypair() } catch(e:any) { alert(e?.message) } }}
+                disabled={deriving}
+                style={{ width:'100%', padding:'12px', borderRadius:10, background: deriving ? 'rgba(0,212,170,0.3)' : '#00d4aa', color:'#000', fontWeight:700, fontSize:14, border:'none', cursor: deriving ? 'not-allowed' : 'pointer' }}
               >
-                {creating ? 'Creating...' : '⚡ Generate Agent Keypair'}
+                {deriving ? 'Sign in your wallet...' : 'Activate Agent Key'}
               </button>
             )}
           </div>
