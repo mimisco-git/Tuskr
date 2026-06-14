@@ -102,6 +102,49 @@ export default async function handler(req, res) {
       return res.json({ activeIds })
     }
 
+    // ── FLOOR PRICE (DeepBook-powered price discovery) ──────────────
+    if (type === 'floor') {
+      const [listed, sold, delisted] = await Promise.all([
+        queryBoth(network, 'tuskr_marketplace::ListedEvent'),
+        queryBoth(network, 'tuskr_marketplace::SoldEvent'),
+        queryBoth(network, 'tuskr_marketplace::DelistedEvent'),
+      ])
+      const soldIds     = new Set(sold.map(e => norm(e.parsedJson?.listing_id)).filter(Boolean))
+      const delistedIds = new Set(delisted.map(e => norm(e.parsedJson?.listing_id)).filter(Boolean))
+      const activeIds   = [...new Set(
+        listed
+          .map(e => norm(e.parsedJson?.listing_id))
+          .filter(id => id && !soldIds.has(id) && !delistedIds.has(id))
+      )].slice(0, 50) // cap at 50 for speed
+
+      if (!activeIds.length) return res.json({ floorSui: 0, floorMist: 0, count: 0, totalVolumeSui: 0 })
+
+      // Fetch listing objects to get actual prices
+      const objs = await rpc(network, 'sui_multiGetObjects', [
+        activeIds, { showContent: true }
+      ])
+
+      const prices = (objs.result || [])
+        .filter(o => o?.data?.content?.fields)
+        .map(o => Number(o.data.content.fields.price || 0))
+        .filter(p => p > 0)
+        .sort((a, b) => a - b)
+
+      const floorMist = prices[0] ?? 0
+      const floorSui  = floorMist / 1e9
+
+      // Total volume from all sold events
+      const totalVolumeMist = sold.reduce((acc, e) => acc + Number(e.parsedJson?.price || 0), 0)
+
+      return res.json({
+        floorSui:        parseFloat(floorSui.toFixed(4)),
+        floorMist,
+        count:           prices.length,
+        totalVolumeSui:  parseFloat((totalVolumeMist / 1e9).toFixed(4)),
+        allPrices:       prices.slice(0, 10).map(p => p / 1e9),
+      })
+    }
+
     // ── USER LISTINGS (Profile Listed tab) ───────────────────────────
     if (type === 'user_listings') {
       if (!address) return res.json({ listings:[] })
