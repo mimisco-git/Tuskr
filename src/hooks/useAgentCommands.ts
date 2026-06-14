@@ -77,54 +77,117 @@ Format: {"action":"mint","prompt":"..."} or {"action":"buy","maxPrice":2} or {"a
   }
 }
 
-// ── Step 2 (for mint): generate concept + real AI image via Pollinations ─────
-async function generateConceptAndImage(prompt: string): Promise<{
-  name: string; description: string; blobId: string; mediaUrl: string
-} | null> {
+// ── Canvas fallback: generates a unique gradient art image client-side ─────
+function makeCanvasBlob(name: string): Promise<Blob> {
+  return new Promise(resolve => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 512; canvas.height = 512
+    const ctx = canvas.getContext('2d')!
+    const palettes = [
+      ['#00d4aa','#6366f1'],['#f59e0b','#ec4899'],['#3b82f6','#8b5cf6'],
+      ['#06b6d4','#0d9488'],['#a855f7','#ec4899'],['#10b981','#3b82f6'],
+    ]
+    const [c1,c2] = palettes[Math.floor(Math.random()*palettes.length)]
+    const gr = ctx.createLinearGradient(0,0,512,512)
+    gr.addColorStop(0, c1); gr.addColorStop(1, c2)
+    ctx.fillStyle = gr; ctx.fillRect(0,0,512,512)
+    // Overlay circles
+    for (let i=0;i<6;i++) {
+      ctx.beginPath()
+      ctx.arc(Math.random()*512,Math.random()*512,40+Math.random()*80,0,Math.PI*2)
+      ctx.fillStyle=`rgba(255,255,255,${0.03+Math.random()*0.07})`; ctx.fill()
+    }
+    // Tuskr T mark
+    ctx.fillStyle='rgba(255,255,255,0.15)'
+    ctx.fillRect(216,160,80,24); ctx.fillRect(244,184,24,120)
+    // Name text
+    ctx.fillStyle='rgba(255,255,255,0.9)'
+    ctx.font='bold 22px Arial'
+    ctx.textAlign='center'
+    const short = name.length>18 ? name.slice(0,18)+'...' : name
+    ctx.fillText(short,256,380)
+    ctx.fillStyle='rgba(255,255,255,0.35)'
+    ctx.font='12px monospace'; ctx.fillText('TUSKR · WALRUS',256,408)
+    canvas.toBlob(b => resolve(b!),'image/png')
+  })
+}
 
-  // Parallel: Groq generates the concept AND Pollinations generates the image
-  const seed = Math.floor(Math.random() * 999999)
-  const encodedPrompt = encodeURIComponent(`${prompt}, NFT digital art, vibrant, detailed, professional`)
-  const imgUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true&seed=${seed}&model=flux`
+// ── Step 2 (for mint): generate concept + AI image (Pollinations) ────────────
+async function generateConceptAndImage(
+  prompt: string,
+  onStatus: (msg: string) => void
+): Promise<{ name: string; description: string; blobId: string; mediaUrl: string } | null> {
 
-  const [conceptRes, imgBlob] = await Promise.all([
-    // Groq: generate name + description
-    GROQ_KEY ? fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${GROQ_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', max_tokens: 150, temperature: 0.85,
-        messages: [
-          { role:'system', content:'Reply ONLY with JSON: {"name":"...max 30 chars","description":"...max 100 chars"}' },
-          { role:'user', content:`NFT name and description for: "${prompt}"` }
-        ]
-      })
-    }).then(r => r.json()).catch(() => null) : Promise.resolve(null),
-
-    // Pollinations: fetch the generated image as a blob
-    fetch(imgUrl, { signal: AbortSignal.timeout(30000) })
-      .then(r => r.ok ? r.blob() : null)
-      .catch(() => null),
-  ])
-
-  // Parse concept
+  // 1. Generate NFT concept with Groq (fast, parallel)
   let name = prompt.slice(0,30)
-  let description = `A unique NFT: ${prompt}`
-  if (conceptRes) {
-    try {
-      const text = conceptRes.choices?.[0]?.message?.content ?? ''
-      const c = JSON.parse(text.replace(/```json|```/g,'').trim())
-      name = c.name || name
-      description = c.description || description
-    } catch { /* use defaults */ }
+  let description = `A unique Tuskr NFT: ${prompt}`
+
+  const conceptPromise = GROQ_KEY
+    ? fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method:'POST',
+        headers:{'Authorization':`Bearer ${GROQ_KEY}`,'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'llama-3.3-70b-versatile', max_tokens:150, temperature:0.85,
+          messages:[
+            {role:'system',content:'Reply ONLY with JSON: {"name":"...max 30 chars","description":"...max 100 chars"}'},
+            {role:'user',content:`NFT name and description for: "${prompt}"`}
+          ]
+        })
+      }).then(r=>r.json()).catch(()=>null)
+    : Promise.resolve(null)
+
+  // 2. Try Pollinations.ai for real AI image (up to 55s)
+  onStatus(`Generating AI image for "${prompt}" via Pollinations.ai...`)
+  const seed = Math.floor(Math.random() * 999999)
+  const encoded = encodeURIComponent(`${prompt}, NFT digital art, vibrant, ultra detailed`)
+  const polUrl = `https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${seed}&model=flux`
+
+  let imgBlob: Blob | null = null
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 55000)
+    const r = await fetch(polUrl, { signal: controller.signal })
+    clearTimeout(timer)
+    if (r.ok) {
+      imgBlob = await r.blob()
+      onStatus('AI image ready. Uploading to Walrus...')
+    }
+  } catch {
+    onStatus('Pollinations.ai timed out. Using generated artwork instead...')
   }
 
-  // Upload image to Walrus
-  if (!imgBlob) return null
-  for (const pub of [PUBLISHER, 'https://walrus-testnet-publisher.bartestnet.com']) {
+  // 3. Canvas fallback if Pollinations fails or times out
+  if (!imgBlob || imgBlob.size < 1000) {
+    onStatus('Generating artwork locally and uploading to Walrus...')
+    // Wait for concept first so we have the name
+    const conceptRes = await conceptPromise
+    if (conceptRes) {
+      try {
+        const text = conceptRes.choices?.[0]?.message?.content ?? ''
+        const c = JSON.parse(text.replace(/```json|```/g,'').trim())
+        name = c.name || name; description = c.description || description
+      } catch { /* use defaults */ }
+    }
+    imgBlob = await makeCanvasBlob(name)
+  } else {
+    // Also resolve concept
+    const conceptRes = await conceptPromise
+    if (conceptRes) {
+      try {
+        const text = conceptRes.choices?.[0]?.message?.content ?? ''
+        const c = JSON.parse(text.replace(/```json|```/g,'').trim())
+        name = c.name || name; description = c.description || description
+      } catch { /* use defaults */ }
+    }
+  }
+
+  // 4. Upload to Walrus
+  const publishers = [PUBLISHER, 'https://walrus-testnet-publisher.bartestnet.com', 'https://walrus-testnet.staketab.org:443']
+  for (const pub of publishers) {
     try {
       const r = await fetch(`${pub}/v1/blobs?epochs=5`, {
-        method:'PUT', body: imgBlob, signal: AbortSignal.timeout(25000),
+        method:'PUT', body: imgBlob,
+        signal: AbortSignal.timeout(30000),
       })
       if (!r.ok) continue
       const d = await r.json()
@@ -132,7 +195,8 @@ async function generateConceptAndImage(prompt: string): Promise<{
       if (blobId) return { name, description, blobId, mediaUrl:`${AGGREGATOR}/v1/blobs/${blobId}` }
     } catch { continue }
   }
-  return null
+
+  throw new Error('Walrus upload failed after 3 attempts. Check your internet connection.')
 }
 
 // ── Step 3: execute on-chain ─────────────────────────────────────────────────
@@ -160,28 +224,27 @@ export function useAgentCommands(
         const prompt = cmd.prompt || input
         upd({ status:'generating', message:`Groq AI is creating the concept. Pollinations.ai is generating the image for "${prompt}"...` })
 
-        const data = await generateConceptAndImage(prompt)
-        if (!data) throw new Error('Image generation or Walrus upload failed. Check your connection.')
+        const data = await generateConceptAndImage(prompt, (msg) => upd({ message: msg }))
 
-        upd({ status:'uploading', message:`"${data.name}" ready. Image stored on Walrus. Minting on Sui...` })
+        upd({ status:'uploading', message:`"${data!.name}" ready. Image stored on Walrus. Minting on Sui...` })
 
         const tx = new Transaction()
         tx.setSender(agentAddr)
         tx.moveCall({
           target: `${PKG}::tuskr_nft::mint`,
           arguments: [
-            tx.pure.string(data.name),
-            tx.pure.string(data.description),
-            tx.pure.string(data.blobId),
-            tx.pure.string(data.mediaUrl),
+            tx.pure.string(data!.name),
+            tx.pure.string(data!.description),
+            tx.pure.string(data!.blobId),
+            tx.pure.string(data!.mediaUrl),
             tx.pure.u16(500),
           ],
         })
 
         upd({ status:'executing', message:'Agent signing mint transaction. No wallet popup...' })
-        const res = await executeAutonomously(tx, GAS, { type:'mint', nftName: data.name })
+        const res = await executeAutonomously(tx, GAS, { type:'mint', nftName: data!.name })
         if (res) {
-          upd({ status:'done', message:`"${data.name}" minted! Image on Walrus. NFT is in agent wallet. Go to Suiscan to see it.`, txDigest: res.digest })
+          upd({ status:'done', message:`"${data!.name}" minted! Image on Walrus. NFT is in agent wallet. Go to Suiscan to see it.`, txDigest: res.digest })
         } else {
           throw new Error('Mint failed. Fund the agent address with testnet SUI first.')
         }
@@ -189,7 +252,13 @@ export function useAgentCommands(
       // ── BUY ───────────────────────────────────────────────────────────────
       } else if (cmd.action === 'buy') {
         const maxP = cmd.maxPrice ?? 2
-        upd({ status:'executing', message:`Scanning marketplace for cheapest NFT under ${maxP} SUI...` })
+        // Check budget FIRST before even scanning marketplace
+        const remaining = policy.maxSpendSui - policy.spentSui
+        if (remaining < GAS + 0.001) {
+          throw new Error(`Agent budget too low (${remaining.toFixed(4)} SUI remaining). Top up the agent address or increase the budget.`)
+        }
+        const effectiveMax = Math.min(maxP, remaining - GAS)
+        upd({ status:'executing', message:`Scanning marketplace for cheapest NFT under ${effectiveMax.toFixed(3)} SUI (budget: ${remaining.toFixed(4)} SUI)...` })
 
         const [floorRes, listRes] = await Promise.all([
           fetch('/api/tuskr-nfts?type=floor&network=testnet').then(r=>r.json()),
@@ -197,7 +266,10 @@ export function useAgentCommands(
         ])
 
         if (!floorRes.floorSui) throw new Error('No active listings on the marketplace right now.')
-        if (floorRes.floorSui > maxP) throw new Error(`Cheapest listing is ${floorRes.floorSui} SUI. Raise your max price above ${floorRes.floorSui}.`)
+        if (floorRes.floorSui > maxP) throw new Error(`Cheapest listing is ${floorRes.floorSui} SUI. Your max is ${maxP} SUI. Try: "buy cheapest under ${Math.ceil(floorRes.floorSui + 0.5)} SUI"`)
+        if (floorRes.floorSui + GAS > remaining) {
+          throw new Error(`Cheapest NFT is ${floorRes.floorSui} SUI but agent budget is only ${remaining.toFixed(4)} SUI. Increase the budget in Step 2 above.`)
+        }
 
         const ids: string[] = listRes.activeIds?.slice(0, 20) || []
         if (!ids.length) throw new Error('No listing IDs found.')
@@ -210,6 +282,7 @@ export function useAgentCommands(
         const listings = (rpcData.result||[])
           .filter((o:any) => o?.data?.content?.fields?.price)
           .map((o:any) => ({ listingId:o.data.objectId, price:BigInt(o.data.content.fields.price), name:o.data.content.fields.name||'Tuskr NFT' }))
+          .filter((l:any) => Number(l.price)/1e9 <= effectiveMax)
           .sort((a:any,b:any) => Number(a.price - b.price))
 
         if (!listings.length) throw new Error('Could not read listing details.')
