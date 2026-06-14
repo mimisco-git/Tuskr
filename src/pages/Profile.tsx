@@ -115,17 +115,28 @@ export default function Profile() {
     if (!effectiveAddr) { setLoad(false); return }
     setLoad(true)
     try {
-      const net = localStorage.getItem('tuskr_network') || 'testnet'
-      const [raw, lstRes, sldRes, bgtRes] = await Promise.all([
-        fetchOwnedNFTs(effectiveAddr),
+      const net = 'testnet'
+      const [ownedRes, lstRes, sldRes] = await Promise.all([
+        // user_owned = minted + bought - sold, all from on-chain events
+        fetch(`/api/tuskr-nfts?type=user_owned&address=${effectiveAddr}&network=${net}`).then(r => r.json()),
         fetch(`/api/tuskr-nfts?type=user_listings&address=${effectiveAddr}&network=${net}`).then(r => r.json()),
         fetch(`/api/tuskr-nfts?type=user_sold&address=${effectiveAddr}&network=${net}`).then(r => r.json()),
-        fetch(`/api/tuskr-nfts?type=user_bought&address=${effectiveAddr}&network=${net}`).then(r => r.json()),
       ])
-      setOwned(raw.map(parseNFT))
+      // user_owned already returns correctly shaped objects — no parseNFT needed
+      setOwned((ownedRes.nfts || []).map((n: any) => ({
+        objectId:    n.objectId,
+        name:        n.name        || 'Tuskr NFT',
+        description: n.description || '',
+        mediaUrl:    n.blobId
+          ? `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${n.blobId}`
+          : (n.mediaUrl || ''),
+        blobId:      n.blobId      || '',
+        creator:     n.creator     || '',
+        royaltyBps:  n.royaltyBps  || 0,
+      })))
       setListed(lstRes.listings || [])
       setSold(sldRes.sold || [])
-      setBought(bgtRes.bought || [])
+      setBought([]) // merged into owned tab
     } catch { setOwned([]); setListed([]); setSold([]); setBought([]) }
     finally { setLoad(false) }
   }, [effectiveAddr])

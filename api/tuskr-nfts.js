@@ -145,6 +145,71 @@ export default async function handler(req, res) {
       })
     }
 
+    // ── USER OWNED — minted + bought - sold (Profile Owned tab) ─────────
+    if (type === 'user_owned') {
+      if (!address) return res.json({ nfts: [] })
+
+      const [minted, sold] = await Promise.all([
+        queryBoth(network, 'tuskr_nft::MintedEvent'),
+        queryBoth(network, 'tuskr_marketplace::SoldEvent'),
+      ])
+
+      // NFTs minted by this user
+      const mintedIds = new Set(
+        minted
+          .filter(e => norm(e.parsedJson?.creator) === address || norm(e.sender) === address)
+          .map(e => norm(e.parsedJson?.nft_id))
+          .filter(Boolean)
+      )
+
+      // NFTs bought by this user
+      const boughtIds = new Set(
+        sold
+          .filter(e => norm(e.parsedJson?.buyer) === address)
+          .map(e => norm(e.parsedJson?.nft_id))
+          .filter(Boolean)
+      )
+
+      // NFTs this user sold away (remove from owned set)
+      const soldAwayIds = new Set(
+        sold
+          .filter(e => norm(e.parsedJson?.seller) === address)
+          .map(e => norm(e.parsedJson?.nft_id))
+          .filter(Boolean)
+      )
+
+      // Union of minted + bought, minus sold
+      const ownedIds = [...new Set([...mintedIds, ...boughtIds])]
+        .filter(id => !soldAwayIds.has(id))
+
+      if (!ownedIds.length) return res.json({ nfts: [] })
+
+      // Fetch NFT objects directly for names, images, blob IDs
+      const objs = await rpc(network, 'sui_multiGetObjects', [
+        ownedIds, { showContent: true, showDisplay: true }
+      ])
+
+      const nfts = (objs.result || [])
+        .filter(o => o?.data)
+        .map(o => {
+          const f  = o.data.content?.fields ?? {}
+          const d  = o.data.display?.data   ?? {}
+          const rawUrl = f.media_url
+          const urlStr = typeof rawUrl === 'string' ? rawUrl : (rawUrl?.url ?? '')
+          return {
+            objectId:    o.data.objectId,
+            name:        f.name    || d.name    || 'Tuskr NFT',
+            description: f.description || d.description || '',
+            blobId:      f.blob_id || d.blob_id || '',
+            mediaUrl:    d.image_url || urlStr || '',
+            creator:     f.creator || d.creator || '',
+            royaltyBps:  Number(f.royalty_bps ?? 0),
+          }
+        })
+
+      return res.json({ nfts })
+    }
+
     // ── USER LISTINGS (Profile Listed tab) ───────────────────────────
     if (type === 'user_listings') {
       if (!address) return res.json({ listings:[] })
