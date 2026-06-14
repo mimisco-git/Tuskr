@@ -75,7 +75,6 @@ const handleActivate = () => {
     setWithdrawing(true)
     setWithdrawMsg('Building withdrawal transaction...')
     try {
-      const { Transaction } = await import('@mysten/sui/transactions')
       const tx = new Transaction()
       tx.setSender(agentAddr)
       // Transfer all gas (minus fee reserve) back to owner wallet

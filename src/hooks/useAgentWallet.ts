@@ -19,7 +19,7 @@ import { Ed25519Keypair }                               from '@mysten/sui/keypai
 import { Transaction }                                  from '@mysten/sui/transactions'
 
 // Fixed derivation message — changing this changes ALL agent addresses
-const DERIVE_MSG = 'Tuskr Agent Wallet v1 — Key Derivation'
+const DERIVE_MSG = 'Tuskr Agent Wallet v1: Key Derivation'
 
 const AGENT_POLICY   = 'tuskr_agent_policy'
 const AGENT_LOG      = 'tuskr_agent_log'
