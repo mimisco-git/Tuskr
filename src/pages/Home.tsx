@@ -333,7 +333,7 @@ export default function Home() {
               and emerging opportunities, with media permanently stored on Walrus
               and ownership enforced by Sui Move.
             </p>
-            <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'center' }}>
+            <div className={s.ctaBtnGroup}>
 
               {/* Primary CTA */}
               <Link to="/marketplace" style={{
@@ -422,21 +422,23 @@ export default function Home() {
             </div>
 
             {/* Live stats — 6-col grid, responsive */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3,1fr)',
-              width: '100%',
-              marginTop: 16,
-              marginBottom: 20,
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: 16,
-              overflow: 'hidden',
-            }}
+            <div
+              className={s.statsGrid}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3,1fr)',
+                width: '100%',
+                marginTop: 16,
+                marginBottom: 20,
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: 16,
+                overflow: 'hidden',
+              }}
               ref={el => {
                 if (el) {
-                  const cols = window.innerWidth >= 640 ? '6' : '3'
-                  el.style.gridTemplateColumns = `repeat(${cols},1fr)`
+                  const w = window.innerWidth
+                  el.style.gridTemplateColumns = w >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
                 }
               }}
             >
@@ -447,17 +449,17 @@ export default function Home() {
                 { icon: '🛍️', value: String(liveStats.listed || '0'),                              label: 'Active Listings'     },
                 { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—',    label: 'Total Volume'        },
                 { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook' },
-              ].map((s, i) => (
-                <div key={s.label} style={{
+              ].map((stat, i) => (
+                <div key={stat.label} className={s.statCell} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
                   padding: '8px 4px',
                   borderLeft: i % 3 !== 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   borderTop: i >= 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   gap: 2,
                 }}>
-                  <span style={{ fontSize: 'clamp(12px,1.2vw,14px)', lineHeight: 1 }}>{s.icon}</span>
-                  <span style={{ fontSize: 'clamp(11px,1.1vw,13px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{s.value}</span>
-                  <span style={{ fontSize: 'clamp(8px,0.7vw,10px)', fontWeight: 700, color: 'rgba(245,245,247,0.7)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign:'center', lineHeight: 1.2 }}>{s.label}</span>
+                  <span className={s.statIcon} style={{ fontSize: 'clamp(12px,1.2vw,14px)', lineHeight: 1 }}>{stat.icon}</span>
+                  <span className={s.statValue} style={{ fontSize: 'clamp(11px,1.1vw,13px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{stat.value}</span>
+                  <span className={s.statLabel} style={{ fontSize: 'clamp(8px,0.7vw,10px)', fontWeight: 700, color: 'rgba(245,245,247,0.7)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign:'center', lineHeight: 1.2 }}>{stat.label}</span>
                 </div>
               ))}
             </div>
