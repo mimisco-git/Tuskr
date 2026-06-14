@@ -333,30 +333,92 @@ export default function Home() {
               and emerging opportunities, with media permanently stored on Walrus
               and ownership enforced by Sui Move.
             </p>
-            <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
-              <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
-                Start discovering <Arrow/>
+            <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'center' }}>
+
+              {/* Primary CTA */}
+              <Link to="/marketplace" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                height: 52, padding: '0 28px',
+                borderRadius: 14, textDecoration: 'none',
+                background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
+                color: '#000', fontSize: 15, fontWeight: 800,
+                letterSpacing: '-0.01em', whiteSpace: 'nowrap',
+                boxShadow: '0 0 32px rgba(0,212,170,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
+                transition: 'box-shadow 0.2s, transform 0.15s',
+              }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 0 48px rgba(0,212,170,0.45), inset 0 1px 0 rgba(255,255,255,0.2)'
+                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 0 32px rgba(0,212,170,0.25), inset 0 1px 0 rgba(255,255,255,0.15)'
+                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+                }}
+              >
+                Start discovering
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M2 7h10M7 2l5 5-5 5" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </Link>
+
+              {/* Agent Wallet — gradient border glass */}
               <Link to="/agent-wallet" style={{
-                display:'flex', alignItems:'center', gap:8,
-                padding:'12px 20px', borderRadius:12,
-                background:'rgba(99,102,241,0.12)',
-                border:'1px solid rgba(99,102,241,0.3)',
-                color:'#818cf8', fontSize:14, fontWeight:600,
-                textDecoration:'none', whiteSpace:'nowrap',
-              }}>
-                🤖 Agent Wallet
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                height: 52, padding: '0 22px',
+                borderRadius: 14, textDecoration: 'none',
+                background: 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(99,102,241,0.7), rgba(139,92,246,0.3)) border-box',
+                border: '1px solid transparent',
+                color: '#a5b4fc', fontSize: 14, fontWeight: 700,
+                letterSpacing: '-0.01em', whiteSpace: 'nowrap',
+                transition: 'background 0.2s, color 0.2s, transform 0.15s',
+              }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(rgba(99,102,241,0.12), rgba(99,102,241,0.08)) padding-box, linear-gradient(135deg, rgba(99,102,241,0.9), rgba(139,92,246,0.6)) border-box'
+                  ;(e.currentTarget as HTMLElement).style.color = '#c7d2fe'
+                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(99,102,241,0.7), rgba(139,92,246,0.3)) border-box'
+                  ;(e.currentTarget as HTMLElement).style.color = '#a5b4fc'
+                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <rect x="2" y="4" width="11" height="8" rx="2" stroke="#a5b4fc" strokeWidth="1.4"/>
+                  <path d="M2 7h11" stroke="#a5b4fc" strokeWidth="1.4"/>
+                  <circle cx="10.5" cy="9.5" r="1" fill="#a5b4fc"/>
+                </svg>
+                Agent Wallet
               </Link>
+
+              {/* AI Generator — gradient border glass */}
               <Link to="/mint/ai" style={{
-                display:'flex', alignItems:'center', gap:8,
-                padding:'12px 20px', borderRadius:12,
-                background:'rgba(0,212,170,0.08)',
-                border:'1px solid rgba(0,212,170,0.2)',
-                color:'#00d4aa', fontSize:14, fontWeight:600,
-                textDecoration:'none', whiteSpace:'nowrap',
-              }}>
-                ✨ AI Generator
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                height: 52, padding: '0 22px',
+                borderRadius: 14, textDecoration: 'none',
+                background: 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(0,212,170,0.5), rgba(6,182,212,0.2)) border-box',
+                border: '1px solid transparent',
+                color: 'rgba(0,212,170,0.85)', fontSize: 14, fontWeight: 700,
+                letterSpacing: '-0.01em', whiteSpace: 'nowrap',
+                transition: 'background 0.2s, color 0.2s, transform 0.15s',
+              }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(rgba(0,212,170,0.07), rgba(0,212,170,0.04)) padding-box, linear-gradient(135deg, rgba(0,212,170,0.8), rgba(6,182,212,0.5)) border-box'
+                  ;(e.currentTarget as HTMLElement).style.color = '#00d4aa'
+                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(0,212,170,0.5), rgba(6,182,212,0.2)) border-box'
+                  ;(e.currentTarget as HTMLElement).style.color = 'rgba(0,212,170,0.85)'
+                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+                }}
+              >
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path d="M7.5 1.5l1.5 3.5 3.5.5-2.5 2.5.5 3.5L7.5 10l-3 1.5.5-3.5L2.5 5.5l3.5-.5z" stroke="rgba(0,212,170,0.85)" strokeWidth="1.3" strokeLinejoin="round"/>
+                </svg>
+                AI Generator
               </Link>
+
             </div>
 
             {/* Live stats — premium full-width */}

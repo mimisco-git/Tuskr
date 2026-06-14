@@ -32,19 +32,31 @@ function httpsGet(host, path) {
 }
 
 async function getPriceFromDeepBook() {
-  // DeepBook Indexer — get best bid/ask for SUI/USDC pool
-  const data = await httpsGet(
-    DEEPBOOK_INDEXER,
-    `/get_level2_ticks_from_mid?pool_id=${SUI_USDC_POOL}&ticks=1`
-  )
-  // Returns { bids: [[price, qty]], asks: [[price, qty]] }
-  // Price is in USDC per SUI (6 decimals tick)
-  const bids = data.bids?.[0]
-  const asks = data.asks?.[0]
-  if (bids && asks) {
-    const mid = (Number(bids[0]) + Number(asks[0])) / 2
-    return Math.round(mid * 1000) / 1000  // 3 decimal places
-  }
+  // Try DeepBook indexer level2 endpoint
+  try {
+    const data = await httpsGet(
+      DEEPBOOK_INDEXER,
+      `/get_level2_ticks_from_mid?pool_id=${SUI_USDC_POOL}&ticks=1`
+    )
+    const bids = data.bids?.[0]
+    const asks = data.asks?.[0]
+    if (bids && asks) {
+      const mid = (Number(bids[0]) + Number(asks[0])) / 2
+      if (mid > 0) return Math.round(mid * 1000) / 1000
+    }
+  } catch { /* try alternate endpoint */ }
+
+  // Try alternate: get_pools summary endpoint
+  try {
+    const pools = await httpsGet(DEEPBOOK_INDEXER, '/get_pools')
+    const suiUsdc = Array.isArray(pools)
+      ? pools.find((p) => p.pool_id === SUI_USDC_POOL || (p.base_asset?.includes('SUI') && p.quote_asset?.includes('USDC')))
+      : null
+    if (suiUsdc?.mid_price && Number(suiUsdc.mid_price) > 0) {
+      return Math.round(Number(suiUsdc.mid_price) * 1000) / 1000
+    }
+  } catch { /* fall through */ }
+
   throw new Error('No DeepBook price data')
 }
 
