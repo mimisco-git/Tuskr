@@ -450,14 +450,14 @@ export default function Home() {
               ].map((s, i) => (
                 <div key={s.label} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '7px 4px',
+                  padding: '5px 4px',
                   borderLeft: i % 3 !== 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   borderTop: i >= 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
-                  gap: 3,
+                  gap: 2,
                 }}>
-                  <span style={{ fontSize: 'clamp(13px,1.3vw,15px)', lineHeight: 1 }}>{s.icon}</span>
+                  <span style={{ fontSize: 'clamp(12px,1.2vw,14px)', lineHeight: 1 }}>{s.icon}</span>
                   <span style={{ fontSize: 'clamp(11px,1.1vw,13px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{s.value}</span>
-                  <span style={{ fontSize: 'clamp(7px,0.6vw,9px)', color: 'rgba(245,245,247,0.4)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.07em', textAlign:'center', lineHeight: 1.2 }}>{s.label}</span>
+                  <span style={{ fontSize: 'clamp(8px,0.7vw,10px)', fontWeight: 700, color: 'rgba(245,245,247,0.7)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign:'center', lineHeight: 1.2 }}>{s.label}</span>
                 </div>
               ))}
             </div>
