@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react'
-import { useCurrentAccount, ConnectButton } from '@mysten/dapp-kit'
+import { useState, useCallback, useEffect } from 'react'
+import { useCurrentAccount, useSuiClient, ConnectButton } from '@mysten/dapp-kit'
+import { useDeepBookPrice } from '../hooks/useDeepBookPrice'
 import { useSeal }        from '../hooks/useSeal'
 import { useWalrus } from '../hooks/useWalrus'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
@@ -9,11 +10,12 @@ import { Link } from 'react-router-dom'
 import s from './Mint.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
-type Step = 'upload' | 'details' | 'minting' | 'done'
+type Step = 'upload' | 'details' | 'guardian' | 'minting' | 'done'
 
 const STEPS = [
   { key: 'upload',  label: 'Upload',  desc: 'Add your file' },
   { key: 'details', label: 'Details', desc: 'Name your NFT' },
+  { key: 'guardian', label: 'Review',  desc: 'Confirm transaction' },
   { key: 'minting', label: 'Mint',    desc: 'Sign on Sui' },
   { key: 'done',    label: 'Done',    desc: 'Live on Walrus' },
 ] as const
@@ -24,6 +26,14 @@ export default function Mint() {
   const account = useCurrentAccount()
   const { uploadBlob, uploading, error: wErr } = useWalrus()
   const { encrypt: sealEncrypt, isAvailable: sealAvailable } = useSeal()
+  const client = useSuiClient()
+
+  useEffect(() => {
+    if (!account) return
+    client.getBalance({ owner: account.address }).then((b: any) => {
+      setSuiBalance(Number(b.totalBalance) / 1e9)
+    }).catch(() => {})
+  }, [account, client])
   const { mintNFT } = useNFTMarketplace()
   const { awardXP } = useXP(account?.address)
 
@@ -32,6 +42,8 @@ export default function Mint() {
   const [file,     setFile]     = useState<File | null>(null)
   const [preview,  setPreview]  = useState<string | null>(null)
   const [isVideo,  setIsVideo]  = useState(false)
+  const [suiBalance, setSuiBalance] = useState<number | null>(null)
+  const { price: suiPrice } = useDeepBookPrice()
   const [blobId,   setBlobId]   = useState<string | null>(null)
   const [mediaUrl, setMediaUrl] = useState<string | null>(null)
   const [name,     setName]     = useState('')
@@ -373,13 +385,130 @@ export default function Mint() {
                   </button>
                   <button
                     className={s.mintBtn}
-                    onClick={mint}
+                    onClick={() => setStep('guardian')}
                     disabled={!name.trim() || minting}
                   >
-                    Mint NFT on Sui &rarr;
+                    Review & Mint &rarr;
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─── GUARDIAN PREVIEW ─────────────────────────────────── */}
+        {step === 'guardian' && (
+          <div className={s.card}>
+            <div style={{ padding: '32px 28px' }}>
+
+              {/* Header */}
+              <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:28 }}>
+                <div style={{ width:44, height:44, borderRadius:12, background:'rgba(0,212,170,0.12)', border:'1px solid rgba(0,212,170,0.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>🤖</div>
+                <div>
+                  <div style={{ fontSize:18, fontWeight:800, color:'#fff', letterSpacing:'-0.02em' }}>AI Agent — Transaction Preview</div>
+                  <div style={{ fontSize:13, color:'rgba(245,245,247,0.4)', marginTop:2 }}>Review what the agent will execute on your behalf</div>
+                </div>
+              </div>
+
+              {/* PTB Steps */}
+              <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:24 }}>
+                {[
+                  {
+                    icon:'🌊', done:true,
+                    action:'Store media on Walrus',
+                    detail: `Blob ID: ${blobId?.slice(0,20)}... · Permanent storage · Cannot be deleted`,
+                    color:'#00d4aa',
+                  },
+                  ...(useSealEncrypt ? [{
+                    icon:'🔐', done:false,
+                    action:'Encrypt description with Seal',
+                    detail:'Private content stored on Walrus · Only you can decrypt',
+                    color:'#a855f7',
+                  }] : []),
+                  {
+                    icon:'⚡', done:false,
+                    action:'Mint TuskrNFT on Sui Move',
+                    detail:`Contract: tuskr_nft::mint · Royalty: ${royalty}% · Network: Testnet`,
+                    color:'#3b82f6',
+                  },
+                  {
+                    icon:'🏦', done:false,
+                    action:'Transfer NFT to your wallet',
+                    detail:`Owner: ${account?.address?.slice(0,14)}...${account?.address?.slice(-6)}`,
+                    color:'#f59e0b',
+                  },
+                ].map((step, i) => (
+                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'14px 16px', background: step.done ? 'rgba(0,212,170,0.06)' : 'rgba(255,255,255,0.03)', border:`1px solid ${step.done ? 'rgba(0,212,170,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius:12 }}>
+                    <div style={{ width:34, height:34, borderRadius:9, background:'rgba(0,0,0,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0 }}>
+                      {step.done ? '✅' : step.icon}
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <span style={{ fontSize:14, fontWeight:700, color:'#fff' }}>{step.action}</span>
+                        {step.done && <span style={{ fontSize:10, background:'rgba(0,212,170,0.15)', color:'#00d4aa', borderRadius:5, padding:'1px 7px', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.08em' }}>Complete</span>}
+                      </div>
+                      <div style={{ fontSize:12, color:'rgba(245,245,247,0.38)', marginTop:4, fontFamily:'Space Mono,monospace' }}>{step.detail}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Cost breakdown */}
+              <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, padding:'16px 18px', marginBottom:16 }}>
+                <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:12 }}>Cost Breakdown</div>
+                {[
+                  { label:'Estimated gas fee', value:'~0.01 SUI', sub: suiPrice ? `~$${(0.01*suiPrice).toFixed(4)}` : '' },
+                  { label:'Walrus storage', value:'Prepaid ✓', sub:'Permanent — never expires' },
+                  { label:'Royalty (on resale)', value:`${royalty}%`, sub:'You earn this on every secondary sale' },
+                ].map((row, i) => (
+                  <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', padding:'7px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                    <span style={{ fontSize:13, color:'rgba(245,245,247,0.55)' }}>{row.label}</span>
+                    <div style={{ textAlign:'right' }}>
+                      <div style={{ fontSize:13, fontWeight:700, color:'#fff' }}>{row.value}</div>
+                      {row.sub && <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', marginTop:2 }}>{row.sub}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Wallet balance warning */}
+              {suiBalance !== null && suiBalance < 0.05 && (
+                <div style={{ display:'flex', gap:10, padding:'12px 14px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:10, marginBottom:16 }}>
+                  <span style={{ fontSize:16 }}>⚠️</span>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:700, color:'#f87171' }}>Low balance</div>
+                    <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)', marginTop:2 }}>Your wallet has {suiBalance.toFixed(4)} SUI. You may not have enough for gas. Top up via faucet before minting.</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Price context */}
+              {suiPrice && (
+                <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', background:'rgba(0,0,0,0.2)', borderRadius:10, marginBottom:24 }}>
+                  <span style={{ width:6, height:6, borderRadius:'50%', background:'#00d4aa', boxShadow:'0 0 6px #00d4aa', flexShrink:0, display:'inline-block' }}/>
+                  <span style={{ fontSize:12, color:'rgba(245,245,247,0.4)', fontFamily:'Space Mono,monospace' }}>
+                    Live price via DeepBook: 1 SUI = ${suiPrice.toFixed(3)} USDC · Wallet: {suiBalance?.toFixed(4) ?? '...'} SUI
+                  </span>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div style={{ display:'flex', gap:12 }}>
+                <button
+                  onClick={() => setStep('details')}
+                  style={{ flex:1, padding:'13px', borderRadius:12, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(245,245,247,0.6)', fontSize:14, fontWeight:600, cursor:'pointer' }}
+                >
+                  ← Go Back
+                </button>
+                <button
+                  onClick={mint}
+                  disabled={minting}
+                  style={{ flex:2, padding:'13px', borderRadius:12, background:'#00d4aa', color:'#000', fontSize:15, fontWeight:800, border:'none', cursor:'pointer', letterSpacing:'-0.01em' }}
+                >
+                  {minting ? 'Executing...' : 'Confirm & Mint on Sui →'}
+                </button>
+              </div>
+
             </div>
           </div>
         )}
