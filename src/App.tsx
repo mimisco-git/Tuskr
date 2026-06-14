@@ -19,6 +19,7 @@ import BatchMint        from './pages/BatchMint'
 import ListNFT          from './pages/ListNFT'
 import Leaderboard      from './pages/Leaderboard'
 import Auction          from './pages/Auction'
+import AgentWallet from './pages/AgentWallet'
 import GenesisCollection from './pages/GenesisCollection'
 import CreateCollection from './pages/CreateCollection'
 import VerifyBlob    from './pages/VerifyBlob'
@@ -55,6 +56,7 @@ function AnimatedRoutes() {
           <Route path="/leaderboard" element={<ErrorBoundary><Leaderboard /></ErrorBoundary>} />
           <Route path="/auction"     element={<ErrorBoundary><Auction /></ErrorBoundary>} />
           <Route path="/zklogin"     element={<ErrorBoundary><ZkLogin /></ErrorBoundary>} />
+          <Route path="/agent-wallet" element={<ErrorBoundary><AgentWallet /></ErrorBoundary>} />
           <Route path="/collections/genesis" element={<ErrorBoundary><GenesisCollection /></ErrorBoundary>} />
           <Route path="/collections/create" element={<ErrorBoundary><CreateCollection /></ErrorBoundary>} />
           <Route path="/verify/:blobId" element={<ErrorBoundary><VerifyBlob /></ErrorBoundary>} />
