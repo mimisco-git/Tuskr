@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { Link } from 'react-router-dom'
 import { useDeepBookPrice, suiToUsd } from '../hooks/useDeepBookPrice'
+import { useDeepBookSwap } from '../hooks/useDeepBookSwap'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useToast } from '../components/Toast'
 import { useNetwork } from '../hooks/useNetwork'
@@ -42,9 +43,32 @@ export default function Marketplace() {
   const [loadingCols,  setLoadingCols]  = useState(true)
   const [loadingTuskr, setLoadingTuskr] = useState(false)
   const [loadingList,  setLoadingList]  = useState(false)
-  const [buying,       setBuying]       = useState<string|null>(null) // listingId being bought
+  const [buying,       setBuying]       = useState<string|null>(null)
+  const [usdcModal,    setUsdcModal]    = useState<any>(null)  // listing for USDC modal
+  const { getQuote, swapAndBuy, quote, quoting, swapping, coinLabel } = useDeepBookSwap()
+  const { price: suiPrice } = useDeepBookPrice()
   const [search,       setSearch]       = useState('')
   const [sortBy,       setSortBy]       = useState<'volume'|'floor'>('volume')
+
+  /* ── Buy with USDC via DeepBook ── */
+  const handleBuyWithUsdc = async (l: any) => {
+    if (!account) { toastErr('Connect your wallet first'); return }
+    setUsdcModal(l)
+    await getQuote(Number(l.price) / 1e9)
+  }
+
+  const confirmUsdcBuy = async () => {
+    if (!usdcModal) return
+    try {
+      await swapAndBuy(usdcModal.listingId, BigInt(usdcModal.price), quote?.usdcNeeded ?? 0)
+      setListings(prev => prev.filter((x: any) => x.listingId !== usdcModal.listingId))
+      setUsdcModal(null)
+      setTimeout(() => loadListings(), 3000)
+      toastErr(`✅ Bought with ${coinLabel}! NFT is now yours.`)
+    } catch (e: any) {
+      toastErr(e?.message?.slice(0, 100) || 'Swap failed')
+    }
+  }
 
   /* ── Buy an NFT ── */
   const handleBuy = async (l: any) => {
@@ -442,18 +466,22 @@ export default function Marketplace() {
                         {account?.address===l.seller ? (
                           <span style={{color:'var(--a)',fontSize:12,fontWeight:700}}>Your listing</span>
                         ) : account ? (
-                          <button
-                            onClick={() => handleBuy(l)}
-                            disabled={!!buying}
-                            style={{
-                              padding:'6px 14px', borderRadius:8, fontSize:13, fontWeight:700,
-                              background:'#00d4aa', color:'#000', border:'none', cursor:'pointer',
-                              opacity: buying===l.listingId ? 0.7 : 1,
-                              minWidth:70,
-                            }}
-                          >
-                            {buying===l.listingId ? '...' : 'Buy'}
-                          </button>
+                          <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                            <button
+                              onClick={() => handleBuy(l)}
+                              disabled={!!buying}
+                              style={{ padding:'5px 12px', borderRadius:7, fontSize:12, fontWeight:700, background:'#00d4aa', color:'#000', border:'none', cursor:'pointer', opacity: buying===l.listingId ? 0.7 : 1 }}
+                            >
+                              {buying===l.listingId ? '...' : 'Buy SUI'}
+                            </button>
+                            <button
+                              onClick={() => handleBuyWithUsdc(l)}
+                              disabled={!!buying || swapping}
+                              style={{ padding:'5px 12px', borderRadius:7, fontSize:12, fontWeight:600, background:'rgba(99,102,241,0.15)', color:'#818cf8', border:'1px solid rgba(99,102,241,0.3)', cursor:'pointer' }}
+                            >
+                              Buy USDC
+                            </button>
+                          </div>
                         ) : (
                           <span style={{fontSize:11,color:'rgba(245,245,247,0.35)'}}>Connect wallet</span>
                         )}
@@ -467,6 +495,51 @@ export default function Marketplace() {
         )}
 
       </div>
+      {/* ── DeepBook USDC Buy Modal ── */}
+      {usdcModal && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }} onClick={() => setUsdcModal(null)}>
+          <div style={{ background:'#0d0f14', border:'1px solid rgba(255,255,255,0.1)', borderRadius:20, padding:'28px 24px', maxWidth:420, width:'100%' }} onClick={e => e.stopPropagation()}>
+
+            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:20 }}>
+              <span style={{ fontSize:24 }}>🔄</span>
+              <div>
+                <div style={{ fontSize:16, fontWeight:800, color:'#fff' }}>Buy with USDC via DeepBook</div>
+                <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)' }}>Powered by DeepBook V3 — Sui's native order book</div>
+              </div>
+            </div>
+
+            <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:14, padding:'16px 18px', marginBottom:16 }}>
+              <div style={{ fontSize:13, color:'rgba(245,245,247,0.4)', marginBottom:12 }}>Transaction breakdown</div>
+              {[
+                { label:'NFT', value: usdcModal.name },
+                { label:'NFT price', value: `${(usdcModal.price/1e9).toFixed(3)} SUI` },
+                { label:'DeepBook quote', value: quoting ? 'Fetching...' : quote ? `≈ ${quote.usdcNeeded.toFixed(4)} ${coinLabel}` : '—' },
+                { label:'Slippage tolerance', value: '0.5%' },
+                { label:'Pool', value: 'SUI/DBUSDC · DeepBook V3' },
+              ].map((r, i) => (
+                <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'6px 0', borderTop: i>0?'1px solid rgba(255,255,255,0.05)':'none' }}>
+                  <span style={{ fontSize:12, color:'rgba(245,245,247,0.4)' }}>{r.label}</span>
+                  <span style={{ fontSize:12, fontWeight:600, color:'#fff' }}>{r.value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', background:'rgba(99,102,241,0.08)', border:'1px solid rgba(99,102,241,0.2)', borderRadius:10, marginBottom:20 }}>
+              <span style={{ fontSize:14 }}>ℹ️</span>
+              <span style={{ fontSize:12, color:'rgba(245,245,247,0.45)' }}>DeepBook swaps {coinLabel}→SUI then buys the NFT in one transaction block.</span>
+            </div>
+
+            <div style={{ display:'flex', gap:10 }}>
+              <button onClick={() => setUsdcModal(null)} style={{ flex:1, padding:'12px', borderRadius:10, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(245,245,247,0.6)', fontSize:14, fontWeight:600, cursor:'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={confirmUsdcBuy} disabled={swapping || quoting || !quote} style={{ flex:2, padding:'12px', borderRadius:10, background: swapping ? 'rgba(99,102,241,0.3)' : '#6366f1', color:'#fff', fontSize:14, fontWeight:700, border:'none', cursor: swapping?'not-allowed':'pointer' }}>
+                {swapping ? 'Swapping on DeepBook...' : quoting ? 'Getting quote...' : `Confirm — Pay ${quote ? quote.usdcNeeded.toFixed(3) : '...'} ${coinLabel}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
