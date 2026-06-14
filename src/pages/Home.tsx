@@ -333,9 +333,31 @@ export default function Home() {
               and emerging opportunities, with media permanently stored on Walrus
               and ownership enforced by Sui Move.
             </p>
-            <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
-              Start discovering <Arrow/>
-            </Link>
+            <div style={{ display:'flex', gap:12, flexWrap:'wrap', alignItems:'center' }}>
+              <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
+                Start discovering <Arrow/>
+              </Link>
+              <Link to="/agent-wallet" style={{
+                display:'flex', alignItems:'center', gap:8,
+                padding:'12px 20px', borderRadius:12,
+                background:'rgba(99,102,241,0.12)',
+                border:'1px solid rgba(99,102,241,0.3)',
+                color:'#818cf8', fontSize:14, fontWeight:600,
+                textDecoration:'none', whiteSpace:'nowrap',
+              }}>
+                🤖 Agent Wallet
+              </Link>
+              <Link to="/mint/ai" style={{
+                display:'flex', alignItems:'center', gap:8,
+                padding:'12px 20px', borderRadius:12,
+                background:'rgba(0,212,170,0.08)',
+                border:'1px solid rgba(0,212,170,0.2)',
+                color:'#00d4aa', fontSize:14, fontWeight:600,
+                textDecoration:'none', whiteSpace:'nowrap',
+              }}>
+                ✨ AI Generator
+              </Link>
+            </div>
 
             {/* Live stats — premium full-width */}
             <div style={{
@@ -349,20 +371,20 @@ export default function Home() {
               overflow: 'hidden',
             }}>
               {[
-                { icon: '🔮', value: liveStats.minted || '—', label: 'NFTs Minted' },
-                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—', label: 'On Walrus' },
-                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : (liveStats.listed ? `${liveStats.listed}` : '—'), label: floorSui ? `Floor${floorUsd ? ' · ' + floorUsd : ''}` : 'Listed' },
-                { icon: '📊', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : (suiPrice ? `$${suiPrice.toFixed(2)}` : '—'), label: totalVolumeSui ? 'Total Volume' : '1 SUI Price' },
+                { icon: '🔮', value: liveStats.minted || '0', label: 'NFTs Minted' },
+                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '∞', label: 'Stored on Walrus' },
+                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : `${liveStats.listed || '0'}`, label: floorSui ? `Floor Price${floorUsd ? ' · '+floorUsd : ''}` : 'Active Listings' },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—', label: 'SUI/USDC · DeepBook' },
               ].map((s, i) => (
                 <div key={s.label} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '5px 8px',
+                  padding: '12px 8px',
                   borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                   gap: 6,
                 }}>
-                  <span style={{ fontSize: 'clamp(20px,2.5vw,28px)', lineHeight: 1 }}>{s.icon}</span>
-                  <span style={{ fontSize: 'clamp(15px,1.8vw,20px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</span>
-                  <span style={{ fontSize: 'clamp(7px,0.75vw,9px)', color: 'rgba(245,245,247,0.3)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{s.label}</span>
+                  <span style={{ fontSize: 'clamp(18px,2vw,24px)', lineHeight: 1 }}>{s.icon}</span>
+                  <span style={{ fontSize: 'clamp(14px,1.6vw,18px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{s.value}</span>
+                  <span style={{ fontSize: 'clamp(9px,0.8vw,11px)', color: 'rgba(245,245,247,0.45)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign:'center' }}>{s.label}</span>
                 </div>
               ))}
             </div>
