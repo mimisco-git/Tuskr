@@ -46,7 +46,7 @@ export function useNFTMarketplace() {
 
     // Validate inputs before sending
     if (!params.name.trim())     throw new Error('NFT name is required')
-    if (!params.blobId.trim())   throw new Error('Blob ID is required — upload to Walrus first')
+    if (!params.blobId.trim())   throw new Error('Blob ID is required. Upload to Walrus first.')
     if (!params.mediaUrl.trim()) throw new Error('Media URL is required')
 
     const tx = new Transaction()

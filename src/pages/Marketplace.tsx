@@ -506,7 +506,7 @@ export default function Marketplace() {
               <span style={{ fontSize:24 }}>🔄</span>
               <div>
                 <div style={{ fontSize:16, fontWeight:800, color:'#fff' }}>Buy with USDC via DeepBook</div>
-                <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)' }}>Powered by DeepBook V3 — Sui's native order book</div>
+                <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)' }}>Powered by DeepBook V3. Sui's native order book.</div>
               </div>
             </div>
 
@@ -536,7 +536,7 @@ export default function Marketplace() {
                 Cancel
               </button>
               <button onClick={confirmUsdcBuy} disabled={swapping || quoting || !quote} style={{ flex:2, padding:'12px', borderRadius:10, background: swapping ? 'rgba(99,102,241,0.3)' : '#6366f1', color:'#fff', fontSize:14, fontWeight:700, border:'none', cursor: swapping?'not-allowed':'pointer' }}>
-                {swapping ? 'Swapping on DeepBook...' : quoting ? 'Getting quote...' : `Confirm — Pay ${quote ? quote.usdcNeeded.toFixed(3) : '...'} ${coinLabel}`}
+                {swapping ? 'Swapping on DeepBook...' : quoting ? 'Getting quote...' : `Confirm: Pay ${quote ? quote.usdcNeeded.toFixed(3) : '...'} ${coinLabel}`}
               </button>
             </div>
           </div>

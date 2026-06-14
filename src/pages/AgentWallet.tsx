@@ -55,7 +55,7 @@ export default function AgentWallet() {
         type: 'test', nftName: 'Agent Test Transaction',
       })
       if (result) {
-        setTestMsg(`✅ Agent executed successfully! Tx: ${result.digest.slice(0,16)}... — check activity log.`)
+        setTestMsg(`✅ Agent executed successfully! Tx: ${result.digest.slice(0,16)}... Check activity log.`)
       } else {
         setTestMsg('❌ Agent needs testnet SUI. Copy the agent address and use the Sui faucet.')
       }
@@ -99,16 +99,16 @@ export default function AgentWallet() {
             Agent Wallet
           </h1>
           <p style={{ fontSize:15, color:'rgba(245,245,247,0.4)', lineHeight:1.6 }}>
-            Your AI agent gets its own Sui wallet with a strict spending policy. It signs transactions autonomously within the budget — no wallet popup. Every action is logged on Walrus. You can revoke it instantly.
+            Your AI agent gets its own Sui wallet with a strict spending policy. It signs transactions autonomously within the budget, no wallet popup.. Every action is logged on Walrus. You can revoke it instantly.
           </p>
         </div>
 
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:20, marginBottom:20 }}>
 
-          {/* Step 1 — Create Agent */}
+          {/* Step 1: Create Agent */}
           <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'20px' }}>
             <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:12 }}>
-              Step 1 — Create Agent
+              Step 1: Create Agent
             </div>
             {agentAddr ? (
               <div>
@@ -139,10 +139,10 @@ export default function AgentWallet() {
             )}
           </div>
 
-          {/* Step 2 — Set Policy */}
+          {/* Step 2: Set Policy */}
           <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'20px' }}>
             <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:12 }}>
-              Step 2 — Set Policy
+              Step 2: Set Policy
             </div>
             <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
               <div>
@@ -168,7 +168,7 @@ export default function AgentWallet() {
                   style={{ width:'100%', padding:'8px 10px', borderRadius:8, background:'rgba(15,15,20,1)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', fontSize:13, boxSizing:'border-box' }}
                 >
                   <option value="tuskr_nft_only">Tuskr NFT minting only</option>
-                  <option value="tuskr_all">Tuskr — mint + list + buy</option>
+                  <option value="tuskr_all">Tuskr: mint, list and buy</option>
                 </select>
               </div>
               <button
@@ -232,10 +232,10 @@ export default function AgentWallet() {
               <div style={{ fontSize:12, fontWeight:700, color:'#a5b4fc', marginBottom:8 }}>What the agent does autonomously:</div>
               <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
                 {([
-                  { c:'#a5b4fc', text:'Signs Sui transactions using its own Ed25519 keypair — no wallet popup' },
+                  { c:'#a5b4fc', text:'Signs Sui transactions using its own Ed25519 keypair. No wallet popup.' },
                   { c:'#a5b4fc', text:'Enforces the 0.5 SUI budget ceiling before every action' },
-                  { c:'#a5b4fc', text:'Logs every action permanently to Walrus — verifiable on-chain' },
-                  { c:'#a5b4fc', text:'Respects the 24h expiry — all actions blocked after timeout' },
+                  { c:'#a5b4fc', text:'Logs every action permanently to Walrus, verifiable on-chain.' },
+                  { c:'#a5b4fc', text:'Respects the 24h expiry. All actions blocked after timeout.' },
                   { c:'#f87171', text:'Instantly disabled when you click Revoke Agent' },
                 ] as {c:string,text:string}[]).map((item, i) => (
                   <div key={i} style={{ fontSize:12, color:'rgba(245,245,247,0.6)', display:'flex', alignItems:'flex-start', gap:8 }}>
@@ -253,7 +253,7 @@ export default function AgentWallet() {
                 disabled={testing || !policy.active}
                 style={{ width:'100%', padding:'11px', borderRadius:10, background: testing ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.12)', border:'1px solid rgba(99,102,241,0.3)', color:'#a5b4fc', fontSize:13, fontWeight:700, cursor: testing ? 'not-allowed' : 'pointer' }}
               >
-                {testing ? 'Signing transaction...' : 'Test Agent — Fire a Real Transaction'}
+                {testing ? 'Signing transaction...' : 'Test Agent: Fire a Real Transaction'}
               </button>
               {testMsg && (
                 <div style={{ marginTop:10, padding:'10px 14px', background: testMsg.startsWith('✅') ? 'rgba(0,212,170,0.08)' : testMsg.startsWith('❌') ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.04)', border:`1px solid ${testMsg.startsWith('✅') ? 'rgba(0,212,170,0.25)' : testMsg.startsWith('❌') ? 'rgba(239,68,68,0.25)' : 'rgba(255,255,255,0.08)'}`, borderRadius:10, fontSize:12, color:'rgba(245,245,247,0.7)', lineHeight:1.5, fontFamily:'Space Mono,monospace' }}>

@@ -405,7 +405,7 @@ export default function Mint() {
               <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:28 }}>
                 <div style={{ width:44, height:44, borderRadius:12, background:'rgba(0,212,170,0.12)', border:'1px solid rgba(0,212,170,0.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>🤖</div>
                 <div>
-                  <div style={{ fontSize:18, fontWeight:800, color:'#fff', letterSpacing:'-0.02em' }}>AI Agent — Transaction Preview</div>
+                  <div style={{ fontSize:18, fontWeight:800, color:'#fff', letterSpacing:'-0.02em' }}>AI Agent: Transaction Preview</div>
                   <div style={{ fontSize:13, color:'rgba(245,245,247,0.4)', marginTop:2 }}>Review what the agent will execute on your behalf</div>
                 </div>
               </div>
@@ -458,7 +458,7 @@ export default function Mint() {
                 <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:12 }}>Cost Breakdown</div>
                 {[
                   { label:'Estimated gas fee', value:'~0.01 SUI', sub: suiPrice ? `~$${(0.01*suiPrice).toFixed(4)}` : '' },
-                  { label:'Walrus storage', value:'Prepaid ✓', sub:'Permanent — never expires' },
+                  { label:'Walrus storage', value:'Prepaid ✓', sub:'Permanent, never expires' },
                   { label:'Royalty (on resale)', value:`${royalty}%`, sub:'You earn this on every secondary sale' },
                 ].map((row, i) => (
                   <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', padding:'7px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>

@@ -244,7 +244,7 @@ export default function Profile() {
             {editing ? (
               <textarea
                 value={editBio} onChange={e => setEditBio(e.target.value)}
-                placeholder="Short bio — who are you as a creator?"
+                placeholder="Short bio. Who are you as a creator?"
                 rows={2}
                 style={{ marginTop:6, width:'100%', maxWidth:380, fontSize:13, color:'rgba(245,245,247,0.7)', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'6px 10px', outline:'none', resize:'none', fontFamily:'inherit' }}
               />

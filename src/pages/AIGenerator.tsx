@@ -80,13 +80,13 @@ export default function AIGenerator() {
     toast('Uploading image to Walrus...', 'loading')
     const uploaded = await uploadBlob(imageFile, account?.address)
     if (!uploaded) {
-      toastError('Walrus upload failed — check your network connection')
+      toastError('Walrus upload failed. Check your network connection.')
       setStep('review')
       return
     }
 
     // Mint on Sui
-    toast('Minting on Sui — confirm in your wallet...', 'loading')
+    toast('Minting on Sui, confirm in your wallet...', 'loading')
     try {
       const result = await mintNFT({
         name:        concept.name || 'Tuskr NFT',

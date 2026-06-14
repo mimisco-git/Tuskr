@@ -261,7 +261,7 @@ export default function NFTDetail() {
                     <p style={{ fontSize:13, color:'rgba(245,245,247,0.5)', margin:0 }}>
                       Private content secured with Seal threshold encryption.
                       {(account?.address === nft.creator || account?.address === nftOwner)
-                        ? ' You own this NFT — unlock to reveal.'
+                        ? ' You own this NFT. Unlock to reveal.'
                         : ' Only the NFT owner can unlock this.'}
                     </p>
                   </div>

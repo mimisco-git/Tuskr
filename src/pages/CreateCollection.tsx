@@ -55,7 +55,7 @@ export default function CreateCollection() {
           <div className={s.successIcon}>🎉</div>
           <h2 className={s.successTitle}>Collection Created!</h2>
           <p className={s.successSub}>
-            <strong>{name}</strong> is ready. Start minting NFTs into it — each NFT you mint goes into your collection automatically.
+            <strong>{name}</strong> is ready. Start minting NFTs into it. Each NFT you mint goes into your collection automatically.
           </p>
           {coverBlobId && (
             <div className={s.blobRow}>
@@ -81,7 +81,7 @@ export default function CreateCollection() {
           <h1 className={s.title}>Create Collection</h1>
           <p className={s.sub}>
             Collections on Tuskr group your minted NFTs together. Set a name,
-            cover image, and royalty — then start minting.
+            cover image and royalty, then start minting.
           </p>
         </div>
 

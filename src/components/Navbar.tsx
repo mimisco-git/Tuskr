@@ -314,7 +314,7 @@ export default function Navbar() {
       </header>
 
       {/* ═══════════════════════════════════════
-          MOBILE DRAWER — must be OUTSIDE <header>
+          MOBILE DRAWER: must be OUTSIDE <header>
           because backdrop-filter on header traps
           position:fixed children, making them invisible.
       ═══════════════════════════════════════ */}
