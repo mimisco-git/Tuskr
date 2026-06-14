@@ -750,36 +750,33 @@
   gap: 10px;
   align-items: center;
 }
-@media (max-width: 540px) {
+@media (max-width: 600px) {
   .ctaBtnGroup {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    gap: 8px;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 8px !important;
   }
   .ctaBtnGroup a {
+    display: flex !important;
     width: 100% !important;
     justify-content: center !important;
     height: 48px !important;
-    padding: 0 16px !important;
+    padding: 0 20px !important;
+    box-sizing: border-box !important;
+    white-space: normal !important;
   }
 }
 
-/* ── MOBILE: Stats bar — readable on small screens ── */
-@media (max-width: 480px) {
+/* ── MOBILE: Stats bar — 2-col on small screens ── */
+@media (max-width: 600px) {
   .statsGrid {
     grid-template-columns: repeat(2, 1fr) !important;
   }
   .statCell {
-    border-left: none !important;
-    border-top: 1px solid rgba(255,255,255,0.07) !important;
-    padding: 10px 8px !important;
+    padding: 12px 8px !important;
   }
-  .statCell:nth-child(odd) { border-left: none !important; }
-  .statCell:nth-child(even) { border-left: 1px solid rgba(255,255,255,0.07) !important; }
-  .statCell:nth-child(1),
-  .statCell:nth-child(2) { border-top: none !important; }
-  .statIcon  { font-size: 16px !important; }
-  .statValue { font-size: 14px !important; }
-  .statLabel { font-size: 9px !important; letter-spacing: 0.06em !important; }
+  .statIcon  { font-size: 18px !important; }
+  .statValue { font-size: 16px !important; }
+  .statLabel { font-size: 10px !important; letter-spacing: 0.05em !important; color: rgba(245,245,247,0.65) !important; }
 }

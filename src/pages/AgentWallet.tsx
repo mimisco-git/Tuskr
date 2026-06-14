@@ -23,7 +23,9 @@ export default function AgentWallet() {
   const [copied,    setCopied]    = useState(false)
   const [testing,   setTesting]   = useState(false)
   const [testMsg,   setTestMsg]   = useState('')
-  const [cmdInput,   setCmdInput]   = useState('')
+  const [cmdInput,      setCmdInput]      = useState('')
+  const [withdrawing,   setWithdrawing]   = useState(false)
+  const [withdrawMsg,   setWithdrawMsg]   = useState('')
 
 const handleActivate = () => {
     activatePolicy({
@@ -63,6 +65,32 @@ const handleActivate = () => {
         setTestMsg(`❌ ${msg.slice(0, 120)}`)
       }
     } finally { setTesting(false) }
+  }
+
+  const handleWithdraw = async () => {
+    if (!account?.address || !agentAddr || !derived) {
+      setWithdrawMsg('Activate the agent key first.')
+      return
+    }
+    setWithdrawing(true)
+    setWithdrawMsg('Building withdrawal transaction...')
+    try {
+      const { Transaction } = await import('@mysten/sui/transactions')
+      const tx = new Transaction()
+      tx.setSender(agentAddr)
+      // Transfer all gas (minus fee reserve) back to owner wallet
+      tx.transferObjects([tx.gas], tx.pure.address(account.address))
+      const result = await executeAutonomously(tx, 0, {
+        type: 'withdraw', nftName: 'Withdraw to main wallet',
+      })
+      if (result) {
+        setWithdrawMsg(`Withdrawn to your main wallet. Tx: ${result.digest.slice(0,20)}...`)
+      } else {
+        setWithdrawMsg('Withdrawal failed. Make sure agent has SUI balance.')
+      }
+    } catch (e: any) {
+      setWithdrawMsg(e?.message?.slice(0, 120) || 'Withdrawal failed.')
+    } finally { setWithdrawing(false) }
   }
 
   const copyAddr = () => {
@@ -400,7 +428,29 @@ const handleActivate = () => {
           </div>
         )}
 
-        {/* Empty state */}
+        {/* Withdraw funds from agent wallet */}
+      {agentAddr && derived && (
+        <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:'20px', marginBottom:20 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:'#fff', marginBottom:4 }}>Withdraw from Agent Wallet</div>
+          <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)', marginBottom:14, lineHeight:1.6 }}>
+            Transfer all SUI from the agent wallet back to your main wallet. Use this to collect earnings after NFT sales or to reclaim unused gas.
+          </div>
+          <button
+            onClick={handleWithdraw}
+            disabled={withdrawing || !policy.active}
+            style={{ width:'100%', padding:'11px', borderRadius:10, background: withdrawing ? 'rgba(0,212,170,0.2)' : 'rgba(0,212,170,0.1)', border:'1px solid rgba(0,212,170,0.3)', color:'#00d4aa', fontSize:13, fontWeight:700, cursor: withdrawing ? 'not-allowed' : 'pointer' }}
+          >
+            {withdrawing ? 'Withdrawing...' : 'Withdraw All SUI to My Wallet'}
+          </button>
+          {withdrawMsg && (
+            <div style={{ marginTop:10, padding:'10px 14px', borderRadius:10, background: withdrawMsg.startsWith('Withdrawn') ? 'rgba(0,212,170,0.08)' : 'rgba(239,68,68,0.08)', border:`1px solid ${withdrawMsg.startsWith('Withdrawn') ? 'rgba(0,212,170,0.25)' : 'rgba(239,68,68,0.2)'}`, fontSize:12, color:'rgba(245,245,247,0.7)', lineHeight:1.5, fontFamily:'Space Mono,monospace' }}>
+              {withdrawMsg}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Empty state */}
         {!agentAddr && (
           <div style={{ textAlign:'center', padding:'40px 0', color:'rgba(245,245,247,0.25)', fontSize:14 }}>
             Create an agent keypair above to get started. The agent will act within your set policy without requiring a wallet popup for each action.

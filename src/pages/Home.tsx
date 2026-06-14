@@ -436,10 +436,14 @@ export default function Home() {
                 overflow: 'hidden',
               }}
               ref={el => {
-                if (el) {
+                if (!el) return
+                const applyGrid = () => {
                   const w = window.innerWidth
-                  el.style.gridTemplateColumns = w >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
+                  if (w >= 640) el.style.gridTemplateColumns = 'repeat(6,1fr)'
+                  else el.style.gridTemplateColumns = 'repeat(3,1fr)'
                 }
+                applyGrid()
+                window.addEventListener('resize', applyGrid)
               }}
             >
               {[
