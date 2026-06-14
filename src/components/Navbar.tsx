@@ -93,6 +93,7 @@ const LINKS = [
     { label: 'Mint NFT',     to: '/mint' },
     { label: 'AI Generator', to: '/mint/ai' },
     { label: 'Batch Mint',   to: '/mint/batch' },
+    { label: '🤖 Agent Wallet', to: '/agent-wallet' },
     { label: 'List for Sale',to: '/list' },
   ]},
   { label: 'Community', sub: [

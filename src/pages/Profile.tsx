@@ -48,7 +48,7 @@ function useGoogleUser(): GoogleUser | null {
 
 function shortAddr(a: string) { return `${a.slice(0,8)}…${a.slice(-6)}` }
 
-type Tab = 'owned' | 'listed' | 'sold' | 'bought'
+type Tab = 'owned' | 'listed' | 'sold'
 
 function NFTCard({ nft, badge }: { nft: ParsedNFT; badge?: string }) {
   return (
@@ -104,7 +104,6 @@ export default function Profile() {
   const [owned,   setOwned]  = useState<ParsedNFT[]>([])
   const [listed,  setListed] = useState<any[]>([])
   const [sold,    setSold]   = useState<any[]>([])
-  const [bought,  setBought] = useState<any[]>([])
   const [loading, setLoad]   = useState(true)
   const [copied,  setCopied] = useState(false)
 
@@ -136,8 +135,7 @@ export default function Profile() {
       })))
       setListed(lstRes.listings || [])
       setSold(sldRes.sold || [])
-      setBought([]) // merged into owned tab
-    } catch { setOwned([]); setListed([]); setSold([]); setBought([]) }
+    } catch { setOwned([]); setListed([]); setSold([]) }
     finally { setLoad(false) }
   }, [effectiveAddr])
 
@@ -333,24 +331,6 @@ export default function Profile() {
                         +{(Number(item.price)/1e9).toFixed(3)} SUI
                       </span>
                     </div>
-                  ))}
-                </div>
-            )}
-            {tab==='bought' && (bought.length===0
-              ? <Empty msg="No purchases yet."/>
-              : <div className={s.grid}>
-                  {bought.map((item: any) => (
-                    <NFTCard key={item.nftId} nft={{
-                      objectId:    item.nftId,
-                      name:        item.name     || 'Tuskr NFT',
-                      description: '',
-                      royaltyBps:  0,
-                      mediaUrl:    item.blobId
-                        ? `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${item.blobId}`
-                        : (item.mediaUrl || ''),
-                      blobId:      item.blobId  || '',
-                      creator:     item.seller  || '',
-                    }} badge={`${(Number(item.price)/1e9).toFixed(3)} SUI paid`}/>
                   ))}
                 </div>
             )}
