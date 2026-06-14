@@ -7,8 +7,11 @@ const OLD_PKG = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382
 
 // ── Normalize any Sui address/ID to lowercase 0x + 64 hex chars ─────────────
 function norm(id) {
-  if (!id || typeof id !== 'string') return ''
-  const hex = id.replace(/^0x/i, '').toLowerCase()
+  if (!id) return ''
+  // sui::object::ID serializes as {id:"0x..."} in parsedJson
+  const raw = (typeof id === 'object') ? (id.id || id.ID || '') : String(id)
+  if (!raw) return ''
+  const hex = raw.replace(/^0x/i, '').toLowerCase()
   return '0x' + hex.padStart(64, '0')
 }
 
@@ -123,11 +126,11 @@ export default async function handler(req, res) {
           && !delistedIds.has(lid)
       })
 
-      const nftIds  = mine.map(e => norm(e.parsedJson?.nft_id)).filter(Boolean)
+      const nftIds  = mine.map(e => norm(e.parsedJson?.nft_id?.id || e.parsedJson?.nft_id)).filter(Boolean)
       const nftData = await fetchNFTData(network, nftIds)
 
       const listings = mine.map(e => {
-        const nftId = norm(e.parsedJson?.nft_id)
+        const nftId = norm(e.parsedJson?.nft_id?.id || e.parsedJson?.nft_id)
         const info  = nftData[nftId] || {}
         return {
           listingId: norm(e.parsedJson?.listing_id),
@@ -149,11 +152,11 @@ export default async function handler(req, res) {
       // seller is who listed it — normalize and compare
       const mine = events.filter(e => norm(e.parsedJson?.seller) === address)
 
-      const nftIds  = mine.map(e => norm(e.parsedJson?.nft_id)).filter(Boolean)
+      const nftIds  = mine.map(e => norm(e.parsedJson?.nft_id?.id || e.parsedJson?.nft_id)).filter(Boolean)
       const nftData = await fetchNFTData(network, nftIds)
 
       const sold = mine.map(e => {
-        const nftId = norm(e.parsedJson?.nft_id)
+        const nftId = norm(e.parsedJson?.nft_id?.id || e.parsedJson?.nft_id)
         const info  = nftData[nftId] || {}
         return {
           listingId: norm(e.parsedJson?.listing_id),
@@ -175,7 +178,7 @@ export default async function handler(req, res) {
       // buyer is who called buy()
       const mine = events.filter(e => norm(e.parsedJson?.buyer) === address)
 
-      const nftIds  = mine.map(e => norm(e.parsedJson?.nft_id)).filter(Boolean)
+      const nftIds  = mine.map(e => norm(e.parsedJson?.nft_id?.id || e.parsedJson?.nft_id)).filter(Boolean)
       const nftData = await fetchNFTData(network, nftIds)
 
       const bought = mine.map(e => {
