@@ -2,8 +2,8 @@
    MINT PAGE — Premium Walrus-inspired design
 ===================================================== */
 
-.page { padding: 72px 0 96px; min-height: 80vh; }
-.inner { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+.page { padding: 72px 0 96px }
+.inner { max-width: 760px; margin: 0 auto; padding: 0 24px }
 
 /* ── Gate (not connected) ── */
 .gate {
@@ -16,11 +16,11 @@
   color: var(--a); display: flex; align-items: center; justify-content: center;
   margin-bottom: 24px;
 }
-.gateTitle { font-size: clamp(24px,4vw,36px); font-weight: 700; letter-spacing: -0.03em; color: #fff; margin-bottom: 12px; }
-.gateSub { font-size: 16px; color: rgba(245,245,247,0.45); line-height: 1.7; margin-bottom: 28px; max-width: 360px; }
+.gateTitle { font-size: clamp(24px,4vw,36px); font-weight: 700; letter-spacing: -0.03em; color: #fff; margin-bottom: 12px }
+.gateSub { font-size: 16px; color: rgba(245,245,247,0.45); line-height: 1.7; margin-bottom: 28px; max-width: 360px }
 
 /* ── Page header ── */
-.pageHead { margin-bottom: 40px; }
+.pageHead { margin-bottom: 40px }
 .pageEyebrow {
   display: inline-flex; align-items: center; gap: 7px;
   font-family: 'Space Mono', monospace; font-size: 10px;
@@ -32,13 +32,13 @@
   background: var(--a); box-shadow: 0 0 8px var(--a);
   animation: pulse 2s infinite;
 }
-@keyframes pulse { 50%{ opacity:.3; } }
+@keyframes pulse { 50%{ opacity:.3 } }
 .pageTitle {
   font-size: clamp(32px,5vw,52px); font-weight: 800;
   letter-spacing: -0.04em; color: #fff; line-height: 1;
   margin-bottom: 12px;
 }
-.pageSub { font-size: 16px; color: rgba(245,245,247,0.45); line-height: 1.7; }
+.pageSub { font-size: 16px; color: rgba(245,245,247,0.45); line-height: 1.7 }
 
 /* ── Premium Stepper ── */
 .stepper {
@@ -55,7 +55,7 @@
   height: 1px; background: rgba(255,255,255,0.10); z-index: 0;
   transition: background 0.3s;
 }
-.stepLineDone { background: var(--a); }
+.stepLineDone { background: var(--a) }
 
 .stepCircle {
   width: 40px; height: 40px; border-radius: 50%; z-index: 1;
@@ -77,15 +77,15 @@
   background: var(--a);
   color: #000;
 }
-.stepNum { font-size: 14px; font-weight: 700; }
+.stepNum { font-size: 14px; font-weight: 700 }
 
-.stepText { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.stepText { display: flex; flex-direction: column; align-items: center; gap: 2px }
 .stepLabel {
   font-size: 13px; font-weight: 600; color: rgba(245,245,247,0.35);
   transition: color 0.2s;
 }
-.stepLabelActive { color: var(--a); }
-.stepLabelDone { color: rgba(245,245,247,0.55); }
+.stepLabelActive { color: var(--a) }
+.stepLabelDone { color: rgba(245,245,247,0.55) }
 .stepDesc {
   font-size: 11px; color: rgba(245,245,247,0.20);
   white-space: nowrap;
@@ -97,12 +97,12 @@
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: 24px; padding: 36px;
 }
-.cardHead { margin-bottom: 28px; }
+.cardHead { margin-bottom: 28px }
 .cardTitle {
   font-size: 22px; font-weight: 700; letter-spacing: -0.02em;
   color: #fff; margin-bottom: 6px;
 }
-.cardSub { font-size: 14px; color: rgba(245,245,247,0.45); }
+.cardSub { font-size: 14px; color: rgba(245,245,247,0.45) }
 
 /* ── Drop Zone ── */
 .dropZone {
@@ -113,20 +113,20 @@
   transition: border-color 0.2s, background 0.2s;
   margin-bottom: 16px;
 }
-.dropZone:hover { border-color: rgba(0,212,170,0.35); background: rgba(0,212,170,0.03); }
-.dropZoneDrag { border-color: var(--a) !important; background: rgba(0,212,170,0.06) !important; }
-.dropZoneHasFile { border-style: solid; border-color: rgba(0,212,170,0.25); }
+.dropZone:hover { border-color: rgba(0,212,170,0.35); background: rgba(0,212,170,0.03) }
+.dropZoneDrag { border-color: var(--a) !important; background: rgba(0,212,170,0.06) !important }
+.dropZoneHasFile { border-style: solid; border-color: rgba(0,212,170,0.25) }
 
-.dropEmpty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px; }
+.dropEmpty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px }
 .dropIconWrap {
   width: 56px; height: 56px; border-radius: 16px;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
   display: flex; align-items: center; justify-content: center;
   color: rgba(245,245,247,0.5); margin-bottom: 4px;
 }
-.dropTitle { font-size: 17px; font-weight: 600; color: rgba(245,245,247,0.75); }
-.dropTypes { font-size: 13px; color: rgba(245,245,247,0.30); }
-.dropPreview { width: 100%; height: 280px; object-fit: contain; display: block; }
+.dropTitle { font-size: 17px; font-weight: 600; color: rgba(245,245,247,0.75) }
+.dropTypes { font-size: 13px; color: rgba(245,245,247,0.30) }
+.dropPreview { width: 100%; height: 280px; object-fit: contain; display: block }
 
 /* ── File bar ── */
 .fileBar {
@@ -135,15 +135,15 @@
   background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.18);
   margin-bottom: 16px;
 }
-.fileBarIcon { color: var(--a); flex-shrink: 0; }
-.fileBarName { font-size: 14px; color: #f5f5f7; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fileBarSize { font-size: 12px; color: rgba(245,245,247,0.4); white-space: nowrap; }
+.fileBarIcon { color: var(--a); flex-shrink: 0 }
+.fileBarName { font-size: 14px; color: #f5f5f7; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.fileBarSize { font-size: 12px; color: rgba(245,245,247,0.4); white-space: nowrap }
 .fileBarRemove {
   background: transparent; border: none; cursor: pointer;
   color: rgba(245,245,247,0.35); padding: 2px; border-radius: 4px;
   transition: color 0.15s;
 }
-.fileBarRemove:hover { color: rgba(245,245,247,0.75); }
+.fileBarRemove:hover { color: rgba(245,245,247,0.75) }
 
 /* ── Walrus badge ── */
 .walrusBadgeRow {
@@ -157,12 +157,12 @@
   padding: 3px 8px; border-radius: 99px;
   background: rgba(0,212,170,0.10); border: 1px solid rgba(0,212,170,0.20);
 }
-.walrusDot { width: 5px; height: 5px; border-radius: 50%; background: var(--a); }
-.walrusLabel { font-family: 'Space Mono',monospace; font-size: 9px; font-weight: 700; color: var(--a); letter-spacing: 0.1em; }
-.walrusDesc { font-size: 13px; color: rgba(245,245,247,0.40); line-height: 1.5; }
+.walrusDot { width: 5px; height: 5px; border-radius: 50%; background: var(--a) }
+.walrusLabel { font-family: 'Space Mono',monospace; font-size: 9px; font-weight: 700; color: var(--a); letter-spacing: 0.1em }
+.walrusDesc { font-size: 13px; color: rgba(245,245,247,0.40); line-height: 1.5 }
 
 /* ── Error ── */
-.errMsg { font-size: 13px; color: #ff6b6b; padding: 10px 14px; border-radius: 8px; background: rgba(255,50,50,0.07); margin-bottom: 12px; }
+.errMsg { font-size: 13px; color: #ff6b6b; padding: 10px 14px; border-radius: 8px; background: rgba(255,50,50,0.07); margin-bottom: 12px }
 
 /* ── Primary button ── */
 .primaryBtn {
@@ -189,26 +189,26 @@
   display: grid; grid-template-columns: 220px 1fr;
   gap: 28px; align-items: start;
 }
-.detailPreviewCol { position: sticky; top: 80px; }
-.detailPreviewWrap { border-radius: 16px; overflow: hidden; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
-.detailPreviewImg { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.detailPreviewCol { position: sticky; top: 80px }
+.detailPreviewWrap { border-radius: 16px; overflow: hidden; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08) }
+.detailPreviewImg { width: 100%; aspect-ratio: 1; object-fit: cover; display: block }
 .blobTag {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 12px;
   background: rgba(0,0,0,0.4); border-top: 1px solid rgba(255,255,255,0.06);
 }
-.blobId { font-family: 'Space Mono',monospace; font-size: 10px; color: rgba(245,245,247,0.35); flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.blobId { font-family: 'Space Mono',monospace; font-size: 10px; color: rgba(245,245,247,0.35); flex: 1; overflow: hidden; text-overflow: ellipsis }
 
-.detailForm { display: flex; flex-direction: column; gap: 20px; }
+.detailForm { display: flex; flex-direction: column; gap: 20px }
 
-.field { display: flex; flex-direction: column; gap: 8px; position: relative; }
+.field { display: flex; flex-direction: column; gap: 8px; position: relative }
 .fieldLabel {
   font-family: 'Space Mono',monospace; font-size: 10px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.12em;
   color: rgba(245,245,247,0.40);
   display: flex; align-items: center; justify-content: space-between;
 }
-.required { color: var(--a); }
+.required { color: var(--a) }
 .royaltyVal {
   font-size: 16px; font-weight: 700; color: var(--a);
   font-family: 'Inter',sans-serif;
@@ -221,13 +221,13 @@
   font-family: 'Inter',sans-serif;
   box-sizing: border-box;
 }
-.fieldInput:focus { border-color: var(--a); }
-.fieldTextarea { resize: vertical; min-height: 100px; }
-.fieldCount { position: absolute; bottom: 10px; right: 12px; font-size: 11px; color: rgba(245,245,247,0.25); }
-.fieldHint { font-size: 12px; color: rgba(245,245,247,0.30); }
+.fieldInput:focus { border-color: var(--a) }
+.fieldTextarea { resize: vertical; min-height: 100px }
+.fieldCount { position: absolute; bottom: 10px; right: 12px; font-size: 11px; color: rgba(245,245,247,0.25) }
+.fieldHint { font-size: 12px; color: rgba(245,245,247,0.30) }
 
 /* Royalty slider */
-.sliderWrap { display: flex; flex-direction: column; gap: 6px; }
+.sliderWrap { display: flex; flex-direction: column; gap: 6px }
 .slider {
   -webkit-appearance: none; appearance: none;
   width: 100%; height: 4px; border-radius: 2px;
@@ -252,7 +252,7 @@
   color: rgba(245,245,247,0.6); font-size: 15px; font-weight: 500;
   cursor: pointer; transition: background 0.15s;
 }
-.backBtn:hover { background: rgba(255,255,255,0.10); }
+.backBtn:hover { background: rgba(255,255,255,0.10) }
 .mintBtn {
   flex: 1; padding: 14px 24px; border-radius: 12px;
   background: #00d4aa !important; color: #000000 !important;
@@ -266,10 +266,10 @@
   box-shadow: 0 0 44px rgba(0,212,170,0.40);
   transform: translateY(-1px);
 }
-.mintBtn:disabled { opacity: 0.60 !important; cursor: not-allowed; transform: none; background: #00d4aa !important; color: #000 !important; }
+.mintBtn:disabled { opacity: 0.60 !important; cursor: not-allowed; transform: none; background: #00d4aa !important; color: #000 !important }
 
 /* ── Minting state ── */
-.statusBox { text-align: center; padding: 48px 24px; }
+.statusBox { text-align: center; padding: 48px 24px }
 .spinnerLarge {
   width: 56px; height: 56px; border-radius: 50%;
   border: 3px solid rgba(0,212,170,0.15);
@@ -277,26 +277,26 @@
   animation: spin 0.9s linear infinite;
   margin: 0 auto 24px;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
-.statusTitle { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #fff; margin-bottom: 10px; }
-.statusSub { font-size: 15px; color: rgba(245,245,247,0.45); line-height: 1.7; margin-bottom: 32px; }
-.statusSteps { display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 280px; margin: 0 auto; }
+@keyframes spin { to { transform: rotate(360deg) } }
+.statusTitle { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #fff; margin-bottom: 10px }
+.statusSub { font-size: 15px; color: rgba(245,245,247,0.45); line-height: 1.7; margin-bottom: 32px }
+.statusSteps { display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 280px; margin: 0 auto }
 .statusStep {
   display: flex; align-items: center; gap: 10px;
   font-size: 14px; color: rgba(245,245,247,0.55);
 }
-.statusCheck { color: var(--a); font-weight: 700; }
-.statusStepActive { color: #fff; font-weight: 500; }
+.statusCheck { color: var(--a); font-weight: 700 }
+.statusStepActive { color: #fff; font-weight: 500 }
 .statusSpinnerSmall {
   width: 14px; height: 14px; border-radius: 50%;
   border: 2px solid rgba(0,212,170,0.2); border-top-color: var(--a);
   animation: spin 0.7s linear infinite; flex-shrink: 0;
 }
-.statusStepPending { color: rgba(245,245,247,0.25); }
-.statusPendingDot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); flex-shrink: 0; }
+.statusStepPending { color: rgba(245,245,247,0.25) }
+.statusPendingDot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); flex-shrink: 0 }
 
 /* ── Done state ── */
-.doneBox { text-align: center; padding: 48px 24px; position: relative; }
+.doneBox { text-align: center; padding: 48px 24px; position: relative }
 .doneGlow {
   position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   width: 300px; height: 200px; border-radius: 50%;
@@ -315,20 +315,20 @@
   font-size: 28px; font-weight: 800; letter-spacing: -0.03em;
   color: #fff; margin-bottom: 10px;
 }
-.doneSub { font-size: 15px; color: rgba(245,245,247,0.50); line-height: 1.7; margin-bottom: 24px; }
+.doneSub { font-size: 15px; color: rgba(245,245,247,0.50); line-height: 1.7; margin-bottom: 24px }
 .donePrevWrap {
   width: 140px; height: 140px; border-radius: 16px; overflow: hidden;
   margin: 0 auto 28px; border: 1px solid rgba(255,255,255,0.10);
 }
-.donePreview { width: 100%; height: 100%; object-fit: cover; display: block; }
-.doneActions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.donePreview { width: 100%; height: 100%; object-fit: cover; display: block }
+.doneActions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap }
 .doneExplorer {
   padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
   color: var(--a); border: 1px solid rgba(0,212,170,0.25);
   text-decoration: none; background: rgba(0,212,170,0.06);
   transition: background 0.15s;
 }
-.doneExplorer:hover { background: rgba(0,212,170,0.12); }
+.doneExplorer:hover { background: rgba(0,212,170,0.12) }
 .doneProfile {
   padding: 11px 20px; border-radius: 10px; font-size: 15px; font-weight: 700;
   background: #00d4aa; color: #000; text-decoration: none;
@@ -336,13 +336,13 @@
   transition: background 0.15s;
   display: inline-block;
 }
-.doneProfile:hover { background: #00efc0; border-color: #00efc0; }
+.doneProfile:hover { background: #00efc0; border-color: #00efc0 }
 .doneReset {
   padding: 11px 20px; border-radius: 10px; font-size: 14px; font-weight: 600;
   background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.20);
   color: #fff; cursor: pointer; transition: background 0.15s;
 }
-.doneReset:hover { background: rgba(255,255,255,0.14); }
+.doneReset:hover { background: rgba(255,255,255,0.14) }
 
 /* ── Spinner inline ── */
 .spinner {
@@ -353,21 +353,21 @@
 
 /* ── Responsive ── */
 @media (max-width: 720px) {
-  .card { padding: 24px 18px; }
-  .detailLayout { grid-template-columns: 1fr; }
-  .detailPreviewCol { position: static; }
-  .detailPreviewWrap { aspect-ratio: 1; max-width: 200px; margin: 0 auto; }
-  .detailActions { flex-direction: column; }
-  .backBtn { width: 100%; }
-  .stepDesc { display: none; }
-  .stepper { gap: 0; }
+  .card { padding: 24px 18px }
+  .detailLayout { grid-template-columns: 1fr }
+  .detailPreviewCol { position: static }
+  .detailPreviewWrap { aspect-ratio: 1; max-width: 200px; margin: 0 auto }
+  .detailActions { flex-direction: column }
+  .backBtn { width: 100% }
+  .stepDesc { display: none }
+  .stepper { gap: 0 }
 }
 @media (max-width: 480px) {
-  .page { padding: 56px 0 72px; }
-  .inner { padding: 0 16px; }
-  .pageTitle { font-size: 28px; }
-  .stepLabel { font-size: 11px; }
-  .stepCircle { width: 34px; height: 34px; }
-  .dropZone { min-height: 180px; }
-  .dropPreview { height: 200px; }
+  .page { padding: 56px 0 72px }
+  .inner { padding: 0 16px }
+  .pageTitle { font-size: 28px }
+  .stepLabel { font-size: 11px }
+  .stepCircle { width: 34px; height: 34px }
+  .dropZone { min-height: 180px }
+  .dropPreview { height: 200px }
 }

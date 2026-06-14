@@ -1,5 +1,5 @@
 /* ── PAGE ── */
-.page { padding: 80px 0 80px; min-height: 80vh; }
+.page { padding: 80px 0 80px }
 
 /* Cover gradient behind header */
 .coverBg {
@@ -9,11 +9,11 @@
 }
 
 /* ── GATE (not signed in) ── */
-.gateWrap { text-align: center; padding: 100px 20px; max-width: 480px; margin: 0 auto; }
-.gateIcon { font-size: 56px; margin-bottom: 20px; }
-.gateTitle { font-size: clamp(24px,4vw,36px); font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.03em; }
-.gateDesc { font-size: 16px; color: rgba(245,245,247,0.45); margin-bottom: 32px; line-height: 1.6; }
-.gateActions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.gateWrap { text-align: center; padding: 100px 20px; max-width: 480px; margin: 0 auto }
+.gateIcon { font-size: 56px; margin-bottom: 20px }
+.gateTitle { font-size: clamp(24px,4vw,36px); font-weight: 700; color: #fff; margin-bottom: 12px; letter-spacing: -0.03em }
+.gateDesc { font-size: 16px; color: rgba(245,245,247,0.45); margin-bottom: 32px; line-height: 1.6 }
+.gateActions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap }
 
 /* ── HEADER ── */
 .header {
@@ -23,8 +23,8 @@
 }
 
 /* Avatar */
-.avatarWrap { position: relative; flex-shrink: 0; }
-.avatar { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; display: block; border: 2px solid rgba(0,212,170,0.3); }
+.avatarWrap { position: relative; flex-shrink: 0 }
+.avatar { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; display: block; border: 2px solid rgba(0,212,170,0.3) }
 .avatarFallback {
   width: 80px; height: 80px; border-radius: 20px;
   background: linear-gradient(135deg, rgba(0,212,170,0.2), rgba(100,40,220,0.2));
@@ -41,14 +41,14 @@
 }
 
 /* Header info */
-.headerInfo { flex: 1; min-width: 0; }
+.headerInfo { flex: 1; min-width: 0 }
 .name {
   font-size: clamp(22px, 3.5vw, 36px); font-weight: 700;
   color: #fff; letter-spacing: -0.03em; margin-bottom: 16px; line-height: 1;
 }
 
 /* Account list */
-.accountList { display: flex; flex-direction: column; gap: 10px; }
+.accountList { display: flex; flex-direction: column; gap: 10px }
 .accountRow {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 14px; border-radius: 12px;
@@ -56,15 +56,15 @@
   border: 1px solid rgba(255,255,255,0.08);
   transition: border-color 0.18s;
 }
-.accountRow:hover { border-color: rgba(255,255,255,0.14); }
-.accountRowDimmed { opacity: 0.6; }
+.accountRow:hover { border-color: rgba(255,255,255,0.14) }
+.accountRowDimmed { opacity: 0.6 }
 .accountIcon {
   width: 28px; height: 28px; border-radius: 8px;
   background: rgba(255,255,255,0.06);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   color: rgba(245,245,247,0.6);
 }
-.accountDetail { flex: 1; min-width: 0; }
+.accountDetail { flex: 1; min-width: 0 }
 .accountType {
   display: block; font-size: 11px; font-weight: 600;
   letter-spacing: 0.08em; text-transform: uppercase;
@@ -85,12 +85,12 @@
   font-size: 11px; color: rgba(245,245,247,0.3);
   transition: color 0.15s;
 }
-.addrBtn:hover .copyHint { color: var(--a); }
+.addrBtn:hover .copyHint { color: var(--a) }
 .linkBtn {
   font-size: 13px; color: var(--a); text-decoration: none; font-weight: 500;
 }
-.linkBtn:hover { text-decoration: underline; }
-.linkWalletInline { margin-top: 4px; }
+.linkBtn:hover { text-decoration: underline }
+.linkWalletInline { margin-top: 4px }
 .linkWalletInline :global(button) {
   font-size: 13px !important; padding: 6px 14px !important; min-height: unset !important;
 }
@@ -105,10 +105,10 @@
   font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
   text-transform: uppercase; color: rgba(0,212,170,0.6); flex-shrink: 0;
 }
-.suiAddrVal { font-family: 'Space Mono', monospace; font-size: 12px; color: #00d4aa; }
+.suiAddrVal { font-family: 'Space Mono', monospace; font-size: 12px; color: #00d4aa }
 
 /* Header actions */
-.headerActions { display: flex; flex-direction: column; gap: 8px; margin-left: auto; }
+.headerActions { display: flex; flex-direction: column; gap: 8px; margin-left: auto }
 
 /* ── STATS ── */
 .statsRow {
@@ -139,26 +139,26 @@
   border-bottom: 2px solid transparent; margin-bottom: -1px;
   transition: color 0.18s, border-color 0.18s;
 }
-.tabBtn:hover { color: rgba(245,245,247,0.75); }
-.tabBtnActive { color: #fff; border-bottom-color: var(--a); }
+.tabBtn:hover { color: rgba(245,245,247,0.75) }
+.tabBtnActive { color: #fff; border-bottom-color: var(--a) }
 
 /* ── NFT GRID ── */
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px }
 .skelCard {
   aspect-ratio: 1; border-radius: 16px;
   background: rgba(255,255,255,0.04);
   animation: shimmer 1.5s ease infinite;
 }
-@keyframes shimmer { 50% { opacity: 0.4; } }
+@keyframes shimmer { 50% { opacity: 0.4 } }
 
 .nftCard {
   display: block; text-decoration: none;
   background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07);
   border-radius: 16px; overflow: hidden; transition: all 0.2s;
 }
-.nftCard:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
-.nftImg { position: relative; aspect-ratio: 1; background: rgba(255,255,255,0.03); overflow: hidden; }
-.nftImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nftCard:hover { border-color: rgba(255,255,255,0.16); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4) }
+.nftImg { position: relative; aspect-ratio: 1; background: rgba(255,255,255,0.03); overflow: hidden }
+.nftImg img { width: 100%; height: 100%; object-fit: cover; display: block }
 .nftImgFallback {
   width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
   font-size: 32px; font-weight: 700; color: rgba(245,245,247,0.15);
@@ -175,50 +175,50 @@
   color: var(--a); background: rgba(0,0,0,0.75); border: 1px solid rgba(0,212,170,0.3);
   padding: 3px 7px; border-radius: 99px; backdrop-filter: blur(8px);
 }
-.nftBody { padding: 12px 14px; }
-.nftName { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nftRoyalty { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--a); background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.18); padding: 2px 6px; border-radius: 4px; }
+.nftBody { padding: 12px 14px }
+.nftName { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.nftRoyalty { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--a); background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.18); padding: 2px 6px; border-radius: 4px }
 
 /* ── ACTIVITY LIST (sold) ── */
-.activityList { display: flex; flex-direction: column; gap: 8px; }
+.activityList { display: flex; flex-direction: column; gap: 8px }
 .activityRow {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 16px; border-radius: 12px;
   background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
 }
-.activityDot { width: 8px; height: 8px; border-radius: 50%; background: var(--a); flex-shrink: 0; }
-.activityText { font-size: 14px; color: rgba(245,245,247,0.65); flex: 1; }
-.activityPrice { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--a); font-weight: 600; }
+.activityDot { width: 8px; height: 8px; border-radius: 50%; background: var(--a); flex-shrink: 0 }
+.activityText { font-size: 14px; color: rgba(245,245,247,0.65); flex: 1 }
+.activityPrice { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--a); font-weight: 600 }
 
 /* ── EMPTY STATE ── */
-.empty { text-align: center; padding: 80px 20px; }
-.emptyIcon { font-size: 48px; margin-bottom: 16px; }
-.emptyMsg { font-size: 16px; color: rgba(245,245,247,0.35); margin-bottom: 24px; }
+.empty { text-align: center; padding: 80px 20px }
+.emptyIcon { font-size: 48px; margin-bottom: 16px }
+.emptyMsg { font-size: 16px; color: rgba(245,245,247,0.35); margin-bottom: 24px }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 1024px) { .grid { grid-template-columns: repeat(3, 1fr) } }
 @media (max-width: 768px) {
-  .page { padding: 60px 0 60px; }
-  .header { flex-direction: column; gap: 16px; }
-  .headerActions { margin-left: 0; flex-direction: row; }
-  .statsRow { grid-template-columns: repeat(2, 1fr); }
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .name { font-size: 24px; }
+  .page { padding: 60px 0 60px }
+  .header { flex-direction: column; gap: 16px }
+  .headerActions { margin-left: 0; flex-direction: row }
+  .statsRow { grid-template-columns: repeat(2, 1fr) }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 10px }
+  .name { font-size: 24px }
 }
 @media (max-width: 480px) {
-  .statsRow { grid-template-columns: repeat(2, 1fr); }
-  .grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .tabBtn { padding: 10px 12px; font-size: 13px; }
+  .statsRow { grid-template-columns: repeat(2, 1fr) }
+  .grid { grid-template-columns: 1fr 1fr; gap: 8px }
+  .tabBtn { padding: 10px 12px; font-size: 13px }
 }
 
-.suiAddrActions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.suiAddrActions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
 .suiscanLink {
   font-size: 12px; color: var(--a); text-decoration: none;
   padding: 4px 10px; border-radius: 6px;
   background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.20);
   transition: background 0.15s; white-space: nowrap;
 }
-.suiscanLink:hover { background: rgba(0,212,170,0.15); }
+.suiscanLink:hover { background: rgba(0,212,170,0.15) }
 .suiAddrNote {
   font-size: 11px; color: rgba(245,245,247,0.28); margin-top: 6px; line-height: 1.5;
 }

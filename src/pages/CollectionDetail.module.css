@@ -1,8 +1,8 @@
-.page { padding: 0 0 96px; min-height: 80vh; }
+.page { padding: 0 0 96px }
 
 /* Banner */
-.banner { position: relative; height: 280px; overflow: hidden; background: rgba(255,255,255,0.03); }
-.bannerImg { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.7); }
+.banner { position: relative; height: 280px; overflow: hidden; background: rgba(255,255,255,0.03) }
+.bannerImg { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(0.7) }
 .bannerOverlay {
   position: absolute; inset: 0;
   background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.9) 100%);
@@ -14,8 +14,8 @@
   margin-top: -48px; margin-bottom: 28px;
   position: relative; z-index: 1; flex-wrap: wrap;
 }
-.avatarWrap { flex-shrink: 0; }
-.avatar { width: 88px; height: 88px; border-radius: 18px; object-fit: cover; border: 3px solid rgba(0,212,170,0.4); display: block; }
+.avatarWrap { flex-shrink: 0 }
+.avatar { width: 88px; height: 88px; border-radius: 18px; object-fit: cover; border: 3px solid rgba(0,212,170,0.4); display: block }
 .imgFallback {
   width: 88px; height: 88px; border-radius: 18px; flex-shrink: 0;
   background: linear-gradient(135deg,rgba(0,212,170,0.15),rgba(100,40,220,0.15));
@@ -23,22 +23,22 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 28px; font-weight: 700; color: rgba(245,245,247,0.5);
 }
-.identityInfo { flex: 1; min-width: 0; padding-top: 52px; }
-.identityTop { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
-.colTitle { font-size: clamp(24px,4vw,40px); font-weight: 800; letter-spacing: -0.04em; color: #fff; line-height: 1; }
+.identityInfo { flex: 1; min-width: 0; padding-top: 52px }
+.identityTop { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px }
+.colTitle { font-size: clamp(24px,4vw,40px); font-weight: 800; letter-spacing: -0.04em; color: #fff; line-height: 1 }
 .verified {
   font-size: 12px; font-weight: 700; color: var(--a);
   background: rgba(0,212,170,0.10); border: 1px solid rgba(0,212,170,0.25);
   padding: 3px 10px; border-radius: 99px;
 }
-.description { font-size: 14px; color: rgba(245,245,247,0.45); line-height: 1.6; max-width: 560px; }
+.description { font-size: 14px; color: rgba(245,245,247,0.45); line-height: 1.6; max-width: 560px }
 .backBtn {
   margin-left: auto; padding: 9px 16px; border-radius: 10px; margin-top: 56px;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10);
   color: rgba(245,245,247,0.65); font-size: 14px; text-decoration: none;
   transition: background 0.15s; white-space: nowrap;
 }
-.backBtn:hover { background: rgba(255,255,255,0.10); }
+.backBtn:hover { background: rgba(255,255,255,0.10) }
 
 /* Stats bar */
 .statsBar {
@@ -46,40 +46,40 @@
   padding: 20px 24px; border-radius: 16px; margin-bottom: 28px; gap: 0;
   background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
 }
-.stat { flex: 1; min-width: 100px; text-align: center; padding: 4px 12px; }
-.statNum { display: block; font-size: clamp(18px,2.5vw,28px); font-weight: 700; letter-spacing: -0.03em; color: #fff; margin-bottom: 4px; }
-.statSui { font-size: 13px; color: var(--a); font-weight: 600; }
-.statLabel { font-family: 'Space Mono',monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.10em; color: rgba(245,245,247,0.28); display: block; }
-.statDivider { width: 1px; height: 40px; background: rgba(255,255,255,0.07); flex-shrink: 0; }
+.stat { flex: 1; min-width: 100px; text-align: center; padding: 4px 12px }
+.statNum { display: block; font-size: clamp(18px,2.5vw,28px); font-weight: 700; letter-spacing: -0.03em; color: #fff; margin-bottom: 4px }
+.statSui { font-size: 13px; color: var(--a); font-weight: 600 }
+.statLabel { font-family: 'Space Mono',monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.10em; color: rgba(245,245,247,0.28); display: block }
+.statDivider { width: 1px; height: 40px; background: rgba(255,255,255,0.07); flex-shrink: 0 }
 
 /* Tabs */
-.tabBar { display: flex; align-items: center; gap: 4px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 24px; }
+.tabBar { display: flex; align-items: center; gap: 4px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 24px }
 .tab {
   padding: 10px 20px; font-size: 15px; font-weight: 500;
   color: rgba(245,245,247,0.45); background: transparent;
   border: none; cursor: pointer; border-bottom: 2px solid transparent;
   margin-bottom: -1px; transition: color 0.15s, border-color 0.15s;
 }
-.tab:hover { color: rgba(245,245,247,0.75); }
-.tabActive { color: #fff; border-bottom-color: var(--a); }
+.tab:hover { color: rgba(245,245,247,0.75) }
+.tabActive { color: #fff; border-bottom-color: var(--a) }
 .tradeportLink {
   margin-left: auto; font-size: 13px; color: var(--a);
   text-decoration: none; padding: 6px 12px; border-radius: 8px;
   background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.18);
   white-space: nowrap; transition: background 0.15s;
 }
-.tradeportLink:hover { background: rgba(0,212,170,0.15); }
+.tradeportLink:hover { background: rgba(0,212,170,0.15) }
 
 /* NFT Grid */
-.grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px }
 .card {
   background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px; overflow: hidden; transition: all 0.2s;
 }
-.card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-3px); }
-.cardImg { position: relative; aspect-ratio: 1; overflow: hidden; background: rgba(255,255,255,0.04); }
-.nftImg { width: 100%; height: 100%; object-fit: cover; display: block; }
-.imgFallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: rgba(245,245,247,0.15); }
+.card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-3px) }
+.cardImg { position: relative; aspect-ratio: 1; overflow: hidden; background: rgba(255,255,255,0.04) }
+.nftImg { width: 100%; height: 100%; object-fit: cover; display: block }
+.imgFallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: rgba(245,245,247,0.15) }
 .listedBadge {
   position: absolute; top: 8px; left: 8px;
   font-family: 'Space Mono',monospace; font-size: 9px; font-weight: 700;
@@ -91,83 +91,83 @@
   background: rgba(0,0,0,0.75); border: 1px solid rgba(0,212,170,0.3);
   padding: 3px 7px; border-radius: 99px; backdrop-filter: blur(4px);
 }
-.cardBody { padding: 12px 14px; }
-.nftName { font-size: 13px; font-weight: 600; color: #f5f5f7; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.priceRow { display: flex; align-items: center; gap: 4px; }
-.price { font-size: 15px; font-weight: 700; color: #fff; }
-.priceSui { font-size: 11px; color: rgba(245,245,247,0.4); flex: 1; }
+.cardBody { padding: 12px 14px }
+.nftName { font-size: 13px; font-weight: 600; color: #f5f5f7; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.priceRow { display: flex; align-items: center; gap: 4px }
+.price { font-size: 15px; font-weight: 700; color: #fff }
+.priceSui { font-size: 11px; color: rgba(245,245,247,0.4); flex: 1 }
 .buyBtn {
   font-size: 12px; font-weight: 700; color: #000; background: var(--a);
   padding: 4px 10px; border-radius: 6px; text-decoration: none;
   transition: background 0.15s;
 }
-.buyBtn:hover { background: #00efc0; }
-.unlisted { font-size: 12px; color: rgba(245,245,247,0.28); }
+.buyBtn:hover { background: #00efc0 }
+.unlisted { font-size: 12px; color: rgba(245,245,247,0.28) }
 
 /* Skeleton */
-.skelBanner { height: 280px; background: rgba(255,255,255,0.04); animation: shimmer 1.4s ease infinite; }
-.skelStats { height: 80px; border-radius: 16px; background: rgba(255,255,255,0.04); margin: 16px 0; animation: shimmer 1.4s ease infinite; }
-.skelGrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-top: 16px; }
-.skelCard { aspect-ratio: 1; border-radius: 16px; background: rgba(255,255,255,0.04); animation: shimmer 1.4s ease infinite; }
-@keyframes shimmer { 50% { opacity: .4; } }
+.skelBanner { height: 280px; background: rgba(255,255,255,0.04); animation: shimmer 1.4s ease infinite }
+.skelStats { height: 80px; border-radius: 16px; background: rgba(255,255,255,0.04); margin: 16px 0; animation: shimmer 1.4s ease infinite }
+.skelGrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-top: 16px }
+.skelCard { aspect-ratio: 1; border-radius: 16px; background: rgba(255,255,255,0.04); animation: shimmer 1.4s ease infinite }
+@keyframes shimmer { 50% { opacity: .4 } }
 
 /* Empty / not found */
-.empty { text-align: center; padding: 60px 24px; }
-.empty p { font-size: 16px; color: rgba(245,245,247,0.4); margin-bottom: 20px; }
-.notFound { text-align: center; padding: 80px 24px; }
-.notFound p { font-size: 16px; color: rgba(245,245,247,0.4); margin-bottom: 20px; }
-.activityPlaceholder { text-align: center; padding: 60px 24px; }
-.activityPlaceholder p { font-size: 16px; color: rgba(245,245,247,0.4); margin-bottom: 20px; }
+.empty { text-align: center; padding: 60px 24px }
+.empty p { font-size: 16px; color: rgba(245,245,247,0.4); margin-bottom: 20px }
+.notFound { text-align: center; padding: 80px 24px }
+.notFound p { font-size: 16px; color: rgba(245,245,247,0.4); margin-bottom: 20px }
+.activityPlaceholder { text-align: center; padding: 60px 24px }
+.activityPlaceholder p { font-size: 16px; color: rgba(245,245,247,0.4); margin-bottom: 20px }
 
 /* Responsive */
-@media (max-width: 1024px) { .grid { grid-template-columns: repeat(3,1fr); } .skelGrid { grid-template-columns: repeat(3,1fr); } }
+@media (max-width: 1024px) { .grid { grid-template-columns: repeat(3,1fr) } .skelGrid { grid-template-columns: repeat(3,1fr) } }
 @media (max-width: 768px) {
-  .banner { height: 180px; }
-  .statsBar { gap: 8px; padding: 16px; }
-  .stat { min-width: 80px; padding: 4px 8px; }
-  .statDivider { display: none; }
-  .grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
-  .skelGrid { grid-template-columns: repeat(2,1fr); }
-  .identity { flex-direction: column; }
-  .backBtn { margin-left: 0; margin-top: 8px; }
+  .banner { height: 180px }
+  .statsBar { gap: 8px; padding: 16px }
+  .stat { min-width: 80px; padding: 4px 8px }
+  .statDivider { display: none }
+  .grid { grid-template-columns: repeat(2,1fr); gap: 10px }
+  .skelGrid { grid-template-columns: repeat(2,1fr) }
+  .identity { flex-direction: column }
+  .backBtn { margin-left: 0; margin-top: 8px }
 }
-@media (max-width: 480px) { .grid { grid-template-columns: 1fr 1fr; gap: 8px; } }
+@media (max-width: 480px) { .grid { grid-template-columns: 1fr 1fr; gap: 8px } }
 
 /* Activity list in collection detail */
-.activityList { display: flex; flex-direction: column; gap: 6px; }
+.activityList { display: flex; flex-direction: column; gap: 6px }
 .activityRow {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 14px; border-radius: 12px;
   background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
   transition: background 0.12s;
 }
-.activityRow:hover { background: rgba(255,255,255,0.04); }
-.activityImg { width: 40px; height: 40px; border-radius: 9px; object-fit: cover; flex-shrink: 0; }
-.activityBody { flex: 1; min-width: 0; }
-.activityName { display: block; font-size: 14px; font-weight: 600; color: #f5f5f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.activityType { font-size: 11px; color: rgba(245,245,247,0.35); }
-.activityPrice { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap; }
-.activitySui { font-size: 11px; color: rgba(245,245,247,0.35); }
-.activityTime { font-size: 11px; color: rgba(245,245,247,0.25); white-space: nowrap; flex-shrink: 0; }
+.activityRow:hover { background: rgba(255,255,255,0.04) }
+.activityImg { width: 40px; height: 40px; border-radius: 9px; object-fit: cover; flex-shrink: 0 }
+.activityBody { flex: 1; min-width: 0 }
+.activityName { display: block; font-size: 14px; font-weight: 600; color: #f5f5f7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.activityType { font-size: 11px; color: rgba(245,245,247,0.35) }
+.activityPrice { font-size: 15px; font-weight: 700; color: #fff; white-space: nowrap }
+.activitySui { font-size: 11px; color: rgba(245,245,247,0.35) }
+.activityTime { font-size: 11px; color: rgba(245,245,247,0.25); white-space: nowrap; flex-shrink: 0 }
 
 /* ── CollectionDetail mobile ── */
 @media (max-width: 640px) {
-  .banner { height: 140px; }
-  .identity { margin-top: -36px; gap: 12px; flex-wrap: wrap; }
-  .avatar { width: 64px; height: 64px; border-radius: 14px; }
-  .imgFallback { width: 64px; height: 64px; border-radius: 14px; font-size: 20px; }
-  .identityInfo { padding-top: 40px; }
-  .colTitle { font-size: 22px; }
-  .backBtn { display: none; }
-  .statsBar { padding: 12px 10px; gap: 0; flex-wrap: wrap; }
-  .stat { min-width: 50%; padding: 6px 8px; text-align: center; }
-  .statNum { font-size: 18px; }
-  .statDivider { display: none; }
-  .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .skelGrid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  .tabBar { gap: 2px; }
-  .tab { padding: 8px 12px; font-size: 13px; }
-  .tradeportLink { font-size: 11px; padding: 4px 8px; }
-  .activityRow { flex-wrap: wrap; gap: 8px; }
-  .activityTime { width: 100%; text-align: right; }
+  .banner { height: 140px }
+  .identity { margin-top: -36px; gap: 12px; flex-wrap: wrap }
+  .avatar { width: 64px; height: 64px; border-radius: 14px }
+  .imgFallback { width: 64px; height: 64px; border-radius: 14px; font-size: 20px }
+  .identityInfo { padding-top: 40px }
+  .colTitle { font-size: 22px }
+  .backBtn { display: none }
+  .statsBar { padding: 12px 10px; gap: 0; flex-wrap: wrap }
+  .stat { min-width: 50%; padding: 6px 8px; text-align: center }
+  .statNum { font-size: 18px }
+  .statDivider { display: none }
+  .grid { grid-template-columns: repeat(2, 1fr); gap: 8px }
+  .skelGrid { grid-template-columns: repeat(2, 1fr); gap: 8px }
+  .tabBar { gap: 2px }
+  .tab { padding: 8px 12px; font-size: 13px }
+  .tradeportLink { font-size: 11px; padding: 4px 8px }
+  .activityRow { flex-wrap: wrap; gap: 8px }
+  .activityTime { width: 100%; text-align: right }
 }

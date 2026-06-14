@@ -37,7 +37,7 @@ function AnimatedRoutes() {
   const location = useLocation()
   return (
     <AnimatePresence mode="wait">
-      <motion.div key={location.pathname} variants={variants} initial="initial" animate="animate" exit="exit">
+      <motion.div key={location.pathname} variants={variants} initial="initial" animate="animate" exit="exit" style={{ display:'flex', flexDirection:'column', flex:1 }}>
         <ScrollToTop />
         <Routes location={location}>
           <Route path="/"            element={<ErrorBoundary><Home /></ErrorBoundary>} />

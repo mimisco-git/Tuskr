@@ -1,7 +1,7 @@
 /* ── Footer links ── */
 .footer {
   border-top: 1px solid rgba(255,255,255,0.07);
-  padding: 48px 0 32px;
+  padding: 32px 0 24px;
   background: rgba(0,0,0,0.25);
 }
 .grid {
@@ -11,30 +11,30 @@
   margin-bottom: 36px;
 }
 .brandCol {}
-.logo     { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: #fff; display: block; margin-bottom: 8px; }
-.tagline  { font-size: 14px; color: rgba(245,245,247,0.4); margin-bottom: 14px; }
-.badges   { display: flex; gap: 8px; flex-wrap: wrap; }
-.badge    { padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(245,245,247,0.6); }
+.logo     { font-size: 20px; font-weight: 800; letter-spacing: -0.04em; color: #fff; display: block; margin-bottom: 8px }
+.tagline  { font-size: 14px; color: rgba(245,245,247,0.4); margin-bottom: 14px }
+.badges   { display: flex; gap: 8px; flex-wrap: wrap }
+.badge    { padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); color: rgba(245,245,247,0.6) }
 .col {}
-.colTitle { font-family: 'Space Mono',monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(245,245,247,0.28); margin-bottom: 14px; }
-.link     { display: block; font-size: 14px; color: rgba(245,245,247,0.5); text-decoration: none; margin-bottom: 8px; transition: color 0.15s; }
-.link:hover { color: var(--a); }
-.contract { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); text-decoration: none; transition: background 0.15s; }
-.contract:hover { background: rgba(0,212,170,0.06); border-color: rgba(0,212,170,0.20); }
-.contractLabel  { font-size: 12px; color: rgba(245,245,247,0.4); flex: 1; }
-.contractAddr   { font-family: 'Space Mono',monospace; font-size: 10px; color: var(--a); }
-.contractArrow  { font-size: 11px; color: rgba(245,245,247,0.25); }
-.bottom         { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 12px; }
-.copy           { font-size: 13px; color: rgba(245,245,247,0.25); }
-.bottomLinks    { display: flex; gap: 20px; }
-.bottomLink     { font-size: 13px; color: rgba(245,245,247,0.3); text-decoration: none; transition: color 0.15s; }
-.bottomLink:hover { color: var(--a); }
+.colTitle { font-family: 'Space Mono',monospace; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(245,245,247,0.28); margin-bottom: 14px }
+.link     { display: block; font-size: 14px; color: rgba(245,245,247,0.5); text-decoration: none; margin-bottom: 8px; transition: color 0.15s }
+.link:hover { color: var(--a) }
+.contract { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); text-decoration: none; transition: background 0.15s }
+.contract:hover { background: rgba(0,212,170,0.06); border-color: rgba(0,212,170,0.20) }
+.contractLabel  { font-size: 12px; color: rgba(245,245,247,0.4); flex: 1 }
+.contractAddr   { font-family: 'Space Mono',monospace; font-size: 10px; color: var(--a) }
+.contractArrow  { font-size: 11px; color: rgba(245,245,247,0.25) }
+.bottom         { display: flex; align-items: center; justify-content: space-between; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 12px }
+.copy           { font-size: 13px; color: rgba(245,245,247,0.25) }
+.bottomLinks    { display: flex; gap: 20px }
+.bottomLink     { font-size: 13px; color: rgba(245,245,247,0.3); text-decoration: none; transition: color 0.15s }
+.bottomLink:hover { color: var(--a) }
 
 @media (max-width: 768px) {
-  .grid { grid-template-columns: 1fr 1fr; gap: 24px; }
-  .brandCol { grid-column: 1 / -1; }
+  .grid { grid-template-columns: 1fr 1fr; gap: 24px }
+  .brandCol { grid-column: 1 / -1 }
 }
-@media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .grid { grid-template-columns: 1fr } }
 
 
 /* ── BRAND CLOSER — the very last element on every page ── */
@@ -47,7 +47,7 @@
 
   /* Height: enough for the mascot head to peek above the text */
   /* text is ~26vw tall (line-height 0.85), head space above = 30vw */
-  height: 56vw;
+  height: 38vw;
 
   /* Nothing comes after this */
 }
@@ -59,7 +59,7 @@
   left: 50%;
   transform: translateX(-50%);
   /* Sit at the bottom — feet are below the brand section (clipped) */
-  bottom: -8vw;
+  bottom: -5vw;
   /* Height: taller than the text so the head pokes well above */
   height: 46vw;
   width: auto;
@@ -95,21 +95,21 @@
 
 /* Taller brand section to accommodate the bigger text */
 .brand {
-  height: 62vw;
+  height: 42vw;
 }
 .brandMascot {
-  height: 52vw;
-  bottom: -10vw;
+  height: 36vw;
+  bottom: -6vw;
 }
 
 @media (max-width: 768px) {
-  .brand       { height: 78vw; }
-  .brandMascot { height: 64vw; bottom: -12vw; }
-  .brandText   { font-size: 37vw; }
+  .brand       { height: 78vw }
+  .brandMascot { height: 46vw; bottom: -12vw }
+  .brandText   { font-size: 37vw }
 }
 
 @media (max-width: 480px) {
-  .brand       { height: 90vw; }
-  .brandMascot { height: 72vw; bottom: -14vw; }
-  .brandText   { font-size: 38vw; }
+  .brand       { height: 90vw }
+  .brandMascot { height: 52vw; bottom: -14vw }
+  .brandText   { font-size: 38vw }
 }
