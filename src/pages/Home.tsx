@@ -421,32 +421,42 @@ export default function Home() {
 
             </div>
 
-            {/* Live stats — premium full-width */}
+            {/* Live stats — 6-col grid, responsive */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(4,1fr)',
+              gridTemplateColumns: 'repeat(3,1fr)',
               width: '100%',
               marginTop: 20,
               background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
               border: '1px solid rgba(255,255,255,0.12)',
               borderRadius: 20,
               overflow: 'hidden',
-            }}>
+            }}
+              ref={el => {
+                if (el) {
+                  const cols = window.innerWidth >= 640 ? '6' : '3'
+                  el.style.gridTemplateColumns = `repeat(${cols},1fr)`
+                }
+              }}
+            >
               {[
-                { icon: '🔮', value: liveStats.minted || '0', label: 'NFTs Minted' },
-                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '∞', label: 'Stored on Walrus' },
-                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : `${liveStats.listed || '0'}`, label: floorSui ? `Floor Price${floorUsd ? ' · '+floorUsd : ''}` : 'Active Listings' },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—', label: 'SUI/USDC · DeepBook' },
+                { icon: '🔮', value: liveStats.minted || '0',                                      label: 'NFTs Minted'         },
+                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',        label: 'Stored on Walrus'    },
+                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                           label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
+                { icon: '🛍️', value: String(liveStats.listed || '0'),                              label: 'Active Listings'     },
+                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—',    label: 'Total Volume'        },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook' },
               ].map((s, i) => (
                 <div key={s.label} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '12px 8px',
-                  borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
-                  gap: 6,
+                  padding: 'clamp(10px,2vw,16px) 6px',
+                  borderLeft: i % 3 !== 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                  borderTop: i >= 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                  gap: 5,
                 }}>
-                  <span style={{ fontSize: 'clamp(18px,2vw,24px)', lineHeight: 1 }}>{s.icon}</span>
-                  <span style={{ fontSize: 'clamp(14px,1.6vw,18px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{s.value}</span>
-                  <span style={{ fontSize: 'clamp(9px,0.8vw,11px)', color: 'rgba(245,245,247,0.45)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign:'center' }}>{s.label}</span>
+                  <span style={{ fontSize: 'clamp(16px,1.8vw,22px)', lineHeight: 1 }}>{s.icon}</span>
+                  <span style={{ fontSize: 'clamp(13px,1.4vw,17px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{s.value}</span>
+                  <span style={{ fontSize: 'clamp(8px,0.7vw,10px)', color: 'rgba(245,245,247,0.4)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign:'center', lineHeight: 1.3 }}>{s.label}</span>
                 </div>
               ))}
             </div>
