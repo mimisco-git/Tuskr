@@ -335,7 +335,7 @@ export default function Home() {
             </p>
             <div className={s.ctaBtnGroup}>
 
-              {/* Primary CTA */}
+              {/* Primary CTA — full width on mobile */}
               <Link to="/marketplace" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 height: 52, padding: '0 28px',
@@ -361,7 +361,9 @@ export default function Home() {
                 </svg>
               </Link>
 
-              {/* Agent Wallet — gradient border glass */}
+              {/* Secondary actions — side-by-side on mobile */}
+              <div className={s.ctaBtnSecondaryGroup}>
+                            {/* Agent Wallet — gradient border glass */}
               <Link to="/agent-wallet" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 height: 52, padding: '0 22px',
@@ -418,10 +420,29 @@ export default function Home() {
                 </svg>
                 AI Generator
               </Link>
+              </div>
 
             </div>
 
-            {/* Live stats — 6-col grid, responsive */}
+            {/* MOBILE: Premium horizontal swipe carousel */}
+            <div className={s.statCarouselWrap}>
+              {[
+                { icon: '🔮', value: liveStats.minted || '0',                                   label: 'NFTs Minted'         },
+                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',     label: 'On Walrus'           },
+                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                        label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
+                { icon: '🛍️', value: String(liveStats.listed || '0'),                           label: 'Active Listings'     },
+                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—', label: 'Total Volume'        },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook'  },
+              ].map((stat) => (
+                <div key={stat.label} className={s.statCarouselCard}>
+                  <span className={s.statCarouselIcon}>{stat.icon}</span>
+                  <span className={s.statCarouselValue}>{stat.value}</span>
+                  <span className={s.statCarouselLabel}>{stat.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* DESKTOP: 6-col grid */}
             <div
               className={s.statsGrid}
               style={{

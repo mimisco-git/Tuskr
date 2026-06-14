@@ -743,40 +743,102 @@
   .brandMascotWrap { margin-top: -40px }
 }
 
-/* ── MOBILE: Button group stacks vertically ── */
+/* ── BUTTON GROUP: desktop flex row ── */
 .ctaBtnGroup {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
 }
+
+/* ── PREMIUM MOBILE: Button hierarchy + stat carousel ── */
 @media (max-width: 600px) {
+  /* Primary CTA: full width, tall tap target */
   .ctaBtnGroup {
     flex-direction: column !important;
     align-items: stretch !important;
     width: 100% !important;
-    gap: 8px !important;
+    gap: 10px !important;
   }
-  .ctaBtnGroup a {
+  /* First button (Start discovering): full width */
+  .ctaBtnGroup a:first-child {
     display: flex !important;
     width: 100% !important;
     justify-content: center !important;
-    height: 48px !important;
-    padding: 0 20px !important;
+    height: 52px !important;
+    padding: 0 24px !important;
     box-sizing: border-box !important;
-    white-space: normal !important;
+  }
+  /* Secondary buttons: side by side in 2-col grid */
+  .ctaBtnSecondaryGroup {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  .ctaBtnSecondaryGroup a {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 46px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    font-size: 13px !important;
+    gap: 6px !important;
   }
 }
 
-/* ── MOBILE: Stats bar — 2-col on small screens ── */
+/* ── STAT CAROUSEL: horizontal scroll on mobile ── */
+.statCarouselWrap {
+  display: none;    /* hidden on desktop */
+}
+.statsGrid {
+  display: grid;   /* shown on desktop */
+}
+
 @media (max-width: 600px) {
+  /* Hide desktop grid */
   .statsGrid {
-    grid-template-columns: repeat(2, 1fr) !important;
+    display: none !important;
   }
-  .statCell {
-    padding: 12px 8px !important;
+  /* Show mobile carousel */
+  .statCarouselWrap {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
+    padding: 2px 4px 12px 4px;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    width: 100%;
+    scrollbar-width: none;         /* Firefox */
+    -ms-overflow-style: none;      /* IE/Edge */
   }
-  .statIcon  { font-size: 18px !important; }
-  .statValue { font-size: 16px !important; }
-  .statLabel { font-size: 10px !important; letter-spacing: 0.05em !important; color: rgba(245,245,247,0.65) !important; }
+  .statCarouselWrap::-webkit-scrollbar {
+    display: none;                 /* Chrome/Safari/Webkit */
+  }
+  .statCarouselCard {
+    flex: 0 0 auto;
+    min-width: 130px;
+    width: 42vw;
+    max-width: 160px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 14px 10px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .statCarouselIcon  { font-size: 18px; line-height: 1; }
+  .statCarouselValue { font-size: 16px; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -0.02em; }
+  .statCarouselLabel { font-size: 9px; font-weight: 700; color: rgba(245,245,247,0.55); font-family: 'Space Mono',monospace; text-transform: uppercase; letter-spacing: 0.07em; text-align: center; line-height: 1.3; }
 }
