@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { Link } from 'react-router-dom'
 import { useDeepBookPrice, suiToUsd } from '../hooks/useDeepBookPrice'
+import { useFloorPrice } from '../hooks/useFloorPrice'
 import { useDeepBookSwap } from '../hooks/useDeepBookSwap'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
 import { useToast } from '../components/Toast'
@@ -46,7 +47,8 @@ export default function Marketplace() {
   const [buying,       setBuying]       = useState<string|null>(null)
   const [usdcModal,    setUsdcModal]    = useState<any>(null)  // listing for USDC modal
   const { getQuote, swapAndBuy, quote, quoting, swapping, coinLabel } = useDeepBookSwap()
-  const { price: suiPrice } = useDeepBookPrice()
+  const { price: suiPrice, source: priceSource } = useDeepBookPrice()
+  const { floorSui, floorUsd, count: activeCount, totalVolumeSui } = useFloorPrice()
   const [search,       setSearch]       = useState('')
   const [sortBy,       setSortBy]       = useState<'volume'|'floor'>('volume')
 

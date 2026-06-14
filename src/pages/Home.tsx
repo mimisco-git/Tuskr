@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSuiClient } from '@mysten/dapp-kit'
 import NFTCard, { NFT } from '../components/NFTCard'
 import usePageTitle from '../hooks/usePageTitle'
+import { useFloorPrice } from '../hooks/useFloorPrice'
+import { useDeepBookPrice } from '../hooks/useDeepBookPrice'
 import s from './Home.module.css'
 
 const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0xe2a80cf865bb40a9b4c7a63e2e82da841d8eb80455091947c394b13ae6d3dc56'
@@ -249,6 +251,8 @@ export default function Home() {
   const [featured,   setFeatured]   = useState<NFT[]>([])
   const [counter,    setCounter]    = useState({ nfts: 0, vol: 0, creators: 0 })
   const [liveStats,  setLiveStats]  = useState({ minted: 0, listed: 0, walrusMB: 0 })
+  const { floorSui, floorUsd, totalVolumeSui } = useFloorPrice()
+  const { price: suiPrice }                    = useDeepBookPrice()
   const client   = useSuiClient()
   const feat     = FEATURES[activeFeat]
   const allPart  = [...PARTNERS, ...PARTNERS]
@@ -347,8 +351,8 @@ export default function Home() {
               {[
                 { icon: '🔮', value: liveStats.minted || '—', label: 'NFTs Minted' },
                 { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—', label: 'On Walrus' },
-                { icon: '🏷️', value: liveStats.listed || '—', label: 'Listed' },
-                { icon: '🗂️', value: '60+', label: 'Collections' },
+                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : (liveStats.listed ? `${liveStats.listed}` : '—'), label: floorSui ? `Floor${floorUsd ? ' · ' + floorUsd : ''}` : 'Listed' },
+                { icon: '📊', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : (suiPrice ? `$${suiPrice.toFixed(2)}` : '—'), label: totalVolumeSui ? 'Total Volume' : '1 SUI Price' },
               ].map((s, i) => (
                 <div key={s.label} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
