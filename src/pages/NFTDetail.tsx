@@ -513,14 +513,36 @@ export default function NFTDetail() {
             </div>
 
             {/* Verify link */}
-            <a
-              href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${nft.blobId}`}
-              target="_blank" rel="noopener noreferrer"
-              style={{ fontSize:12, color:'#00d4aa', textDecoration:'none', fontFamily:'Space Mono,monospace', display:'inline-flex', alignItems:'center', gap:6 }}
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="#00d4aa" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Retrieve directly from Walrus network
-            </a>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              {/* Inline image preview from Walrus via our proxy */}
+              {blobProof?.status === 'verified' && (
+                <div style={{ borderRadius:10, overflow:'hidden', border:'1px solid rgba(0,212,170,0.15)', background:'rgba(0,0,0,0.3)', width:'100%', maxWidth:220 }}>
+                  <img
+                    src={`/api/img?url=${encodeURIComponent('https://aggregator.walrus-testnet.walrus.space/v1/blobs/' + nft!.blobId)}`}
+                    alt="NFT media from Walrus"
+                    style={{ width:'100%', display:'block', objectFit:'cover' }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                  />
+                </div>
+              )}
+              <div style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
+                <a
+                  href={`/verify/${nft!.blobId}`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize:12, color:'#00d4aa', textDecoration:'none', fontFamily:'Space Mono,monospace', display:'inline-flex', alignItems:'center', gap:6 }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="#00d4aa" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  View on Walrus Verifier
+                </a>
+                <a
+                  href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${nft!.blobId}`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize:12, color:'rgba(245,245,247,0.35)', textDecoration:'none', fontFamily:'Space Mono,monospace', display:'inline-flex', alignItems:'center', gap:6 }}
+                >
+                  Raw blob URL
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
