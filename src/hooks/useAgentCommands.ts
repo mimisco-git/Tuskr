@@ -19,7 +19,7 @@ const AGGREGATOR = 'https://aggregator.walrus-testnet.walrus.space'
 const GAS        = 0.015
 
 export interface ParsedCommand {
-  action:    'mint' | 'buy' | 'list' | 'unknown'
+  action:    'mint' | 'buy' | 'list' | 'watch' | 'unknown'
   prompt?:   string   // for mint: what to generate
   maxPrice?: number   // for buy: ceiling price in SUI
   nftId?:    string   // for list: which NFT
@@ -43,6 +43,8 @@ async function parseCommand(input: string): Promise<ParsedCommand> {
     if (lower.includes('mint'))  return { action:'mint',  prompt: input.replace(/mint/i,'').trim(), raw: input }
     if (lower.includes('buy'))   return { action:'buy',   maxPrice: parseFloat(lower.match(/[\d.]+/)?.[0]||'2'), raw: input }
     if (lower.includes('list'))  return { action:'list',  price: parseFloat(lower.match(/[\d.]+/)?.[0]||'2'), raw: input }
+    if (lower.includes('watch') || lower.includes('alert') || lower.includes('monitor') || lower.includes('notify'))
+      return { action:'watch', maxPrice: parseFloat(lower.match(/[\d.]+/)?.[0]||'1'), raw: input }
     return { action:'unknown', raw: input }
   }
 
@@ -204,6 +206,7 @@ export function useAgentCommands(
   agentAddr:           string,
   policy:              { active: boolean; maxSpendSui: number; spentSui: number },
   executeAutonomously: (tx: Transaction, cost: number, meta: { type: string; nftName: string }) => Promise<{ digest: string } | null>,
+  logAction?: (action: { id: string; ts: string; type: string; nftName: string; costSui: number; txDigest: string; status: 'success'|'failed'|'blocked'; reason?: string }) => Promise<void>,
 ) {
   const [result,  setResult]  = useState<CommandResult | null>(null)
   const [running, setRunning] = useState(false)
@@ -328,8 +331,44 @@ export function useAgentCommands(
           throw new Error('List failed. Ensure the NFT is in the agent wallet.')
         }
 
+      // ── WATCH: monitor DeepBook price and notify ─────────────────────────────
+      } else if (cmd.action === 'watch') {
+        const threshold = cmd.maxPrice ?? 1
+        upd({ status:'executing', message:`Setting up price monitor. Will alert when SUI drops below $${threshold}...` })
+
+        // Log this price alert to Walrus via activity log
+        await logAction?.({
+          id: Date.now().toString(), ts: new Date().toISOString(),
+          type: 'watch', nftName: `Price alert: SUI below $${threshold}`,
+          costSui: 0, txDigest: '', status: 'success',
+        })
+
+        // Poll price every 60s for 24h
+        let checks = 0
+        const maxChecks = 60 * 24
+        const poll = setInterval(async () => {
+          checks++
+          if (checks > maxChecks) { clearInterval(poll); return }
+          try {
+            const r = await fetch('/api/deepbook-price', { signal: AbortSignal.timeout(5000) })
+            const d = await r.json()
+            const price = Number(d.price)
+            if (price > 0 && price <= threshold) {
+              clearInterval(poll)
+              upd({ status:'done', message:`Price alert triggered! SUI is now $${price.toFixed(4)}, below your $${threshold} threshold. Check agent commands to act.` })
+              await logAction?.({
+                id: Date.now().toString(), ts: new Date().toISOString(),
+                type: 'watch', nftName: `Price hit $${price.toFixed(4)} (alert: $${threshold})`,
+                costSui: 0, txDigest: '', status: 'success',
+              })
+            }
+          } catch { /* ignore polling errors */ }
+        }, 60_000)
+
+        upd({ status:'done', message:`Price monitor active. Agent will alert when SUI/USDC drops below $${threshold}. Polling every 60 seconds via DeepBook.` })
+
       } else {
-        throw new Error(`Could not understand: "${input}". Try: "mint a sunset NFT", "buy cheapest under 2 SUI", or "list NFT 0x... at 3 SUI"`)
+        throw new Error(`Could not understand: "${input}". Try: "mint a sunset NFT", "buy cheapest under 2 SUI", "list NFT 0x... at 3 SUI", or "alert me when SUI drops below $0.50"`)
       }
 
     } catch (e: any) {

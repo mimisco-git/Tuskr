@@ -1,3 +1,6 @@
+import { useBlobProof }    from '../hooks/useBlobProof'
+import { useWalrusProvenance } from '../hooks/useWalrusProvenance'
+import { useDeepBookPrice }    from '../hooks/useDeepBookPrice'
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
@@ -54,6 +57,9 @@ export default function NFTDetail() {
   const { success, error: toastErr, info } = useToast()
 
   const [nft,       setNft]       = useState<NFTData | null>(null)
+  const blobProof      = useBlobProof(nft?.blobId || undefined)
+  const { trail: provTrail, blobId: provBlobId } = useWalrusProvenance(nft?.id)
+  const { price: suiPrice }   = useDeepBookPrice()
   const [loading,   setLoading]   = useState(true)
   const [notFound,  setNotFound]  = useState(false)
   const [buying,    setBuying]    = useState(false)
@@ -466,6 +472,92 @@ export default function NFTDetail() {
           </div>
         </div>
       )}
+
+      {/* ── WALRUS STORAGE PROOF ───────────────────────────────────── */}
+      {nft?.blobId && (
+        <div style={{ maxWidth:780, margin:'0 auto 24px', padding:'0 20px' }}>
+          <div style={{
+            background:'rgba(255,255,255,0.02)',
+            border:`1px solid ${blobProof?.status === 'verified' ? 'rgba(0,212,170,0.25)' : 'rgba(255,255,255,0.08)'}`,
+            borderRadius:16, padding:'20px 22px',
+          }}>
+            {/* Header */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <div style={{ width:32, height:32, borderRadius:8, background:'rgba(0,212,170,0.1)', border:'1px solid rgba(0,212,170,0.2)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12v8a2 2 0 01-2 2H4a2 2 0 01-2-2V4z" stroke="#00d4aa" strokeWidth="1.2"/><path d="M5 4V3a3 3 0 016 0v1" stroke="#00d4aa" strokeWidth="1.2"/><path d="M8 8v2m0-2a1 1 0 100-2 1 1 0 000 2z" stroke="#00d4aa" strokeWidth="1.2"/></svg>
+                </div>
+                <span style={{ fontSize:14, fontWeight:700, color:'#fff' }}>Walrus Storage Proof</span>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <span style={{ width:7, height:7, borderRadius:'50%', display:'inline-block', background: blobProof?.status === 'verified' ? '#00d4aa' : blobProof?.status === 'checking' ? '#f59e0b' : '#f87171', boxShadow: blobProof?.status === 'verified' ? '0 0 6px #00d4aa' : 'none' }}/>
+                <span style={{ fontSize:11, fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.1em', color: blobProof?.status === 'verified' ? '#00d4aa' : 'rgba(245,245,247,0.4)' }}>
+                  {blobProof?.status === 'checking' ? 'Verifying...' : blobProof?.status === 'verified' ? 'Live on Walrus' : blobProof?.status === 'unavailable' ? 'Unavailable' : 'Checking...'}
+                </span>
+              </div>
+            </div>
+
+            {/* Blob details grid */}
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14 }}>
+              {[
+                { label:'Blob ID', value: nft.blobId ? `${nft.blobId.slice(0,14)}...${nft.blobId.slice(-8)}` : '—' },
+                { label:'File Size', value: blobProof?.size ? `${(blobProof.size / 1024).toFixed(1)} KB` : '—' },
+                { label:'Content Type', value: blobProof?.contentType?.split(';')[0] || '—' },
+                { label:'Storage', value: 'Permanent · 5 epochs' },
+              ].map(({ label, value }) => (
+                <div key={label} style={{ background:'rgba(0,0,0,0.2)', borderRadius:10, padding:'10px 12px' }}>
+                  <div style={{ fontSize:10, color:'rgba(245,245,247,0.35)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:4 }}>{label}</div>
+                  <div style={{ fontSize:12, color:'rgba(245,245,247,0.8)', fontFamily:'Space Mono,monospace', wordBreak:'break-all' }}>{value}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Verify link */}
+            <a
+              href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${nft.blobId}`}
+              target="_blank" rel="noopener noreferrer"
+              style={{ fontSize:12, color:'#00d4aa', textDecoration:'none', fontFamily:'Space Mono,monospace', display:'inline-flex', alignItems:'center', gap:6 }}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="#00d4aa" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Retrieve directly from Walrus network
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* ── NFT PROVENANCE TRAIL ─────────────────────────────────────── */}
+      {provTrail.length > 0 && (
+        <div style={{ maxWidth:780, margin:'0 auto 24px', padding:'0 20px' }}>
+          <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:16, padding:'20px 22px' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1v14M1 8l3-3m10 0l-3-3M1 8l3 3m10 0l-3 3" stroke="rgba(245,245,247,0.5)" strokeWidth="1.2" strokeLinecap="round"/></svg>
+              <span style={{ fontSize:14, fontWeight:700, color:'#fff' }}>Ownership Provenance</span>
+              {provBlobId && <span style={{ fontSize:10, color:'rgba(0,212,170,0.6)', fontFamily:'Space Mono,monospace', background:'rgba(0,212,170,0.08)', padding:'2px 8px', borderRadius:5 }}>On Walrus</span>}
+            </div>
+            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+              {provTrail.map((entry, i) => (
+                <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:12, padding:'10px 12px', background:'rgba(0,0,0,0.15)', borderRadius:10 }}>
+                  <div style={{ width:28, height:28, borderRadius:7, background: entry.event === 'mint' ? 'rgba(0,212,170,0.12)' : entry.event === 'sale' ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:13 }}>
+                    {entry.event === 'mint' ? '✦' : entry.event === 'sale' ? '◈' : '→'}
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:13, fontWeight:600, color:'#fff', textTransform:'capitalize' }}>{entry.event}</div>
+                    <div style={{ fontSize:11, color:'rgba(245,245,247,0.4)', fontFamily:'Space Mono,monospace', marginTop:2 }}>
+                      {entry.from.slice(0,10)}...{entry.from.slice(-6)} → {entry.to.slice(0,10)}...{entry.to.slice(-6)}
+                      {entry.price && ` · ${entry.price} SUI`}
+                      {suiPrice && entry.price && ` · $${(parseFloat(entry.price) * suiPrice).toFixed(2)}`}
+                    </div>
+                  </div>
+                  <div style={{ fontSize:10, color:'rgba(245,245,247,0.25)', fontFamily:'Space Mono,monospace', flexShrink:0 }}>
+                    {new Date(entry.ts).toLocaleDateString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   )
 }

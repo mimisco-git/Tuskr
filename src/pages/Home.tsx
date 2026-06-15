@@ -531,6 +531,24 @@ export default function Home() {
                   <span className={s.statIcon} style={{ fontSize: 'clamp(12px,1.2vw,14px)', lineHeight: 1 }}>{stat.icon}</span>
                   <span className={s.statValue} style={{ fontSize: 'clamp(11px,1.1vw,13px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{stat.value}</span>
                   <span className={s.statLabel} style={{ fontSize: 'clamp(8px,0.7vw,10px)', fontWeight: 700, color: 'rgba(245,245,247,0.7)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign:'center', lineHeight: 1.2 }}>{stat.label}</span>
+                  {(stat as any).sparkline?.length > 2 && (() => {
+                    const pts = (stat as any).sparkline as { t: number; p: number }[]
+                    const mn = Math.min(...pts.map(p => p.p))
+                    const mx = Math.max(...pts.map(p => p.p))
+                    const rng = mx - mn || 0.001
+                    const w = 52, h = 18
+                    const path = pts.map((p, i) => {
+                      const x = (i / (pts.length - 1)) * w
+                      const y = h - ((p.p - mn) / rng) * h
+                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+                    }).join(' ')
+                    const rising = pts[pts.length-1].p >= pts[0].p
+                    return (
+                      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ marginTop:2 }}>
+                        <path d={path} fill="none" stroke={rising ? '#00d4aa' : '#f87171'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.8}/>
+                      </svg>
+                    )
+                  })()}
                 </div>
               ))}
             </div>

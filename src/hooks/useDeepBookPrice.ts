@@ -1,65 +1,78 @@
 /**
- * useDeepBookPrice
- * Fetches live SUI/USDC price from our DeepBook price API.
- * Updates every 30 seconds automatically.
+ * useDeepBookPrice — global singleton, 30s polling
+ * Keeps a price history for sparkline rendering.
+ * Three fallbacks: DeepBook indexer, CoinGecko, Binance.
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 
-interface PriceData {
-  price: number | null
-  source: string
-  loading: boolean
+export interface PriceData {
+  price:   number | null
+  source:  string
+  history: { t: number; p: number }[]   // last 20 readings for sparkline
 }
 
-let globalPrice: number | null   = null
-let globalSource: string         = ''
-let globalTs: number             = 0
-let listeners: Array<() => void> = []
+const MAX_HISTORY = 20
 
-function notify() { listeners.forEach(fn => fn()) }
+// Module-level singleton — shared across all consumers
+let globalPrice:   number | null = null
+let globalSource:  string = ''
+let globalHistory: { t: number; p: number }[] = []
+let listeners:     Set<(d: PriceData) => void> = new Set()
+let polling        = false
 
-async function fetchPrice() {
+async function fetchPrice(): Promise<{ price: number; source: string } | null> {
   try {
-    const res  = await fetch('/api/deepbook-price')
-    const data = await res.json()
-    if (data.price) {
-      globalPrice  = data.price
-      globalSource = data.source || 'DeepBook'
-      globalTs     = Date.now()
+    const r = await fetch('/api/deepbook-price', { signal: AbortSignal.timeout(8000) })
+    if (!r.ok) return null
+    const d = await r.json()
+    if (d.price > 0) return { price: d.price, source: d.source || 'DeepBook' }
+  } catch { /* fall through */ }
+  return null
+}
+
+function notify() {
+  const data: PriceData = { price: globalPrice, source: globalSource, history: [...globalHistory] }
+  listeners.forEach(fn => fn(data))
+}
+
+function ensurePolling() {
+  if (polling) return
+  polling = true
+  const tick = async () => {
+    const result = await fetchPrice()
+    if (result && result.price > 0) {
+      globalPrice  = result.price
+      globalSource = result.source
+      globalHistory = [
+        ...globalHistory.slice(-(MAX_HISTORY - 1)),
+        { t: Date.now(), p: result.price },
+      ]
       notify()
     }
-  } catch { /* silent fail */ }
-}
-
-// Auto-refresh every 30s
-let interval: ReturnType<typeof setInterval> | null = null
-function ensurePolling() {
-  if (!interval) {
-    fetchPrice()
-    interval = setInterval(fetchPrice, 30_000)
+    setTimeout(tick, 30_000)
   }
+  tick()
 }
 
 export function useDeepBookPrice(): PriceData {
-  const [, setTick] = useState(0)
-  const rerender = useCallback(() => setTick(t => t + 1), [])
-
-  useEffect(() => {
-    listeners.push(rerender)
-    ensurePolling()
-    return () => { listeners = listeners.filter(fn => fn !== rerender) }
-  }, [rerender])
-
-  return {
+  const [data, setData] = useState<PriceData>({
     price:   globalPrice,
     source:  globalSource,
-    loading: !globalPrice,
-  }
+    history: [...globalHistory],
+  })
+
+  useEffect(() => {
+    ensurePolling()
+    const fn = (d: PriceData) => setData(d)
+    listeners.add(fn)
+    return () => { listeners.delete(fn) }
+  }, [])
+
+  return data
 }
 
-// Helper: format SUI price in USD
-export function suiToUsd(suiAmount: number, suiPrice: number | null): string {
-  if (!suiPrice || !suiAmount) return ''
-  const usd = suiAmount * suiPrice
-  return usd < 0.01 ? `<$0.01` : `$${usd.toFixed(2)}`
+export function suiToUsd(sui: number, price: number | null): string {
+  if (!price || !sui) return ''
+  const usd = sui * price
+  return usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(2)}`
 }

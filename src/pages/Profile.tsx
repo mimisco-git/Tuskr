@@ -1,3 +1,5 @@
+import { useFloorPrice } from '../hooks/useFloorPrice'
+import { useDeepBookPrice } from '../hooks/useDeepBookPrice'
 import { useUserProfile } from '../hooks/useUserProfile'
 import { useEffect, useState, useCallback } from 'react'
 import { useCurrentAccount } from '@mysten/dapp-kit'
@@ -101,6 +103,8 @@ export default function Profile() {
   const account    = useCurrentAccount()
   const googleUser = useGoogleUser()
   const { fetchOwnedNFTs, fetchListedByUser, fetchSoldByUser } = useNFTMarketplace()
+  const { price: dbPrice }    = useDeepBookPrice()
+  const { floorSui }          = useFloorPrice()
   const [tab,     setTab]    = useState<Tab>('owned')
   const [owned,   setOwned]  = useState<ParsedNFT[]>([])
   const [listed,  setListed] = useState<any[]>([])
