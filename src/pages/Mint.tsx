@@ -126,6 +126,7 @@ export default function Mint() {
       if (account) awardXP(account.address, 'mint', `Minted: ${name}`)
     } catch (e) {
       console.error(e)
+      setMintPhase('idle')
       setStep('details')
     } finally {
       setMinting(false)
