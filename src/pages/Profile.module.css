@@ -97,9 +97,9 @@
 
 /* zkLogin sui address */
 .suiAddrRow {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 14px; border-radius: 10px;
-  background: rgba(0,212,170,0.05); border: 1px solid rgba(0,212,170,0.12);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 14px 16px; border-radius: 12px;
+  background: rgba(0,212,170,0.05); border: 1px solid rgba(0,212,170,0.15);
 }
 .suiAddrLabel {
   font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
@@ -117,20 +117,26 @@
 }
 .statCard {
   padding: 20px; border-radius: 14px; text-align: center;
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: border-color 0.2s, background 0.2s;
+}
+.statCard:hover {
+  border-color: rgba(0,212,170,0.2);
+  background: rgba(0,212,170,0.04);
 }
 .statNum {
   display: block; font-size: clamp(24px, 3vw, 36px); font-weight: 700;
   color: #fff; letter-spacing: -0.03em; line-height: 1; margin-bottom: 4px;
 }
 .statLabel {
-  font-family: 'Space Mono', monospace; font-size: 10px;
-  color: rgba(245,245,247,0.3); text-transform: uppercase; letter-spacing: 0.1em;
+  font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
+  color: rgba(245,245,247,0.55); text-transform: uppercase; letter-spacing: 0.1em;
 }
 
 /* ── TABS ── */
 .tabBar {
-  display: flex; gap: 4px; margin-bottom: 28px;
+  display: flex; gap: 4px; margin-bottom: 28px; margin-top: 4px;
   border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 0;
 }
 .tabBtn {
@@ -201,17 +207,20 @@
   .page { padding: 60px 0 60px }
   .header { flex-direction: column; gap: 16px }
   .headerActions { margin-left: 0; flex-direction: row }
-  .statsRow { grid-template-columns: repeat(2, 1fr) }
+  .statsRow { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 24px }
   .grid { grid-template-columns: repeat(2, 1fr); gap: 10px }
-  .name { font-size: 24px }
+  .name { font-size: 22px }
+  .accountList { margin-top: 12px }
 }
 @media (max-width: 480px) {
-  .statsRow { grid-template-columns: repeat(2, 1fr) }
+  .statsRow { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px }
   .grid { grid-template-columns: 1fr 1fr; gap: 8px }
   .tabBtn { padding: 10px 12px; font-size: 13px }
+  .statCard { padding: 16px 12px }
+  .statNum { font-size: 26px }
 }
 
-.suiAddrActions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.suiAddrActions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100% }
 .suiscanLink {
   font-size: 12px; color: var(--a); text-decoration: none;
   padding: 4px 10px; border-radius: 6px;
@@ -220,5 +229,5 @@
 }
 .suiscanLink:hover { background: rgba(0,212,170,0.15) }
 .suiAddrNote {
-  font-size: 11px; color: rgba(245,245,247,0.28); margin-top: 6px; line-height: 1.5;
+  font-size: 11px; color: rgba(245,245,247,0.35); margin-top: 4px; line-height: 1.5; max-width: 100%;
 }

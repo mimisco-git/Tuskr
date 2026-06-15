@@ -40,7 +40,7 @@ function useGoogleUser(): GoogleUser | null {
       if (!address || !email) { setUser(null); return }
       let picture = '', name = email.split('@')[0]
       try { if (token) { const p = JSON.parse(atob(token.split('.')[1])); picture = p.picture||''; name = p.name||name } } catch {}
-      setUser({ email, name, picture, address })
+      setUser({ email: email || 'Google Account', name: name || email?.split('@')[0] || 'Google User', picture, address })
     }
     read()
     window.addEventListener('storage', read)
@@ -214,7 +214,7 @@ export default function Profile() {
 
           <div className={s.headerInfo}>
             {/* Name + edit toggle */}
-            <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap', paddingRight:4 }}>
               {editing ? (
                 <input
                   value={editName} onChange={e => setEditName(e.target.value)}
@@ -258,7 +258,7 @@ export default function Profile() {
             {profileBlobId && !editing && (
               <div style={{ marginTop:4 }}>
                 <a href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${profileBlobId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:'rgba(0,212,170,0.6)', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
-                  🌊 Profile stored on Walrus
+                  Profile stored on Walrus
                 </a>
               </div>
             )}
@@ -271,7 +271,7 @@ export default function Profile() {
                   <span className={s.accountIcon}><GoogleSvg/></span>
                   <div className={s.accountDetail}>
                     <span className={s.accountType}>Google · zkLogin</span>
-                    <span className={s.accountVal}>{googleUser.email}</span>
+                    <span className={s.accountVal}>{googleUser.email && googleUser.email !== 'undefined' ? googleUser.email : 'Google Account'}</span>
                   </div>
                   <span className={s.connectedDot} title="Connected"/>
                 </div>
@@ -316,7 +316,7 @@ export default function Profile() {
                   <span className={s.suiAddrLabel}>zkLogin Sui Address</span>
                   <div className={s.suiAddrActions}>
                     <button className={s.addrBtn} onClick={()=>doCopy(googleUser.address)}>
-                      <span className={s.suiAddrVal}>{shortAddr(googleUser.address)}</span>
+                      <span className={s.suiAddrVal}>{googleUser.address ? shortAddr(googleUser.address) : 'Pending first transaction'}</span>
                       <span className={s.copyHint}>{copied ? '✓ Copied' : 'Copy'}</span>
                     </button>
                     <a
@@ -329,7 +329,7 @@ export default function Profile() {
                     </a>
                   </div>
                   <p className={s.suiAddrNote}>
-                    This address appears on Suiscan after your first transaction (e.g., minting an NFT).
+                    Appears on Suiscan after your first transaction.
                   </p>
                 </div>
               )}
