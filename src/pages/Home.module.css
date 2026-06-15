@@ -104,6 +104,21 @@
   display: none;
 }
 @media (max-width: 600px) {
+  /* Gradient fade from page into bottom nav dock */
+  .mobileNavGradient {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to top,
+      rgba(0,0,0,0.85) 0%,
+      rgba(0,0,0,0.4) 40%,
+      transparent 100%);
+    z-index: 9998;
+    pointer-events: none;
+  }
+
   .mobileNav {
     display: flex;
     position: fixed;
@@ -214,6 +229,35 @@
   mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.5) 75%, transparent 100%);
 }
 
+/* Ambient teal underglow behind the mascot */
+.mascotWrap::before {
+  content: '';
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 60%;
+  background: radial-gradient(ellipse at center bottom,
+    rgba(0,212,170,0.18) 0%,
+    rgba(0,212,170,0.06) 40%,
+    transparent 72%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Glow layer above mascot body, behind face */
+.mascotWrap::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 30%,
+    rgba(6,182,212,0.07) 0%,
+    transparent 70%);
+  z-index: 1;
+  pointer-events: none;
+}
+
 .mascot {
   display: block;
   width: 100%;
@@ -246,11 +290,13 @@
 
   .mascot {
     height: auto;
+    width: 100%;
     max-width: 100%;
     object-fit: cover;
-    object-position: center top;
-    transform: translateX(-6%);
-    width: 112%;
+    object-position: center 5%;
+    transform: none;
+    display: block;
+    margin: 0 auto;
   }
 }
 

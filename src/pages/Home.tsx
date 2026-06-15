@@ -804,6 +804,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── GRADIENT BEHIND BOTTOM NAV DOCK (mobile only) ── */}
+      <div className={s.mobileNavGradient} aria-hidden/>
+
       {/* ── PREMIUM MOBILE BOTTOM NAV DOCK ── */}
       <nav className={s.mobileNav} aria-label="Mobile navigation">
         <a href="/"           className={s.mobileNavItem}>
