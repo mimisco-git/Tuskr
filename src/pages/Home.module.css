@@ -55,6 +55,120 @@
   align-items: center;
 }
 
+.heroTitle {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: clamp(44px, 6.5vw, 88px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  margin-bottom: 4px;
+  /* Gradient text: white fading to mint green */
+  background: linear-gradient(160deg, #ffffff 0%, #ffffff 50%, rgba(0,212,170,0.85) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.heroTitleAccent {
+  display: block;
+  background: linear-gradient(135deg, rgba(0,212,170,1) 0%, rgba(0,184,148,0.9) 60%, rgba(99,102,241,0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.heroDesc {
+  font-size: clamp(14px, 1.5vw, 17px);
+  color: rgba(245,245,247,0.45);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 4px;
+}
+
+/* ── CURSOR GLOW OVERLAY ── */
+.cursorGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0,212,170,0.08) 0%,
+    rgba(99,102,241,0.04) 30%,
+    transparent 70%
+  );
+  transition: background 0.15s ease;
+}
+
+/* ── MOBILE BOTTOM NAV DOCK ── */
+.mobileNav {
+  display: none;
+}
+@media (max-width: 600px) {
+  .mobileNav {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    align-items: center;
+    gap: 0;
+    padding: 10px 16px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.05) inset;
+  }
+  .mobileNavItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 16px;
+    text-decoration: none;
+    color: rgba(245,245,247,0.45);
+    font-size: 9px;
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: color 0.15s;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+  }
+  .mobileNavItem:last-child { border-right: none; }
+  .mobileNavItem.active,
+  .mobileNavItem:hover { color: #00d4aa; }
+  .mobileNavIcon { font-size: 18px; line-height: 1; margin-bottom: 1px; }
+}
+
+/* ── CAROUSEL INDICATOR DOTS ── */
+.carouselDots {
+  display: none;
+}
+@media (max-width: 600px) {
+  .carouselDots {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+  .carouselDot {
+    width: 5px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.18);
+    transition: width 0.25s ease, background 0.25s ease;
+    cursor: pointer;
+  }
+  .carouselDot.active {
+    width: 18px;
+    background: #00d4aa;
+  }
+}
+
 .heroInner {
   display: flex;
   flex-direction: column;

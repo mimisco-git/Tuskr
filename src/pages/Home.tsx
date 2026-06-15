@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSuiClient } from '@mysten/dapp-kit'
@@ -251,6 +251,9 @@ export default function Home() {
   const [featured,   setFeatured]   = useState<NFT[]>([])
   const [counter,    setCounter]    = useState({ nfts: 0, vol: 0, creators: 0 })
   const [liveStats,  setLiveStats]  = useState({ minted: 0, listed: 0, walrusMB: 0 })
+  const [activeDot,  setActiveDot]  = useState(0)
+  const heroRef     = useRef<HTMLElement>(null)
+  const carouselRef = useRef<HTMLDivElement>(null)
   const { floorSui, floorUsd, totalVolumeSui } = useFloorPrice()
   const { price: suiPrice }                    = useDeepBookPrice()
   const client   = useSuiClient()
@@ -312,11 +315,36 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [])
 
+  // Cursor glow: update CSS variables on mouse move over hero
+  const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%'
+    const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%'
+    heroRef.current?.style.setProperty('--mouse-x', x)
+    heroRef.current?.style.setProperty('--mouse-y', y)
+  }, [])
+
+  // Carousel scroll: update active dot
+  const handleCarouselScroll = useCallback(() => {
+    const el = carouselRef.current
+    if (!el) return
+    const cardWidth = el.scrollWidth / 6
+    const dot = Math.round(el.scrollLeft / cardWidth)
+    setActiveDot(Math.min(dot, 5))
+  }, [])
+
   return (
     <main style={{ background: '#000', overflow: 'hidden' }}>
 
       {/* ════ HERO ════ */}
-      <section className={s.hero}>
+      <section
+        className={s.hero}
+        ref={heroRef}
+        onMouseMove={handleHeroMouseMove}
+        style={{ position:'relative' }}
+      >
+        {/* Cursor-following ambient glow */}
+        <div className={s.cursorGlow} aria-hidden/>
 
         {/* Aurora atmospheric background */}
         <div className={s.aurora} aria-hidden/>
@@ -425,7 +453,7 @@ export default function Home() {
             </div>
 
             {/* MOBILE: Premium horizontal swipe carousel */}
-            <div className={s.statCarouselWrap}>
+            <div className={s.statCarouselWrap} ref={carouselRef} onScroll={handleCarouselScroll}>
               {[
                 { icon: '🔮', value: liveStats.minted || '0',                                   label: 'NFTs Minted'         },
                 { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',     label: 'On Walrus'           },
@@ -439,6 +467,24 @@ export default function Home() {
                   <span className={s.statCarouselValue}>{stat.value}</span>
                   <span className={s.statCarouselLabel}>{stat.label}</span>
                 </div>
+              ))}
+            </div>
+
+            {/* Mobile carousel indicator dots */}
+            <div className={s.carouselDots} aria-hidden>
+              {[0,1,2,3,4,5].map(i => (
+                <button
+                  key={i}
+                  className={`${s.carouselDot}${activeDot === i ? ' ' + s.active : ''}`}
+                  onClick={() => {
+                    const el = carouselRef.current
+                    if (!el) return
+                    const cardWidth = el.scrollWidth / 6
+                    el.scrollTo({ left: cardWidth * i, behavior:'smooth' })
+                    setActiveDot(i)
+                  }}
+                  aria-label={`Go to stat ${i+1}`}
+                />
               ))}
             </div>
 
@@ -721,6 +767,30 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── PREMIUM MOBILE BOTTOM NAV DOCK ── */}
+      <nav className={s.mobileNav} aria-label="Mobile navigation">
+        <a href="/"           className={s.mobileNavItem}>
+          <span className={s.mobileNavIcon}>⌂</span>
+          Home
+        </a>
+        <a href="/marketplace" className={s.mobileNavItem}>
+          <span className={s.mobileNavIcon}>◈</span>
+          Market
+        </a>
+        <a href="/mint"        className={s.mobileNavItem}>
+          <span className={s.mobileNavIcon}>✦</span>
+          Mint
+        </a>
+        <a href="/mint/ai"     className={s.mobileNavItem}>
+          <span className={s.mobileNavIcon}>✧</span>
+          AI
+        </a>
+        <a href="/profile"     className={s.mobileNavItem}>
+          <span className={s.mobileNavIcon}>◉</span>
+          Profile
+        </a>
+      </nav>
 
     </main>
   )
