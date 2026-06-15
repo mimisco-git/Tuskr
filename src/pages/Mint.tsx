@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useCurrentAccount, useSuiClient, ConnectButton } from '@mysten/dapp-kit'
 import { useDeepBookPrice } from '../hooks/useDeepBookPrice'
+import { useWalrusProvenance } from '../hooks/useWalrusProvenance'
 import { useSeal }        from '../hooks/useSeal'
 import { useWalrus } from '../hooks/useWalrus'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
@@ -26,6 +27,8 @@ export default function Mint() {
   const account = useCurrentAccount()
   const { uploadBlob, uploading, error: wErr } = useWalrus()
   const { encrypt: sealEncrypt, isAvailable: sealAvailable } = useSeal()
+  const [mintedNftId, setMintedNftId] = useState('')
+  const { append: appendProv } = useWalrusProvenance(mintedNftId)
   const client = useSuiClient()
 
   useEffect(() => {
@@ -107,6 +110,17 @@ export default function Mint() {
       await new Promise(res => setTimeout(res, 700))
 
       setTxDigest(r.digest)
+      // Write mint provenance to Walrus
+      try {
+        const nftId = (r as any).effects?.created?.[0]?.reference?.objectId || r.digest
+        await appendProv({
+          event:    'mint',
+          from:     '0x0000000000000000000000000000000000000000000000000000000000000000',
+          to:       account?.address || '',
+          txDigest: r.digest,
+          ts:       new Date().toISOString(),
+        })
+      } catch { /* provenance is best-effort */ }
       setStep('done')
       setMintPhase('idle')
       if (account) awardXP(account.address, 'mint', `Minted: ${name}`)

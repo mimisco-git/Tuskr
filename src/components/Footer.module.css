@@ -93,23 +93,23 @@
   padding: 0;
 }
 
-/* Taller brand section to accommodate the bigger text */
+/* Mascot head pokes above the S in tuskr */
 .brand {
-  height: 42vw;
+  height: 44vw;
 }
 .brandMascot {
-  height: 36vw;
-  bottom: -6vw;
+  height: 46vw;
+  bottom: -9vw;
 }
 
 @media (max-width: 768px) {
-  .brand       { height: 78vw }
-  .brandMascot { height: 46vw; bottom: -12vw }
+  .brand       { height: 82vw }
+  .brandMascot { height: 58vw; bottom: -14vw }
   .brandText   { font-size: 37vw }
 }
 
 @media (max-width: 480px) {
-  .brand       { height: 90vw }
-  .brandMascot { height: 52vw; bottom: -14vw }
+  .brand       { height: 95vw }
+  .brandMascot { height: 68vw; bottom: -16vw }
   .brandText   { font-size: 38vw }
 }

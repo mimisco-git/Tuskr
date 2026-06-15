@@ -255,7 +255,7 @@ export default function Home() {
   const heroRef     = useRef<HTMLElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
   const { floorSui, floorUsd, totalVolumeSui } = useFloorPrice()
-  const { price: suiPrice }                    = useDeepBookPrice()
+  const { price: suiPrice, history: priceHistory } = useDeepBookPrice()
   const client   = useSuiClient()
   const feat     = FEATURES[activeFeat]
   const allPart  = [...PARTNERS, ...PARTNERS]
@@ -460,12 +460,30 @@ export default function Home() {
                 { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                        label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
                 { icon: '🛍️', value: String(liveStats.listed || '0'),                           label: 'Active Listings'     },
                 { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—', label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook'  },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook', sparkline: priceHistory  },
               ].map((stat) => (
                 <div key={stat.label} className={s.statCarouselCard}>
                   <span className={s.statCarouselIcon}>{stat.icon}</span>
                   <span className={s.statCarouselValue}>{stat.value}</span>
                   <span className={s.statCarouselLabel}>{stat.label}</span>
+                  {(stat as any).sparkline?.length > 2 && (() => {
+                    const pts = (stat as any).sparkline as { t: number; p: number }[]
+                    const mn = Math.min(...pts.map((p: any) => p.p))
+                    const mx = Math.max(...pts.map((p: any) => p.p))
+                    const rng = mx - mn || 0.001
+                    const w = 60, h = 16
+                    const path = pts.map((p: any, i: number) => {
+                      const x = (i / (pts.length - 1)) * w
+                      const y = h - ((p.p - mn) / rng) * h
+                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+                    }).join(' ')
+                    const rising = pts[pts.length-1].p >= pts[0].p
+                    return (
+                      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ marginTop:2 }}>
+                        <path d={path} fill="none" stroke={rising ? '#00d4aa' : '#f87171'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.8}/>
+                      </svg>
+                    )
+                  })()}
                 </div>
               ))}
             </div>
@@ -519,7 +537,7 @@ export default function Home() {
                 { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                           label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
                 { icon: '🛍️', value: String(liveStats.listed || '0'),                              label: 'Active Listings'     },
                 { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—',    label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook' },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook', sparkline: priceHistory },
               ].map((stat, i) => (
                 <div key={stat.label} className={s.statCell} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
