@@ -51,6 +51,8 @@ export default function Mint() {
   const [royalty,  setRoyalty]  = useState(5)
   const [minting,  setMinting]  = useState(false)
   const [txDigest, setTxDigest] = useState<string | null>(null)
+  // mintPhase drives the live cinematic progress animation
+  const [mintPhase, setMintPhase] = useState<'idle'|'seal'|'wallet'|'minting'|'transferring'>('idle')
   const [dragging, setDragging] = useState(false)
 
   const handleFile = (f: File) => {
@@ -75,15 +77,14 @@ export default function Mint() {
   const mint = async () => {
     if (!blobId || !mediaUrl || !name) return
     setMinting(true)
-    setStep('minting')
+    // Phase 1: Seal encryption (if enabled)
+    setMintPhase('seal')
     try {
-      // Optional: Seal-encrypt the description before minting
       let sealedBlobId = ''
       if (useSealEncrypt && blobId && desc.trim()) {
         try {
           const pkg = import.meta.env.VITE_TESTNET_PACKAGE_ID || import.meta.env.VITE_PACKAGE_ID || ''
           const textBytes = new TextEncoder().encode(desc)
-          // Encrypt using creator address as Seal identity
           const encrypted = await sealEncrypt(textBytes, account?.address || '', pkg)
           if (encrypted) {
             const encFile = new File([new Blob([encrypted as BlobPart])], 'sealed.bin', { type: 'application/octet-stream' })
@@ -93,9 +94,21 @@ export default function Mint() {
         } catch (e) { console.warn('[Seal] Encryption skipped:', e) }
       }
 
+      // Phase 2: Open wallet and mint
+      setMintPhase('wallet')
       const r = await mintNFT({ name, description: desc, blobId, mediaUrl, royaltyBps: royalty * 100, sealedBlobId: sealedBlobId || undefined })
+
+      // Phase 3: Show minting confirmation briefly
+      setMintPhase('minting')
+      await new Promise(res => setTimeout(res, 900))
+
+      // Phase 4: Show transfer step briefly
+      setMintPhase('transferring')
+      await new Promise(res => setTimeout(res, 700))
+
       setTxDigest(r.digest)
       setStep('done')
+      setMintPhase('idle')
       if (account) awardXP(account.address, 'mint', `Minted: ${name}`)
     } catch (e) {
       console.error(e)
@@ -397,94 +410,192 @@ export default function Mint() {
         )}
 
         {/* ─── GUARDIAN PREVIEW ─────────────────────────────────── */}
-        {step === 'guardian' && (
-          <div className={s.card}>
-            <div style={{ padding: '32px 28px' }}>
+        {step === 'guardian' && (() => {
+          // Determine status for each step based on mintPhase
+          const phase = mintPhase
+          const hasSeal = useSealEncrypt
 
-              {/* Header */}
-              <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:28 }}>
-                <div style={{ width:44, height:44, borderRadius:12, background:'rgba(0,212,170,0.12)', border:'1px solid rgba(0,212,170,0.25)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:22, flexShrink:0 }}>🤖</div>
+          type StepStatus = 'done' | 'running' | 'waiting' | 'pending'
+
+          function walrusStatus(): StepStatus { return 'done' }
+          function sealStatus(): StepStatus {
+            if (phase === 'idle') return 'pending'
+            if (phase === 'seal') return 'running'
+            return 'done'
+          }
+          function mintStatus(): StepStatus {
+            if (phase === 'idle' || phase === 'seal') return 'pending'
+            if (phase === 'wallet') return 'waiting'
+            if (phase === 'minting') return 'running'
+            if (phase === 'transferring') return 'done'
+            return 'pending'
+          }
+          function transferStatus(): StepStatus {
+            if (phase === 'idle' || phase === 'seal' || phase === 'wallet' || phase === 'minting') return 'pending'
+            if (phase === 'transferring') return 'running'
+            return 'pending'
+          }
+
+          const isLive = phase !== 'idle'
+
+          const StepRow = ({ status, icon, color, action, detail, liveLabel }: {
+            status: StepStatus, icon: string, color: string, action: string, detail: string, liveLabel?: string
+          }) => {
+            const isDone    = status === 'done'
+            const isRunning = status === 'running' || status === 'waiting'
+            const isPending = status === 'pending'
+            return (
+              <div style={{
+                display:'flex', alignItems:'flex-start', gap:14, padding:'14px 16px',
+                borderRadius:12,
+                background: isDone ? 'rgba(0,212,170,0.06)' : isRunning ? `rgba(${color === '#00d4aa' ? '0,212,170' : color === '#a855f7' ? '168,85,247' : color === '#3b82f6' ? '59,130,246' : '245,158,11'},0.07)` : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${isDone ? 'rgba(0,212,170,0.25)' : isRunning ? color.replace(')', ',0.3)').replace('rgb','rgba') : 'rgba(255,255,255,0.06)'}`,
+                opacity: isPending && isLive ? 0.45 : 1,
+                transition: 'all 0.4s cubic-bezier(0.16,1,0.3,1)',
+              }}>
+                {/* Icon */}
+                <div style={{ width:34, height:34, flexShrink:0, position:'relative', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  {isDone ? (
+                    <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+                      <circle cx="17" cy="17" r="16" fill="rgba(0,212,170,0.12)" stroke="rgba(0,212,170,0.4)" strokeWidth="1"/>
+                      <path d="M10 17L15 22L24 12" stroke="#00d4aa" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  ) : isRunning ? (
+                    <div style={{
+                      width:34, height:34, borderRadius:'50%',
+                      border:`2px solid ${color}`, borderTopColor:'transparent',
+                      animation:'spin 0.75s linear infinite',
+                    }}/>
+                  ) : (
+                    <div style={{ width:34, height:34, borderRadius:9, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16 }}>
+                      {icon}
+                    </div>
+                  )}
+                </div>
+
+                {/* Text */}
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+                    <span style={{ fontSize:14, fontWeight:700, color: isPending && isLive ? 'rgba(245,245,247,0.4)' : '#fff', transition:'color 0.3s' }}>
+                      {action}
+                    </span>
+                    {isDone && (
+                      <span style={{ fontSize:10, background:'rgba(0,212,170,0.15)', color:'#00d4aa', borderRadius:5, padding:'1px 7px', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.08em' }}>
+                        Complete
+                      </span>
+                    )}
+                    {isRunning && liveLabel && (
+                      <span style={{ fontSize:10, background:`${color}20`, color, borderRadius:5, padding:'1px 7px', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.08em' }}>
+                        {liveLabel}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize:12, color:'rgba(245,245,247,0.38)', marginTop:4, fontFamily:'Space Mono,monospace', lineHeight:1.5 }}>
+                    {status === 'waiting' ? 'Waiting for your wallet signature...' : detail}
+                  </div>
+                  {isRunning && (
+                    <div style={{ height:2, background:'rgba(255,255,255,0.06)', borderRadius:2, marginTop:8, overflow:'hidden' }}>
+                      <div style={{ height:'100%', width:'40%', background:`linear-gradient(90deg, transparent, ${color}, transparent)`, borderRadius:2, animation:'shimmer 1.2s ease-in-out infinite' }}/>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          }
+
+          const steps = [
+            <StepRow key="walrus" status={walrusStatus()} icon="🌊" color="#00d4aa"
+              action="Store media on Walrus"
+              detail={`Blob ID: ${blobId?.slice(0,20)}... · Permanent storage · Cannot be deleted`}
+              liveLabel="Uploading"
+            />,
+            ...(hasSeal ? [<StepRow key="seal" status={sealStatus()} icon="🔐" color="#a855f7"
+              action="Encrypt description with Seal"
+              detail="Private content stored on Walrus · Only you can decrypt"
+              liveLabel="Encrypting"
+            />] : []),
+            <StepRow key="mint" status={mintStatus()} icon="⚡" color="#3b82f6"
+              action="Mint TuskrNFT on Sui Move"
+              detail={`Contract: tuskr_nft::mint · Royalty: ${royalty}% · Network: Testnet`}
+              liveLabel={mintStatus() === 'waiting' ? 'Sign in Wallet' : 'Minting'}
+            />,
+            <StepRow key="transfer" status={transferStatus()} icon="🏦" color="#f59e0b"
+              action="Transfer NFT to your wallet"
+              detail={`Owner: ${account?.address?.slice(0,14)}...${account?.address?.slice(-6)}`}
+              liveLabel="Transferring"
+            />,
+          ]
+
+          return (
+          <div className={s.card}>
+            <div style={{ padding:'32px 28px' }}>
+
+              {/* Header — transforms when live */}
+              <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:24 }}>
+                <div style={{
+                  width:44, height:44, borderRadius:12, flexShrink:0,
+                  background: isLive ? 'rgba(0,212,170,0.15)' : 'rgba(0,212,170,0.12)',
+                  border: `1px solid ${isLive ? 'rgba(0,212,170,0.4)' : 'rgba(0,212,170,0.25)'}`,
+                  display:'flex', alignItems:'center', justifyContent:'center',
+                  transition:'all 0.3s',
+                }}>
+                  {isLive
+                    ? <div style={{ width:22, height:22, borderRadius:'50%', border:'2.5px solid #00d4aa', borderTopColor:'transparent', animation:'spin 0.7s linear infinite' }}/>
+                    : <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="6" width="16" height="12" rx="2.5" stroke="#00d4aa" strokeWidth="1.5"/><path d="M7 6V4.5a4 4 0 018 0V6" stroke="#00d4aa" strokeWidth="1.5"/><circle cx="9" cy="12" r="1.2" fill="#00d4aa"/><circle cx="13" cy="12" r="1.2" fill="#00d4aa"/></svg>
+                  }
+                </div>
                 <div>
-                  <div style={{ fontSize:18, fontWeight:800, color:'#fff', letterSpacing:'-0.02em' }}>AI Agent: Transaction Preview</div>
-                  <div style={{ fontSize:13, color:'rgba(245,245,247,0.4)', marginTop:2 }}>Review what the agent will execute on your behalf</div>
+                  <div style={{ fontSize:18, fontWeight:800, color:'#fff', letterSpacing:'-0.02em', transition:'all 0.3s' }}>
+                    {isLive
+                      ? (mintPhase === 'wallet' ? 'Sign in your wallet...' : mintPhase === 'minting' ? 'Minting on Sui...' : mintPhase === 'transferring' ? 'Transferring NFT...' : 'Preparing...')
+                      : 'Transaction Preview'
+                    }
+                  </div>
+                  <div style={{ fontSize:13, color:'rgba(245,245,247,0.4)', marginTop:2, transition:'all 0.3s' }}>
+                    {isLive ? 'Each step completes automatically' : 'Review what will execute on your behalf'}
+                  </div>
                 </div>
               </div>
 
-              {/* PTB Steps */}
-              <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:24 }}>
-                {[
-                  {
-                    icon:'🌊', done:true,
-                    action:'Store media on Walrus',
-                    detail: `Blob ID: ${blobId?.slice(0,20)}... · Permanent storage · Cannot be deleted`,
-                    color:'#00d4aa',
-                  },
-                  ...(useSealEncrypt ? [{
-                    icon:'🔐', done:false,
-                    action:'Encrypt description with Seal',
-                    detail:'Private content stored on Walrus · Only you can decrypt',
-                    color:'#a855f7',
-                  }] : []),
-                  {
-                    icon:'⚡', done:false,
-                    action:'Mint TuskrNFT on Sui Move',
-                    detail:`Contract: tuskr_nft::mint · Royalty: ${royalty}% · Network: Testnet`,
-                    color:'#3b82f6',
-                  },
-                  {
-                    icon:'🏦', done:false,
-                    action:'Transfer NFT to your wallet',
-                    detail:`Owner: ${account?.address?.slice(0,14)}...${account?.address?.slice(-6)}`,
-                    color:'#f59e0b',
-                  },
-                ].map((step, i) => (
-                  <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:14, padding:'14px 16px', background: step.done ? 'rgba(0,212,170,0.06)' : 'rgba(255,255,255,0.03)', border:`1px solid ${step.done ? 'rgba(0,212,170,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius:12 }}>
-                    <div style={{ width:34, height:34, borderRadius:9, background:'rgba(0,0,0,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0 }}>
-                      {step.done ? '✅' : step.icon}
-                    </div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                        <span style={{ fontSize:14, fontWeight:700, color:'#fff' }}>{step.action}</span>
-                        {step.done && <span style={{ fontSize:10, background:'rgba(0,212,170,0.15)', color:'#00d4aa', borderRadius:5, padding:'1px 7px', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.08em' }}>Complete</span>}
+              {/* Live steps */}
+              <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom: isLive ? 20 : 24 }}>
+                {steps}
+              </div>
+
+              {/* Cost breakdown — hide when live */}
+              {!isLive && (
+                <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, padding:'16px 18px', marginBottom:16 }}>
+                  <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:12 }}>Cost Breakdown</div>
+                  {[
+                    { label:'Estimated gas fee', value:'~0.01 SUI', sub: suiPrice ? `~$${(0.01*suiPrice).toFixed(4)}` : '' },
+                    { label:'Walrus storage', value:'Prepaid ✓', sub:'Permanent, never expires' },
+                    { label:'Royalty (on resale)', value:`${royalty}%`, sub:'You earn this on every secondary sale' },
+                  ].map((row, i) => (
+                    <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', padding:'7px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                      <span style={{ fontSize:13, color:'rgba(245,245,247,0.55)' }}>{row.label}</span>
+                      <div style={{ textAlign:'right' }}>
+                        <div style={{ fontSize:13, fontWeight:700, color:'#fff' }}>{row.value}</div>
+                        {row.sub && <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', marginTop:2 }}>{row.sub}</div>}
                       </div>
-                      <div style={{ fontSize:12, color:'rgba(245,245,247,0.38)', marginTop:4, fontFamily:'Space Mono,monospace' }}>{step.detail}</div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
-              {/* Cost breakdown */}
-              <div style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, padding:'16px 18px', marginBottom:16 }}>
-                <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:12 }}>Cost Breakdown</div>
-                {[
-                  { label:'Estimated gas fee', value:'~0.01 SUI', sub: suiPrice ? `~$${(0.01*suiPrice).toFixed(4)}` : '' },
-                  { label:'Walrus storage', value:'Prepaid ✓', sub:'Permanent, never expires' },
-                  { label:'Royalty (on resale)', value:`${royalty}%`, sub:'You earn this on every secondary sale' },
-                ].map((row, i) => (
-                  <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', padding:'7px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                    <span style={{ fontSize:13, color:'rgba(245,245,247,0.55)' }}>{row.label}</span>
-                    <div style={{ textAlign:'right' }}>
-                      <div style={{ fontSize:13, fontWeight:700, color:'#fff' }}>{row.value}</div>
-                      {row.sub && <div style={{ fontSize:11, color:'rgba(245,245,247,0.3)', fontFamily:'Space Mono,monospace', marginTop:2 }}>{row.sub}</div>}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Wallet balance warning */}
-              {suiBalance !== null && suiBalance < 0.05 && (
+              {/* Balance warning — hide when live */}
+              {!isLive && suiBalance !== null && suiBalance < 0.05 && (
                 <div style={{ display:'flex', gap:10, padding:'12px 14px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.25)', borderRadius:10, marginBottom:16 }}>
                   <span style={{ fontSize:16 }}>⚠️</span>
                   <div>
                     <div style={{ fontSize:13, fontWeight:700, color:'#f87171' }}>Low balance</div>
-                    <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)', marginTop:2 }}>Your wallet has {suiBalance.toFixed(4)} SUI. You may not have enough for gas. Top up via faucet before minting.</div>
+                    <div style={{ fontSize:12, color:'rgba(245,245,247,0.4)', marginTop:2 }}>Your wallet has {suiBalance.toFixed(4)} SUI. You may not have enough for gas.</div>
                   </div>
                 </div>
               )}
 
-              {/* Price context */}
-              {suiPrice && (
-                <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', background:'rgba(0,0,0,0.2)', borderRadius:10, marginBottom:24 }}>
+              {/* Price line — hide when live */}
+              {!isLive && suiPrice && (
+                <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', background:'rgba(0,0,0,0.2)', borderRadius:10, marginBottom:20 }}>
                   <span style={{ width:6, height:6, borderRadius:'50%', background:'#00d4aa', boxShadow:'0 0 6px #00d4aa', flexShrink:0, display:'inline-block' }}/>
                   <span style={{ fontSize:12, color:'rgba(245,245,247,0.4)', fontFamily:'Space Mono,monospace' }}>
                     Live price via DeepBook: 1 SUI = ${suiPrice.toFixed(3)} USDC · Wallet: {suiBalance?.toFixed(4) ?? '...'} SUI
@@ -492,27 +603,39 @@ export default function Mint() {
                 </div>
               )}
 
-              {/* Actions */}
-              <div style={{ display:'flex', gap:12 }}>
-                <button
-                  onClick={() => setStep('details')}
-                  style={{ flex:1, padding:'13px', borderRadius:12, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(245,245,247,0.6)', fontSize:14, fontWeight:600, cursor:'pointer' }}
-                >
-                  ← Go Back
-                </button>
-                <button
-                  onClick={mint}
-                  disabled={minting}
-                  style={{ flex:2, padding:'13px', borderRadius:12, background:'#00d4aa', color:'#000', fontSize:15, fontWeight:800, border:'none', cursor:'pointer', letterSpacing:'-0.01em' }}
-                >
-                  {minting ? 'Executing...' : 'Confirm & Mint on Sui →'}
-                </button>
-              </div>
+              {/* Actions: show buttons only when idle, status bar when live */}
+              {isLive ? (
+                <div style={{ padding:'14px 16px', background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:12, display:'flex', alignItems:'center', gap:12 }}>
+                  <div style={{ width:8, height:8, borderRadius:'50%', background:'#00d4aa', boxShadow:'0 0 8px #00d4aa', flexShrink:0, animation:'pulse 1.5s ease-in-out infinite' }}/>
+                  <span style={{ fontSize:13, color:'rgba(245,245,247,0.5)', fontFamily:'Space Mono,monospace' }}>
+                    {mintPhase === 'seal' && 'Encrypting with Seal protocol...'}
+                    {mintPhase === 'wallet' && 'Wallet popup open. Please sign to authorise the mint.'}
+                    {mintPhase === 'minting' && 'Transaction submitted. Waiting for Sui confirmation...'}
+                    {mintPhase === 'transferring' && 'NFT confirmed. Transferring to your wallet...'}
+                  </span>
+                </div>
+              ) : (
+                <div style={{ display:'flex', gap:12 }}>
+                  <button
+                    onClick={() => setStep('details')}
+                    style={{ flex:1, padding:'13px', borderRadius:12, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(245,245,247,0.6)', fontSize:14, fontWeight:600, cursor:'pointer' }}
+                  >
+                    ← Go Back
+                  </button>
+                  <button
+                    onClick={mint}
+                    disabled={minting}
+                    style={{ flex:2, padding:'13px', borderRadius:12, background:'#00d4aa', color:'#000', fontSize:15, fontWeight:800, border:'none', cursor:'pointer', letterSpacing:'-0.01em' }}
+                  >
+                    Confirm and Mint on Sui
+                  </button>
+                </div>
+              )}
 
             </div>
           </div>
-        )}
-
+          )
+        })()}
         {/* Step: Minting */}
         {step === 'minting' && (
           <div className={s.card}>

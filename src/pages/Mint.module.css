@@ -278,6 +278,7 @@
   margin: 0 auto 24px;
 }
 @keyframes spin { to { transform: rotate(360deg) } }
+@keyframes shimmer { 0% { transform: translateX(-120%) } 100% { transform: translateX(280%) } }
 .statusTitle { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #fff; margin-bottom: 10px }
 .statusSub { font-size: 15px; color: rgba(245,245,247,0.45); line-height: 1.7; margin-bottom: 32px }
 .statusSteps { display: flex; flex-direction: column; gap: 10px; text-align: left; max-width: 280px; margin: 0 auto }
