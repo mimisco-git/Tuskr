@@ -225,8 +225,8 @@
   overflow: hidden;
   margin-top: -72px;
   /* Fade mascot bottom into the glass section */
-  -webkit-mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.5) 75%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 50%, rgba(0,0,0,0.5) 75%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, rgba(0,0,0,0.6) 68%, rgba(0,0,0,0.15) 88%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 40%, rgba(0,0,0,0.6) 68%, rgba(0,0,0,0.15) 88%, transparent 100%);
 }
 
 /* Ambient teal underglow behind the mascot */
@@ -349,13 +349,13 @@
 .statement {
   position: relative;
   z-index: 20;
-  /* Premium glass morphism */
+  /* Premium glass morphism — teal tint at top connects mascot glow */
   background: linear-gradient(
     180deg,
-    transparent 0%,
-    transparent 10%,
-    rgba(2, 4, 8, 0.50) 30%,
-    rgba(4, 8, 16, 0.90) 60%,
+    rgba(0,212,170,0.04) 0%,
+    rgba(0,150,100,0.02) 8%,
+    rgba(2, 4, 8, 0.40) 25%,
+    rgba(4, 8, 16, 0.88) 55%,
     rgba(4, 8, 16, 0.97) 100%
   );
   backdrop-filter: blur(64px) saturate(160%);
@@ -363,26 +363,40 @@
   border-top: none;
   box-shadow: none;
   border-radius: 0;
-  /* Mobile: ~100px overlap */
-  margin-top: clamp(-30px, -3vw, -20px);
+  /* Mobile: pull statement up over mascot's faded bottom */
+  margin-top: -80px;
   padding: clamp(56px, 8vw, 100px) 0 clamp(60px, 8vw, 100px);
 }
 @media (min-width: 481px) and (max-width: 768px) {
   .statement {
     border-radius: 36px 36px 0 0;
-    margin-top: -120px;
+    margin-top: -140px;
   }
 }
 @media (min-width: 769px) {
   .statement {
     border-radius: 48px 48px 0 0;
-    margin-top: -40px;
+    margin-top: -60px;
   }
 }
 @media (min-width: 1280px) {
   .statement {
-    margin-top: -40px;
+    margin-top: -60px;
   }
+}
+
+.statement::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 60%;
+  height: 120px;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(0,212,170,0.09) 0%,
+    rgba(0,212,170,0.03) 50%,
+    transparent 100%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .statement .container {
@@ -390,6 +404,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .statementInner {
