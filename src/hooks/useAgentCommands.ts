@@ -22,6 +22,8 @@ export interface ParsedCommand {
   action:    'mint' | 'buy' | 'list' | 'watch' | 'unknown'
   prompt?:   string   // for mint: what to generate
   maxPrice?: number   // for buy: ceiling price in SUI
+  threshold?: number  // for watch: price level to monitor
+  direction?: 'above' | 'below'  // for watch: trigger direction
   nftId?:    string   // for list: which NFT
   price?:    number   // for list: sale price in SUI
   raw:       string   // original user input
@@ -43,8 +45,11 @@ async function parseCommand(input: string): Promise<ParsedCommand> {
     if (lower.includes('mint'))  return { action:'mint',  prompt: input.replace(/mint/i,'').trim(), raw: input }
     if (lower.includes('buy'))   return { action:'buy',   maxPrice: parseFloat(lower.match(/[\d.]+/)?.[0]||'2'), raw: input }
     if (lower.includes('list'))  return { action:'list',  price: parseFloat(lower.match(/[\d.]+/)?.[0]||'2'), raw: input }
-    if (lower.includes('watch') || lower.includes('alert') || lower.includes('monitor') || lower.includes('notify'))
-      return { action:'watch', maxPrice: parseFloat(lower.match(/[\d.]+/)?.[0]||'1'), raw: input }
+    if (lower.includes('watch') || lower.includes('alert') || lower.includes('monitor') || lower.includes('notify') || lower.includes('crosses') || lower.includes('reaches') || lower.includes('hits')) {
+      const price = parseFloat(lower.match(/[\d.]+/)?.[0] || '1')
+      const isAbove = lower.includes('above') || lower.includes('rises') || lower.includes('crosses') || lower.includes('reaches') || lower.includes('hits') || (!lower.includes('below') && !lower.includes('drops') && !lower.includes('falls'))
+      return { action:'watch', threshold: price, maxPrice: price, direction: isAbove ? 'above' : 'below', raw: input }
+    }
     return { action:'unknown', raw: input }
   }
 
@@ -63,8 +68,9 @@ Actions:
 - mint: user wants to create/generate/make an NFT. Extract the visual description as "prompt".
 - buy: user wants to purchase an NFT. Extract max price as "maxPrice" (number in SUI, default 2).
 - list: user wants to list/sell an NFT. Extract "price" (SUI) and "nftId" if mentioned (0x... address).
+- watch: user wants a price alert for SUI/USDC. Words like: alert, notify, watch, monitor, crosses, reaches, hits, above, below, drops, rises. Extract "threshold" (number, the price level) and "direction" ("above" if SUI rises/crosses/above, "below" if SUI drops/falls/below).
 
-Format: {"action":"mint","prompt":"..."} or {"action":"buy","maxPrice":2} or {"action":"list","price":3,"nftId":"0x...or empty"}`
+Format: {"action":"mint","prompt":"..."} or {"action":"buy","maxPrice":2} or {"action":"list","price":3,"nftId":""} or {"action":"watch","threshold":0.9,"direction":"above"}`
           },
           { role: 'user', content: input }
         ]
@@ -333,17 +339,20 @@ export function useAgentCommands(
 
       // ── WATCH: monitor DeepBook price and notify ─────────────────────────────
       } else if (cmd.action === 'watch') {
-        const threshold = cmd.maxPrice ?? 1
-        upd({ status:'executing', message:`Setting up price monitor. Will alert when SUI drops below $${threshold}...` })
+        const threshold = cmd.threshold ?? cmd.maxPrice ?? 1
+        const direction = cmd.direction ?? 'below'
+        const dirLabel  = direction === 'above' ? `rises above $${threshold}` : `drops below $${threshold}`
+
+        upd({ status:'executing', message:`Setting up price monitor. Agent will alert when SUI/USDC ${dirLabel}...` })
 
         // Log this price alert to Walrus via activity log
         await logAction?.({
           id: Date.now().toString(), ts: new Date().toISOString(),
-          type: 'watch', nftName: `Price alert: SUI below $${threshold}`,
+          type: 'watch', nftName: `Price alert: SUI ${dirLabel}`,
           costSui: 0, txDigest: '', status: 'success',
         })
 
-        // Poll price every 60s for 24h
+        // Poll DeepBook price every 60s for 24h
         let checks = 0
         const maxChecks = 60 * 24
         const poll = setInterval(async () => {
@@ -353,22 +362,23 @@ export function useAgentCommands(
             const r = await fetch('/api/deepbook-price', { signal: AbortSignal.timeout(5000) })
             const d = await r.json()
             const price = Number(d.price)
-            if (price > 0 && price <= threshold) {
+            const triggered = direction === 'above' ? price >= threshold : price <= threshold
+            if (price > 0 && triggered) {
               clearInterval(poll)
-              upd({ status:'done', message:`Price alert triggered! SUI is now $${price.toFixed(4)}, below your $${threshold} threshold. Check agent commands to act.` })
+              upd({ status:'done', message:`Alert triggered! SUI is now $${price.toFixed(4)}, which ${direction === 'above' ? 'crossed above' : 'dropped below'} your $${threshold} threshold. Check agent commands to act.` })
               await logAction?.({
                 id: Date.now().toString(), ts: new Date().toISOString(),
-                type: 'watch', nftName: `Price hit $${price.toFixed(4)} (alert: $${threshold})`,
+                type: 'watch', nftName: `SUI hit $${price.toFixed(4)} (alert: ${dirLabel})`,
                 costSui: 0, txDigest: '', status: 'success',
               })
             }
           } catch { /* ignore polling errors */ }
         }, 60_000)
 
-        upd({ status:'done', message:`Price monitor active. Agent will alert when SUI/USDC drops below $${threshold}. Polling every 60 seconds via DeepBook.` })
+        upd({ status:'done', message:`Price monitor active via DeepBook. Checking every 60 seconds. Will alert when SUI/USDC ${dirLabel}.` })
 
       } else {
-        throw new Error(`Could not understand: "${input}". Try: "mint a sunset NFT", "buy cheapest under 2 SUI", "list NFT 0x... at 3 SUI", or "alert me when SUI drops below $0.50"`)
+        throw new Error(`Could not understand: "${input}". Try: "mint a sunset NFT", "buy cheapest under 2 SUI", "alert me when SUI crosses $0.90", or "list NFT 0x... at 3 SUI"`)
       }
 
     } catch (e: any) {
