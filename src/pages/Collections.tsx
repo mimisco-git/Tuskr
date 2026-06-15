@@ -4,17 +4,17 @@ import { fetchSuiCollections, type TPCollection } from '../hooks/useTradeport'
 import NFTImage from '../components/NFTImage'
 import s from './Collections.module.css'
 import usePageTitle from '../hooks/usePageTitle'
+import { useDeepBookPrice } from '../hooks/useDeepBookPrice'
 
-const SUI_USD = 3.8 // approximate — replace with live feed later
 
 function fmt(n: number | null, decimals = 2) {
   if (n == null) return '—'
   return n.toLocaleString('en-US', { maximumFractionDigits: decimals })
 }
 
-function fmtUSD(sui: number | null) {
+function fmtUSD(sui: number | null, suiPrice: number) {
   if (sui == null) return '—'
-  const usd = sui * SUI_USD
+  const usd = sui * suiPrice
   if (usd >= 1_000_000) return `$${(usd / 1_000_000).toFixed(2)}M`
   if (usd >= 1_000)     return `$${(usd / 1_000).toFixed(1)}K`
   return `$${usd.toFixed(0)}`
@@ -26,6 +26,7 @@ type SortKey = 'volume' | 'floor' | 'supply'
 
 export default function Collections() {
   usePageTitle('NFT Collections')
+  const { price: suiUSD } = useDeepBookPrice()
 
   const [cols,    setCols]    = useState<TPCollection[]>([])
   const [loading, setLoading] = useState(true)
@@ -191,7 +192,7 @@ export default function Collections() {
                     <td className={s.tdNum}><span className={s.dim}>{col.supply?.toLocaleString() ?? '—'}</span></td>
                     <td className={s.tdNum}><span className={s.dim}>—</span></td>
                     <td className={s.tdNum}>
-                      <span className={s.mcap}>{fmtUSD(col.floor && col.supply ? col.floor * col.supply : null)}</span>
+                      <span className={s.mcap}>{fmtUSD(col.floor && col.supply ? col.floor * col.supply : null, suiUSD || 0)}</span>
                     </td>
                   </tr>
                 ))}

@@ -65,15 +65,19 @@ export function useWalrusProvenance(nftId: string | undefined) {
     setLoading(false)
   }, [nftId])
 
-  const append = useCallback(async (entry: ProvenanceEntry) => {
-    if (!nftId) return
-    const existing = blobId ? (await fetchBlob(blobId) ?? []) : []
+  const append = useCallback(async (entry: ProvenanceEntry, overrideId?: string) => {
+    const effectiveId = overrideId || nftId
+    if (!effectiveId) return
+    const storedBlobId = overrideId ? localStorage.getItem(KEY(overrideId)) : blobId
+    const existing = storedBlobId ? (await fetchBlob(storedBlobId) ?? []) : []
     const updated  = [...existing, entry]
     const newId    = await pushBlob(updated)
     if (newId) {
-      localStorage.setItem(KEY(nftId), newId)
-      setBlobId(newId)
-      setTrail(updated)
+      localStorage.setItem(KEY(effectiveId), newId)
+      if (!overrideId) {
+        setBlobId(newId)
+        setTrail(updated)
+      }
     }
   }, [nftId, blobId])
 
