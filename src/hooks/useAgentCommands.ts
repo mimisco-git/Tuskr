@@ -37,21 +37,40 @@ export interface CommandResult {
   txDigest?: string
 }
 
-// ── Step 1: parse user input with Groq ──────────────────────────────────────
-async function parseCommand(input: string): Promise<ParsedCommand> {
-  if (!GROQ_KEY) {
-    // Fallback: simple keyword matching
-    const lower = input.toLowerCase()
-    if (lower.includes('mint'))  return { action:'mint',  prompt: input.replace(/mint/i,'').trim(), raw: input }
-    if (lower.includes('buy'))   return { action:'buy',   maxPrice: parseFloat(lower.match(/[\d.]+/)?.[0]||'2'), raw: input }
-    if (lower.includes('list'))  return { action:'list',  price: parseFloat(lower.match(/[\d.]+/)?.[0]||'2'), raw: input }
-    if (lower.includes('watch') || lower.includes('alert') || lower.includes('monitor') || lower.includes('notify') || lower.includes('crosses') || lower.includes('reaches') || lower.includes('hits')) {
-      const price = parseFloat(lower.match(/[\d.]+/)?.[0] || '1')
-      const isAbove = lower.includes('above') || lower.includes('rises') || lower.includes('crosses') || lower.includes('reaches') || lower.includes('hits') || (!lower.includes('below') && !lower.includes('drops') && !lower.includes('falls'))
-      return { action:'watch', threshold: price, maxPrice: price, direction: isAbove ? 'above' : 'below', raw: input }
-    }
-    return { action:'unknown', raw: input }
+// ── Keyword fallback — always runs if Groq fails or returns unknown ──────────
+function keywordParse(input: string): ParsedCommand {
+  const lower = input.toLowerCase()
+  const nums  = lower.match(/[\d.]+/g) || []
+  const firstNum = parseFloat(nums[0] || '1')
+
+  if (lower.includes('mint') || lower.includes('generate') || lower.includes('create') || lower.includes('make'))
+    return { action:'mint', prompt: input.replace(/^(mint|generate|create|make)\s+/i,'').trim() || input, raw: input }
+
+  if (lower.includes('buy') || lower.includes('purchase'))
+    return { action:'buy', maxPrice: firstNum, raw: input }
+
+  if (lower.includes('list') || lower.includes('sell'))
+    return { action:'list', price: firstNum, raw: input }
+
+  if (lower.includes('watch') || lower.includes('alert') || lower.includes('notify') || lower.includes('monitor')
+      || lower.includes('crosses') || lower.includes('reaches') || lower.includes('hits')
+      || lower.includes('drops') || lower.includes('rises') || lower.includes('price')) {
+    const isAbove = lower.includes('above') || lower.includes('rises') || lower.includes('crosses')
+      || lower.includes('reaches') || lower.includes('hits')
+      || (!lower.includes('below') && !lower.includes('drops') && !lower.includes('falls'))
+    return { action:'watch', threshold: firstNum, maxPrice: firstNum, direction: isAbove ? 'above' : 'below', raw: input }
   }
+
+  return { action:'unknown', raw: input }
+}
+
+// ── Step 1: parse user input — Groq first, keyword fallback always ready ──────
+async function parseCommand(input: string): Promise<ParsedCommand> {
+  // Always compute keyword result as backup
+  const keyword = keywordParse(input)
+
+  // If no Groq key, keyword is the only parser
+  if (!GROQ_KEY) return keyword
 
   try {
     const res  = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -79,11 +98,17 @@ Format: {"action":"mint","prompt":"..."} or {"action":"buy","maxPrice":2} or {"a
     const d    = await res.json()
     const text = d.choices?.[0]?.message?.content ?? ''
     const parsed = JSON.parse(text.replace(/```json|```/g,'').trim())
+    // If Groq says unknown, try keyword fallback before giving up
+    if (!parsed.action || parsed.action === 'unknown') return keyword
     return { ...parsed, raw: input }
   } catch {
-    return { action:'unknown', raw: input }
+    // Groq failed — use keyword matching instead of returning unknown
+    return keyword
   }
 }
+
+// If Groq returned unknown action, fall through to keyword matching
+// (handled below in the try block — we add this check there)
 
 // ── Canvas fallback: generates a unique gradient art image client-side ─────
 function makeCanvasBlob(name: string): Promise<Blob> {
