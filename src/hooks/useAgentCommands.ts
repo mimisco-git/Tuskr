@@ -35,6 +35,8 @@ export interface CommandResult {
   status:   'parsing' | 'generating' | 'uploading' | 'executing' | 'done' | 'failed'
   message:  string
   txDigest?: string
+  mediaUrl?: string    // image preview after mint
+  nftName?:  string    // NFT name after mint
 }
 
 // ── Keyword fallback — always runs if Groq fails or returns unknown ──────────
@@ -365,7 +367,7 @@ export function useAgentCommands(
         upd({ status:'executing', message:'Agent signing mint transaction. No wallet popup...' })
         const res = await executeAutonomously(tx, GAS, { type:'mint', nftName: data!.name })
         if (res) {
-          upd({ status:'done', message:`"${data!.name}" minted! Image on Walrus. NFT is in agent wallet. Go to Suiscan to see it.`, txDigest: res.digest })
+          upd({ status:'done', message:`"${data!.name}" minted and stored on Walrus!`, txDigest: res.digest, mediaUrl: data!.mediaUrl, nftName: data!.name })
         } else {
           throw new Error('Mint failed. Fund the agent address with testnet SUI first.')
         }

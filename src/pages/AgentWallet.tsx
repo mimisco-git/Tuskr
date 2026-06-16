@@ -14,7 +14,7 @@ export default function AgentWallet() {
   const {
     agentAddr, derived, deriving, policy, log, saving,
     remainingBudget, budgetPct, isExpired, logBlobId,
-    deriveKeypair, activatePolicy, revoke, executeAutonomously,
+    deriveKeypair, activatePolicy, revoke, executeAutonomously, logAction,
   } = useAgentWallet(account?.address)
 
   const [maxSpend,  setMaxSpend]  = useState('0.5')
@@ -99,7 +99,7 @@ const handleActivate = () => {
   }
 
   const { runCommand, result: cmdResult, running: cmdRunning } =
-    useAgentCommands(agentAddr, policy, executeAutonomously)
+    useAgentCommands(agentAddr, policy, executeAutonomously, logAction)
 
   const statusColor = policy.revoked ? '#f87171' : isExpired ? '#f59e0b' : policy.active ? '#00d4aa' : 'rgba(245,245,247,0.3)'
   const statusLabel = policy.revoked ? 'Revoked' : isExpired ? 'Expired' : policy.active ? 'Active' : 'Inactive'
@@ -313,7 +313,7 @@ const handleActivate = () => {
               {[
                 'mint a cyberpunk elephant NFT',
                 'buy cheapest NFT under 2 SUI',
-                'mint a glowing ocean sunset',
+                'alert me when SUI drops below $0.50',
               ].map(ex => (
                 <button key={ex} onClick={() => setCmdInput(ex)} style={{
                   padding:'5px 12px', borderRadius:20, fontSize:11, cursor:'pointer',
@@ -380,6 +380,40 @@ const handleActivate = () => {
                     style={{ display:'block', marginTop:8, fontSize:11, color:'#6366f1', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
                     Tx on Suiscan: {cmdResult.txDigest.slice(0,24)}...
                   </a>
+                )}
+
+                {/* NFT image preview after successful mint */}
+                {cmdResult.status === 'done' && cmdResult.mediaUrl && (
+                  <div style={{ marginTop:14 }}>
+                    <div style={{ fontSize:10, color:'rgba(245,245,247,0.35)', fontFamily:'Space Mono,monospace', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:8 }}>
+                      Minted NFT · Stored on Walrus
+                    </div>
+                    <div style={{ display:'flex', gap:12, alignItems:'flex-start' }}>
+                      <img
+                        src={`/api/img?url=${encodeURIComponent(cmdResult.mediaUrl)}`}
+                        alt={cmdResult.nftName || 'Minted NFT'}
+                        style={{
+                          width:96, height:96, borderRadius:10, objectFit:'cover',
+                          border:'1px solid rgba(0,212,170,0.25)',
+                          background:'rgba(0,0,0,0.4)',
+                          flexShrink:0,
+                        }}
+                        onError={e => { (e.target as HTMLImageElement).src = cmdResult.mediaUrl! }}
+                      />
+                      <div>
+                        <div style={{ fontSize:14, fontWeight:700, color:'#fff', marginBottom:4 }}>
+                          {cmdResult.nftName}
+                        </div>
+                        <div style={{ fontSize:11, color:'rgba(245,245,247,0.4)', fontFamily:'Space Mono,monospace', wordBreak:'break-all' }}>
+                          {cmdResult.mediaUrl.slice(0,50)}...
+                        </div>
+                        <a href={cmdResult.mediaUrl} target="_blank" rel="noopener noreferrer"
+                          style={{ display:'inline-block', marginTop:6, fontSize:11, color:'#00d4aa', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
+                          View on Walrus ↗
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
