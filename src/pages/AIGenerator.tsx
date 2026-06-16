@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useWalrus } from '../hooks/useWalrus'
+import { useWalrusProvenance } from '../hooks/useWalrusProvenance'
 import { useAgentMemory } from '../hooks/useAgentMemory'
 import { useAIGenerator } from '../hooks/useAIGenerator'
 import { useNFTMarketplace } from '../hooks/useNFTMarketplace'
-import { useCurrentAccount } from '@mysten/dapp-kit'
+import { useCurrentAccount, useSuiClient } from '@mysten/dapp-kit'
 import { useToast } from '../components/Toast'
 import { Link } from 'react-router-dom'
 import { useNetwork } from '../hooks/useNetwork'
@@ -33,6 +34,8 @@ export default function AIGenerator() {
   const { toast, success, error: toastError } = useToast()
   const { uploadBlob, uploading } = useWalrus()
   const { mintNFT } = useNFTMarketplace()
+  const client = useSuiClient()
+  const { append: appendProv } = useWalrusProvenance(undefined)
   const { generateNFTConcept, generating } = useAIGenerator()
   const { memory, loading: memLoading, saving: memSaving, blobId: memBlobId, recordMint, suggestions, topStyle, isFirstVisit } = useAgentMemory(account?.address)
 
@@ -97,6 +100,25 @@ export default function AIGenerator() {
       })
       setTxDigest(result.digest)
       success('NFT minted successfully!')
+      // Write provenance trail to Walrus with real NFT object ID
+      try {
+        let nftId = result.digest
+        const txBlock = await client.getTransactionBlock({
+          digest: result.digest,
+          options: { showObjectChanges: true }
+        })
+        const created = (txBlock.objectChanges ?? []).find(
+          (c: any) => c.type === 'created' && (c.objectType ?? '').includes('TuskrNFT')
+        ) as any
+        if (created?.objectId) nftId = created.objectId
+        await appendProv({
+          event:    'mint',
+          from:     '0x0000000000000000000000000000000000000000000000000000000000000000',
+          to:       account?.address || '',
+          txDigest: result.digest,
+          ts:       new Date().toISOString(),
+        }, nftId)
+      } catch { /* provenance best-effort */ }
       // Write to agent memory on Walrus
       await recordMint({
         name:   concept?.name || 'Tuskr NFT',

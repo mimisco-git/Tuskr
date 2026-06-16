@@ -6,7 +6,7 @@ function rawRequest(url, method, headers, body) {
     const parsed = new URL(url)
     const lib    = parsed.protocol === 'https:' ? https : http
     const req    = lib.request(
-      { hostname: parsed.hostname, path: parsed.pathname + parsed.search, method, headers, timeout: 30000 },
+      { hostname: parsed.hostname, path: parsed.pathname + parsed.search, method, headers, timeout: 20000 },
       res => {
         const chunks = []
         res.on('data', c => chunks.push(c))

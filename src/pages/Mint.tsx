@@ -110,16 +110,29 @@ export default function Mint() {
       await new Promise(res => setTimeout(res, 700))
 
       setTxDigest(r.digest)
-      // Write mint provenance to Walrus
+      // Write mint provenance to Walrus — use real NFT object ID from tx effects
       try {
-        const nftId = (r as any).effects?.created?.[0]?.reference?.objectId || r.digest
+        let nftId = r.digest // safe fallback — tx digest
+        try {
+          const txBlock = await client.getTransactionBlock({
+            digest: r.digest,
+            options: { showEffects: false, showObjectChanges: true }
+          })
+          const created = (txBlock.objectChanges ?? []).find(
+            (c: any) => c.type === 'created' && (c.objectType ?? '').includes('TuskrNFT')
+          ) as any
+          if (created?.objectId) {
+            nftId = created.objectId
+            setMintedNftId(nftId) // also update state so detail page can use it
+          }
+        } catch { /* fall back to digest */ }
         await appendProv({
           event:    'mint',
           from:     '0x0000000000000000000000000000000000000000000000000000000000000000',
           to:       account?.address || '',
           txDigest: r.digest,
           ts:       new Date().toISOString(),
-        }, nftId)  // pass nftId directly — state update is async
+        }, nftId)
       } catch { /* provenance is best-effort */ }
       setStep('done')
       setMintPhase('idle')
@@ -651,30 +664,7 @@ export default function Mint() {
           </div>
           )
         })()}
-        {/* Step: Minting */}
-        {step === 'minting' && (
-          <div className={s.card}>
-            <div className={s.statusBox}>
-              <div className={s.spinnerLarge}/>
-              <h2 className={s.statusTitle}>Confirm in your wallet</h2>
-              <p className={s.statusSub}>
-                Your wallet extension will open with a transaction to sign.
-                <br/>This mints your NFT on Sui.
-              </p>
-              <div className={s.statusSteps}>
-                <div className={s.statusStep}>
-                  <span className={s.statusCheck}>✓</span> File uploaded to Walrus
-                </div>
-                <div className={`${s.statusStep} ${s.statusStepActive}`}>
-                  <span className={s.statusSpinnerSmall}/> Awaiting wallet signature
-                </div>
-                <div className={`${s.statusStep} ${s.statusStepPending}`}>
-                  <span className={s.statusPendingDot}/> NFT minted on Sui
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Minting phase — handled inside guardian step via mintPhase state */}
 
         {/* Step: Done */}
         {step === 'done' && (
