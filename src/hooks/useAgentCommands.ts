@@ -246,32 +246,28 @@ async function generateConceptAndImage(
       }).then(r=>r.json()).catch(()=>null)
     : Promise.resolve(null)
 
-  // 2. Try Pollinations.ai for real AI image — 3 models, 90s timeout, content-type check
-  onStatus(`Generating AI image for "${prompt}" via Pollinations.ai...`)
+  // 2. Generate AI image via our own API proxy (avoids browser CORS on Pollinations)
+  onStatus(`Generating AI image for "${imagePrompt || prompt}" via Pollinations.ai...`)
   const seed = Math.floor(Math.random() * 999999)
-  const encoded = encodeURIComponent(`${imagePrompt || prompt}, NFT digital art, vibrant, ultra detailed, 4k`)
   const models = ['turbo', 'flux', 'flux-realism']
 
   let imgBlob: Blob | null = null
   for (const model of models) {
     if (imgBlob) break
     try {
-      const polUrl = `https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${seed}&model=${model}`
-      const controller = new AbortController()
-      const timer = setTimeout(() => controller.abort(), 90000)
-      const r = await fetch(polUrl, { signal: controller.signal })
-      clearTimeout(timer)
+      const apiUrl = `/api/generate-image?prompt=${encodeURIComponent(imagePrompt || prompt)}&model=${model}&seed=${seed}&width=512&height=512`
+      const r = await fetch(apiUrl, { signal: AbortSignal.timeout(95_000) })
       const ct = r.headers.get('content-type') || ''
       if (r.ok && ct.startsWith('image/')) {
         const blob = await r.blob()
-        if (blob.size > 5000) {         // real image, not an error page
+        if (blob.size > 5000) {
           imgBlob = blob
           onStatus('AI image ready. Uploading to Walrus...')
         }
       }
     } catch {
-      if (model === models[models.length-1]) {
-        onStatus('Pollinations.ai unavailable. Using procedural artwork...')
+      if (model === models[models.length - 1]) {
+        onStatus('Image generation unavailable. Using procedural artwork...')
       }
     }
   }
