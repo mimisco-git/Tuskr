@@ -40,10 +40,10 @@
   color: rgba(0, 229, 204, 0.45);
   letter-spacing: 0.1em;
 }
-.cornerTL { top: 16px; left: 20px; }
-.cornerTR { top: 16px; right: 20px; }
-.cornerBL { bottom: 16px; left: 20px; }
-.cornerBR { bottom: 16px; right: 20px; }
+.cornerTL { top: 16px; left: 20px }
+.cornerTR { top: 16px; right: 20px }
+.cornerBL { bottom: 16px; left: 20px }
+.cornerBR { bottom: 16px; right: 20px }
 
 /* ── Scene 0: Press any key ── */
 .centerContent {
@@ -123,8 +123,8 @@
   opacity: 0.85;
 }
 
-.termOK { color: #00ff88; opacity: 1; }
-.termReady { color: #ffffff; font-weight: bold; opacity: 1; }
+.termOK { color: #00ff88; opacity: 1 }
+.termReady { color: #ffffff; font-weight: bold; opacity: 1 }
 .termSelect {
   color: #e8d5a3;
   font-weight: bold;
@@ -141,7 +141,7 @@
 }
 
 @keyframes blink {
-  50% { opacity: 0; }
+  50% { opacity: 0 }
 }
 
 /* ── Scene 4: Wallet selector ── */
@@ -155,7 +155,7 @@
   z-index: 5;
 }
 
-.walletHeader { text-align: center; }
+.walletHeader { text-align: center }
 
 .walletTitle {
   font-family: 'Courier New', monospace;
@@ -302,9 +302,9 @@
 
 /* ── Mobile ── */
 @media (max-width: 480px) {
-  .terminal { padding: 24px 20px; }
-  .walletWrap { padding: 24px 16px; gap: 18px; }
-  .cornerTL, .cornerBL { left: 12px; }
-  .cornerTR, .cornerBR { right: 12px; }
-  .ascii { font-size: 8px; }
+  .terminal { padding: 24px 20px }
+  .walletWrap { padding: 24px 16px; gap: 18px }
+  .cornerTL, .cornerBL { left: 12px }
+  .cornerTR, .cornerBR { right: 12px }
+  .ascii { font-size: 8px }
 }

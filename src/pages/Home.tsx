@@ -255,7 +255,7 @@ export default function Home() {
   const heroRef     = useRef<HTMLElement>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
   const { floorSui, floorUsd, totalVolumeSui } = useFloorPrice()
-  const { price: suiPrice }                    = useDeepBookPrice()
+  const { price: suiPrice, history: priceHistory } = useDeepBookPrice()
   const client   = useSuiClient()
   const feat     = FEATURES[activeFeat]
   const allPart  = [...PARTNERS, ...PARTNERS]
@@ -316,6 +316,18 @@ export default function Home() {
   }, [])
 
   // Cursor glow: update CSS variables on mouse move over hero
+  // Stats grid responsive columns with proper cleanup
+  useEffect(() => {
+    const applyGrid = () => {
+      const el = document.querySelector('[data-stats-grid]') as HTMLElement | null
+      if (!el) return
+      el.style.gridTemplateColumns = window.innerWidth >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
+    }
+    applyGrid()
+    window.addEventListener('resize', applyGrid)
+    return () => window.removeEventListener('resize', applyGrid)
+  }, [])
+
   const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%'
@@ -460,12 +472,30 @@ export default function Home() {
                 { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                        label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
                 { icon: '🛍️', value: String(liveStats.listed || '0'),                           label: 'Active Listings'     },
                 { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—', label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook'  },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook', sparkline: priceHistory  },
               ].map((stat) => (
                 <div key={stat.label} className={s.statCarouselCard}>
                   <span className={s.statCarouselIcon}>{stat.icon}</span>
                   <span className={s.statCarouselValue}>{stat.value}</span>
                   <span className={s.statCarouselLabel}>{stat.label}</span>
+                  {(stat as any).sparkline?.length > 2 && (() => {
+                    const pts = (stat as any).sparkline as { t: number; p: number }[]
+                    const mn = Math.min(...pts.map((p: any) => p.p))
+                    const mx = Math.max(...pts.map((p: any) => p.p))
+                    const rng = mx - mn || 0.001
+                    const w = 60, h = 16
+                    const path = pts.map((p: any, i: number) => {
+                      const x = (i / (pts.length - 1)) * w
+                      const y = h - ((p.p - mn) / rng) * h
+                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+                    }).join(' ')
+                    const rising = pts[pts.length-1].p >= pts[0].p
+                    return (
+                      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ marginTop:2 }}>
+                        <path d={path} fill="none" stroke={rising ? '#00d4aa' : '#f87171'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.8}/>
+                      </svg>
+                    )
+                  })()}
                 </div>
               ))}
             </div>
@@ -491,6 +521,7 @@ export default function Home() {
             {/* DESKTOP: 6-col grid */}
             <div
               className={s.statsGrid}
+              data-stats-grid=""
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3,1fr)',
@@ -504,13 +535,9 @@ export default function Home() {
               }}
               ref={el => {
                 if (!el) return
-                const applyGrid = () => {
-                  const w = window.innerWidth
-                  if (w >= 640) el.style.gridTemplateColumns = 'repeat(6,1fr)'
-                  else el.style.gridTemplateColumns = 'repeat(3,1fr)'
-                }
-                applyGrid()
-                window.addEventListener('resize', applyGrid)
+                // Apply once on mount (cleanup handled by the resize useEffect below)
+                const w = window.innerWidth
+                el.style.gridTemplateColumns = w >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
               }}
             >
               {[
@@ -519,7 +546,7 @@ export default function Home() {
                 { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                           label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
                 { icon: '🛍️', value: String(liveStats.listed || '0'),                              label: 'Active Listings'     },
                 { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—',    label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook' },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook', sparkline: priceHistory },
               ].map((stat, i) => (
                 <div key={stat.label} className={s.statCell} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -531,6 +558,24 @@ export default function Home() {
                   <span className={s.statIcon} style={{ fontSize: 'clamp(12px,1.2vw,14px)', lineHeight: 1 }}>{stat.icon}</span>
                   <span className={s.statValue} style={{ fontSize: 'clamp(11px,1.1vw,13px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{stat.value}</span>
                   <span className={s.statLabel} style={{ fontSize: 'clamp(8px,0.7vw,10px)', fontWeight: 700, color: 'rgba(245,245,247,0.7)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign:'center', lineHeight: 1.2 }}>{stat.label}</span>
+                  {(stat as any).sparkline?.length > 2 && (() => {
+                    const pts = (stat as any).sparkline as { t: number; p: number }[]
+                    const mn = Math.min(...pts.map(p => p.p))
+                    const mx = Math.max(...pts.map(p => p.p))
+                    const rng = mx - mn || 0.001
+                    const w = 52, h = 18
+                    const path = pts.map((p, i) => {
+                      const x = (i / (pts.length - 1)) * w
+                      const y = h - ((p.p - mn) / rng) * h
+                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+                    }).join(' ')
+                    const rising = pts[pts.length-1].p >= pts[0].p
+                    return (
+                      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ marginTop:2 }}>
+                        <path d={path} fill="none" stroke={rising ? '#00d4aa' : '#f87171'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.8}/>
+                      </svg>
+                    )
+                  })()}
                 </div>
               ))}
             </div>
@@ -768,28 +813,31 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── GRADIENT BEHIND BOTTOM NAV DOCK (mobile only) ── */}
+      <div className={s.mobileNavGradient} aria-hidden/>
+
       {/* ── PREMIUM MOBILE BOTTOM NAV DOCK ── */}
       <nav className={s.mobileNav} aria-label="Mobile navigation">
-        <a href="/"           className={s.mobileNavItem}>
+        <Link to="/"           className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>⌂</span>
           Home
-        </a>
-        <a href="/marketplace" className={s.mobileNavItem}>
+        </Link>
+        <Link to="/marketplace" className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>◈</span>
           Market
-        </a>
-        <a href="/mint"        className={s.mobileNavItem}>
+        </Link>
+        <Link to="/mint"        className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>✦</span>
           Mint
-        </a>
-        <a href="/mint/ai"     className={s.mobileNavItem}>
+        </Link>
+        <Link to="/mint/ai"     className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>✧</span>
           AI
-        </a>
-        <a href="/profile"     className={s.mobileNavItem}>
+        </Link>
+        <Link to="/profile"     className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>◉</span>
           Profile
-        </a>
+        </Link>
       </nav>
 
     </main>

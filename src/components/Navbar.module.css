@@ -11,7 +11,7 @@
   background-size: 200%;
   animation: stripeMove 4s linear infinite;
 }
-@keyframes stripeMove { to { background-position: -200% 0; } }
+@keyframes stripeMove { to { background-position: -200% 0 } }
 
 /* Main bar */
 .bar {
@@ -61,7 +61,7 @@
   transform: translateX(-50%);
 }
 
-.navItem { position: relative; }
+.navItem { position: relative }
 
 .navBtn {
   display: flex;
@@ -101,8 +101,8 @@
   z-index: 200;
 }
 @keyframes dropIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  from { opacity: 0; transform: translateX(-50%) translateY(-6px) }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) }
 }
 .dropLink {
   display: flex;
@@ -117,8 +117,8 @@
   transition: background .12s, color .12s;
   white-space: nowrap;
 }
-.dropLink:hover { background: rgba(255,255,255,0.08); color: #fff; }
-.dropLink svg { opacity: 0.4; flex-shrink: 0; }
+.dropLink:hover { background: rgba(255,255,255,0.08); color: #fff }
+.dropLink svg { opacity: 0.4; flex-shrink: 0 }
 
 /* ─── DESKTOP RIGHT ─── */
 .desktopRight {
@@ -146,10 +146,10 @@
   transition: border-color .15s, color .15s;
   letter-spacing: 0.03em;
 }
-.netBadge:hover { border-color: rgba(255,255,255,0.30); color: #f5f5f7; }
-.netDot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.netMain .netDot { background: #00d4aa; box-shadow: 0 0 8px rgba(0,212,170,0.7); }
-.netTest .netDot { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.7); }
+.netBadge:hover { border-color: rgba(255,255,255,0.30); color: #f5f5f7 }
+.netDot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0 }
+.netMain .netDot { background: #00d4aa; box-shadow: 0 0 8px rgba(0,212,170,0.7) }
+.netTest .netDot { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.7) }
 
 /* Account pill */
 .pill {
@@ -164,8 +164,8 @@
   cursor: pointer;
   transition: border-color .15s;
 }
-.pill:hover { border-color: rgba(255,255,255,0.40); }
-.pillAva { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+.pill:hover { border-color: rgba(255,255,255,0.40) }
+.pillAva { width: 28px; height: 28px; border-radius: 50%; object-fit: cover }
 .pillIni {
   width: 28px; height: 28px; border-radius: 50%;
   background: linear-gradient(135deg, #00d4aa, #0099ff);
@@ -197,16 +197,16 @@
   display: flex; align-items: center; gap: 10px;
   padding: 10px 10px 12px;
 }
-.acctAva { width: 40px; height: 40px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+.acctAva { width: 40px; height: 40px; border-radius: 12px; object-fit: cover; flex-shrink: 0 }
 .acctIni {
   width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
   background: linear-gradient(135deg, #00d4aa, #0099ff);
   font-size: 15px; font-weight: 700; color: #000;
   display: flex; align-items: center; justify-content: center;
 }
-.acctName { font-size: 15px; font-weight: 600; color: #f5f5f7; }
-.acctEmail { font-size: 12px; color: rgba(245,245,247,0.4); margin-top: 1px; word-break: break-all; }
-.acctDivider { height: 1px; background: rgba(255,255,255,0.07); margin: 4px 0; }
+.acctName { font-size: 15px; font-weight: 600; color: #f5f5f7 }
+.acctEmail { font-size: 12px; color: rgba(245,245,247,0.4); margin-top: 1px; word-break: break-all }
+.acctDivider { height: 1px; background: rgba(255,255,255,0.07); margin: 4px 0 }
 
 .acctRow {
   display: flex; align-items: flex-start; gap: 9px;
@@ -220,10 +220,10 @@
   font-size: 10px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.08em; color: rgba(245,245,247,0.28); margin-bottom: 2px; display: block;
 }
-.acctRowVal { font-family: 'Space Mono', monospace; font-size: 12px; color: rgba(245,245,247,0.65); }
+.acctRowVal { font-family: 'Space Mono', monospace; font-size: 12px; color: rgba(245,245,247,0.65) }
 
-.acctConnectWrap { padding: 6px 10px; }
-.acctConnectWrap :global(button) { width: 100% !important; justify-content: center !important; }
+.acctConnectWrap { padding: 6px 10px }
+.acctConnectWrap :global(button) { width: 100% !important; justify-content: center !important }
 
 .acctLink {
   display: flex; align-items: center; gap: 7px;
@@ -231,7 +231,7 @@
   font-size: 13px; font-weight: 500; color: #00d4aa; text-decoration: none;
   transition: background .12s;
 }
-.acctLink:hover { background: rgba(0,212,170,0.08); }
+.acctLink:hover { background: rgba(0,212,170,0.08) }
 
 .acctAction {
   display: block; width: 100%; text-align: left;
@@ -240,12 +240,12 @@
   background: none; border: none; cursor: pointer; text-decoration: none;
   transition: background .12s, color .12s;
 }
-.acctAction:hover { background: rgba(255,255,255,0.07); color: #fff; }
-.acctActionRed { color: rgba(255,80,80,0.75); }
-.acctActionRed:hover { background: rgba(255,50,50,0.08); color: #ff6b6b; }
+.acctAction:hover { background: rgba(255,255,255,0.07); color: #fff }
+.acctActionRed { color: rgba(255,80,80,0.75) }
+.acctActionRed:hover { background: rgba(255,50,50,0.08); color: #ff6b6b }
 
 /* Auth row (not signed in) */
-.authRow { display: flex; align-items: center; gap: 8px; }
+.authRow { display: flex; align-items: center; gap: 8px }
 .signInBtn {
   display: flex; align-items: center; gap: 7px;
   padding: 7px 14px; border-radius: 999px;
@@ -253,7 +253,7 @@
   font-size: 14px; font-weight: 500; color: #f5f5f7;
   text-decoration: none; transition: border-color .15s;
 }
-.signInBtn:hover { border-color: rgba(255,255,255,0.50); }
+.signInBtn:hover { border-color: rgba(255,255,255,0.50) }
 
 /* ─── HAMBURGER ─── */
 .burger {
@@ -275,9 +275,9 @@
   border-radius: 2px;
   transition: transform .22s, opacity .22s;
 }
-.burgerOn span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.burgerOn span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-.burgerOn span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.burgerOn span:nth-child(1) { transform: translateY(7px) rotate(45deg) }
+.burgerOn span:nth-child(2) { opacity: 0; transform: scaleX(0) }
+.burgerOn span:nth-child(3) { transform: translateY(-7px) rotate(-45deg) }
 
 /* ═══════════════════════════════════════════════
    MOBILE DRAWER
@@ -320,16 +320,16 @@
   padding: 16px;
   margin-bottom: 14px;
 }
-.idRow { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
-.idAva { width: 46px; height: 46px; border-radius: 13px; object-fit: cover; }
+.idRow { display: flex; align-items: center; gap: 11px; margin-bottom: 10px }
+.idAva { width: 46px; height: 46px; border-radius: 13px; object-fit: cover }
 .idIni {
   width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
   background: linear-gradient(135deg, #00d4aa, #0099ff);
   font-size: 17px; font-weight: 700; color: #000;
   display: flex; align-items: center; justify-content: center;
 }
-.idName { font-size: 17px; font-weight: 600; color: #f5f5f7; }
-.idEmail { font-size: 12px; color: rgba(245,245,247,0.4); word-break: break-all; }
+.idName { font-size: 17px; font-weight: 600; color: #f5f5f7 }
+.idEmail { font-size: 12px; color: rgba(245,245,247,0.4); word-break: break-all }
 .idAddr {
   font-family: 'Space Mono', monospace; font-size: 11px;
   color: rgba(0,212,170,0.75);
@@ -339,7 +339,7 @@
   margin-bottom: 10px;
   word-break: break-all;
 }
-.idConnectWrap { margin-bottom: 10px; }
+.idConnectWrap { margin-bottom: 10px }
 .idConnectWrap :global(button) {
   width: 100% !important;
   justify-content: center !important;
@@ -353,7 +353,7 @@
   background: rgba(0,212,170,0.07); border: 1px solid rgba(0,212,170,0.18);
   color: #00d4aa; font-size: 14px; font-weight: 500; text-decoration: none;
 }
-.idActions { display: flex; gap: 8px; flex-wrap: wrap; }
+.idActions { display: flex; gap: 8px; flex-wrap: wrap }
 .idBtn {
   flex: 1; min-width: 90px; padding: 10px 12px;
   border-radius: 10px; text-align: center;
@@ -361,9 +361,9 @@
   color: rgba(245,245,247,0.75); font-size: 14px; cursor: pointer; text-decoration: none;
   transition: background .15s;
 }
-.idBtn:hover { background: rgba(255,255,255,0.10); }
-.idBtnRed { color: rgba(255,85,85,0.8); }
-.idBtnRed:hover { background: rgba(255,50,50,0.09); color: #ff6b6b; }
+.idBtn:hover { background: rgba(255,255,255,0.10) }
+.idBtnRed { color: rgba(255,85,85,0.8) }
+.idBtnRed:hover { background: rgba(255,50,50,0.09); color: #ff6b6b }
 
 /* Auth card (not signed in) */
 .authCard {
@@ -373,7 +373,7 @@
   padding: 16px;
   margin-bottom: 14px;
 }
-.authCardTitle { font-size: 17px; font-weight: 700; color: #f5f5f7; margin-bottom: 12px; }
+.authCardTitle { font-size: 17px; font-weight: 700; color: #f5f5f7; margin-bottom: 12px }
 .authGoogleBtn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; padding: 12px; border-radius: 11px; margin-bottom: 10px;
@@ -381,7 +381,7 @@
   color: #f5f5f7; font-size: 15px; font-weight: 500; text-decoration: none;
   transition: background .15s;
 }
-.authGoogleBtn:hover { background: rgba(255,255,255,0.10); }
+.authGoogleBtn:hover { background: rgba(255,255,255,0.10) }
 .authWalletWrap :global(button) {
   width: 100% !important;
   justify-content: center !important;
@@ -391,7 +391,7 @@
 }
 
 /* Quick row */
-.quickRow { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.quickRow { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap }
 .quickBtn {
   flex: 1; min-width: 70px; padding: 12px 14px; text-align: center;
   border-radius: 11px; font-size: 14px; font-weight: 500; text-decoration: none;
@@ -404,7 +404,7 @@
 }
 
 /* Nav sections */
-.navSection { margin-bottom: 20px; }
+.navSection { margin-bottom: 20px }
 .navSectionTitle {
   font-size: 11px; font-weight: 700; text-transform: uppercase;
   letter-spacing: 0.12em; color: rgba(245,245,247,0.25);
@@ -418,8 +418,8 @@
   border-bottom: 1px solid rgba(255,255,255,0.04);
   transition: color .12s;
 }
-.navLink:hover { color: #fff; }
-.navLink span { font-size: 12px; color: rgba(245,245,247,0.3); }
+.navLink:hover { color: #fff }
+.navLink span { font-size: 12px; color: rgba(245,245,247,0.3) }
 
 /* ═══════════════════════════════════════════════
    RESPONSIVE BREAKPOINTS
@@ -427,23 +427,23 @@
 
 /* Mobile: hide desktop elements, show hamburger */
 @media (max-width: 768px) {
-  .desktopNav   { display: none !important; }
-  .desktopRight { display: none !important; }
-  .burger       { display: flex !important; }
-  .inner        { padding: 0 16px; }
+  .desktopNav   { display: none !important }
+  .desktopRight { display: none !important }
+  .burger       { display: flex !important }
+  .inner        { padding: 0 16px }
 }
 
 /* Desktop: show desktop elements, hide hamburger and drawer */
 @media (min-width: 769px) {
-  .burger   { display: none !important; }
-  .drawer   { display: none !important; }
-  .desktopNav   { display: flex !important; }
-  .desktopRight { display: flex !important; }
+  .burger   { display: none !important }
+  .drawer   { display: none !important }
+  .desktopNav   { display: flex !important }
+  .desktopRight { display: flex !important }
 }
 
 /* Mobile drawer nav links */
-.drawerNav { padding: 8px 0 4px; }
-.drawerGroup { margin-bottom: 20px; }
+.drawerNav { padding: 8px 0 4px }
+.drawerGroup { margin-bottom: 20px }
 .drawerGroupLabel {
   display: block;
   font-family: 'Space Mono', monospace;
@@ -461,4 +461,4 @@
   transition: color 0.15s, background 0.15s;
   border-radius: 8px; margin: 0 8px;
 }
-.drawerLink:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.drawerLink:hover { color: #fff; background: rgba(255,255,255,0.06) }

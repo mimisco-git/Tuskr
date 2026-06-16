@@ -10,7 +10,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import s from './CreatorDashboard.module.css'
 import usePageTitle from '../hooks/usePageTitle'
 
-const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID ?? '0xe2a80cf865bb40a9b4c7a63e2e82da841d8eb80455091947c394b13ae6d3dc56'
 
 interface SaleEvent { name: string; price: string; buyer: string; date: string; objectId: string }
 interface ChartPoint { date: string; volume: number; royalties: number }

@@ -46,8 +46,8 @@
 }
 
 @keyframes ticker {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }  /* moves one copy width */
+  0%   { transform: translateX(0) }
+  100% { transform: translateX(-50%) }  /* moves one copy width */
 }
 
 .item {
@@ -57,8 +57,8 @@
   padding: 0 20px;
 }
 
-.name  { font-size: 12px; font-weight: 600; color: #f5f5f7; }
-.type  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
-.price { font-size: 12px; font-weight: 700; color: #fff; }
-.sui   { font-size: 10px; color: rgba(245,245,247,0.35); font-weight: 400; }
-.sep   { font-size: 10px; color: rgba(245,245,247,0.15); }
+.name  { font-size: 12px; font-weight: 600; color: #f5f5f7 }
+.type  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em }
+.price { font-size: 12px; font-weight: 700; color: #fff }
+.sui   { font-size: 10px; color: rgba(245,245,247,0.35); font-weight: 400 }
+.sep   { font-size: 10px; color: rgba(245,245,247,0.15) }

@@ -20,7 +20,7 @@ export default function VerifyBlob() {
   // Use our proxy so browser gets correct Content-Type
   const imgSrc = `/api/img?url=${encodeURIComponent(rawUrl)}`
 
-  useEffect(() => { document.title = 'Verify on Walrus — Tuskr' }, [])
+  useEffect(() => { document.title = 'Verify on Walrus | Tuskr' }, [])
 
   return (
     <main className={s.page}>
