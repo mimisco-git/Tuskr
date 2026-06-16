@@ -108,39 +108,8 @@ export function useDeepBookSwap() {
     }
   }, [account, cfg, signAndExecute])
 
-  // Standalone DBUSDC -> SUI swap via DeepBook (proven working direction)
-  // Uses swap_exact_quote_for_base — same as marketplace Buy with USDC
-  const executeSwap = useCallback(async (
-    _fromToken: 'SUI' | 'DBUSDC',
-    amountIn:   number,
-  ) => {
-    if (!account) throw new Error('No wallet connected')
-    setSwapping(true)
-    try {
-      const tx = new Transaction()
-      tx.setSender(account.address)
-
-      // DBUSDC -> SUI via DeepBook pool::swap_exact_quote_for_base
-      const usdcMicro = BigInt(Math.floor(amountIn * 1_000_000))
-      tx.moveCall({
-        target: `${cfg.PKG}::pool::swap_exact_quote_for_base`,
-        typeArguments: [cfg.SUI_TYPE, cfg.USDC_TYPE, cfg.DEEP_TYPE],
-        arguments: [
-          tx.object(cfg.POOL),
-          tx.pure.u64(usdcMicro),  // exact DBUSDC in
-          tx.pure.u64(0),           // min SUI out (testnet: 0 slippage protection)
-          tx.object(CLOCK),
-        ],
-      })
-
-      return await signAndExecute({ transaction: tx as never })
-    } finally {
-      setSwapping(false)
-    }
-  }, [account, cfg, signAndExecute])
-
   return {
-    getQuote, swapAndBuy, executeSwap, quote, quoting, swapping,
+    getQuote, swapAndBuy, quote, quoting, swapping,
     coinLabel: cfg.COIN_LABEL,
     poolId:    cfg.POOL,
   }

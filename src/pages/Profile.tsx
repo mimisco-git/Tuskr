@@ -1,6 +1,3 @@
-import { useFloorPrice } from '../hooks/useFloorPrice'
-import { useDeepBookPrice } from '../hooks/useDeepBookPrice'
-import { useUserProfile } from '../hooks/useUserProfile'
 import { useEffect, useState, useCallback } from 'react'
 import { useCurrentAccount } from '@mysten/dapp-kit'
 import { Link } from 'react-router-dom'
@@ -40,7 +37,7 @@ function useGoogleUser(): GoogleUser | null {
       if (!address || !email) { setUser(null); return }
       let picture = '', name = email.split('@')[0]
       try { if (token) { const p = JSON.parse(atob(token.split('.')[1])); picture = p.picture||''; name = p.name||name } } catch {}
-      setUser({ email: email || 'Google Account', name: name || email?.split('@')[0] || 'Google User', picture, address })
+      setUser({ email, name, picture, address })
     }
     read()
     window.addEventListener('storage', read)
@@ -103,23 +100,14 @@ export default function Profile() {
   const account    = useCurrentAccount()
   const googleUser = useGoogleUser()
   const { fetchOwnedNFTs, fetchListedByUser, fetchSoldByUser } = useNFTMarketplace()
-  const { price: dbPrice }    = useDeepBookPrice()
-  const { floorSui }          = useFloorPrice()
   const [tab,     setTab]    = useState<Tab>('owned')
   const [owned,   setOwned]  = useState<ParsedNFT[]>([])
   const [listed,  setListed] = useState<any[]>([])
   const [sold,    setSold]   = useState<any[]>([])
   const [loading, setLoad]   = useState(true)
   const [copied,  setCopied] = useState(false)
-  const [editing,       setEditing]       = useState(false)
-  const [editName,      setEditName]      = useState('')
-  const [editBio,       setEditBio]       = useState('')
-  const [savedFeedback, setSavedFeedback] = useState(false)
-
 
   const effectiveAddr = account?.address ?? googleUser?.address ?? null
-  const { profile, saving: profileSaving, blobId: profileBlobId,
-          saveProfile, uploadAvatar, avatarUrl } = useUserProfile(effectiveAddr ?? undefined)
   const bothLinked    = !!(account && googleUser)
 
   const load = useCallback(async () => {
@@ -184,84 +172,16 @@ export default function Profile() {
 
         {/* ── PROFILE HEADER ── */}
         <div className={s.header}>
-          {/* Avatar — custom Walrus photo or Google photo */}
-          <div className={s.avatarWrap} style={{ position:'relative' }}>
-            {avatarUrl
-              ? <img src={avatarUrl} alt="Profile" className={s.avatar} style={{ objectFit:'cover' }}/>
-              : googleUser?.picture
-                ? <img src={googleUser.picture} alt={displayName} className={s.avatar}/>
-                : <div className={s.avatarFallback}>{initials}</div>
+          <div className={s.avatarWrap}>
+            {googleUser?.picture
+              ? <img src={googleUser.picture} alt={displayName} className={s.avatar}/>
+              : <div className={s.avatarFallback}>{initials}</div>
             }
             {bothLinked && <span className={s.linkedBadge} title="Google + Wallet linked">⬡</span>}
-            {/* Edit avatar overlay */}
-            <label style={{
-              position:'absolute', inset:0, borderRadius:'50%', cursor:'pointer',
-              background:'rgba(0,0,0,0)', display:'flex', alignItems:'center',
-              justifyContent:'center', opacity:0, transition:'opacity 0.2s',
-            }}
-              onMouseEnter={e=>(e.currentTarget.style.opacity='1')}
-              onMouseLeave={e=>(e.currentTarget.style.opacity='0')}
-            >
-              <span style={{ color:'#fff', fontSize:22, background:'rgba(0,0,0,0.6)', borderRadius:'50%', width:36, height:36, display:'flex', alignItems:'center', justifyContent:'center' }}>📷</span>
-              <input type="file" accept="image/*" style={{ display:'none' }} onChange={async e => {
-                const file = e.target.files?.[0]
-                if (!file) return
-                const bid = await uploadAvatar(file)
-                if (bid) await saveProfile({ avatarBlobId: bid })
-              }}/>
-            </label>
           </div>
 
           <div className={s.headerInfo}>
-            {/* Name + edit toggle */}
-            <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap', paddingRight:4 }}>
-              {editing ? (
-                <input
-                  value={editName} onChange={e => setEditName(e.target.value)}
-                  placeholder="Your username"
-                  style={{ fontSize:24, fontWeight:800, color:'#fff', background:'rgba(255,255,255,0.08)', border:'1px solid rgba(0,212,170,0.4)', borderRadius:8, padding:'4px 10px', outline:'none', maxWidth:240 }}
-                />
-              ) : (
-                <h1 className={s.name}>{profile?.username || displayName}</h1>
-              )}
-              <button
-                onClick={async () => {
-                  if (editing) {
-                    const ok = await saveProfile({ username: editName, bio: editBio })
-                    setEditing(false)
-                    if (ok !== false) {
-                      setSavedFeedback(true)
-                      setTimeout(() => setSavedFeedback(false), 2500)
-                    }
-                  } else {
-                    setEditName(profile?.username || '')
-                    setEditBio(profile?.bio || '')
-                    setEditing(true)
-                  }
-                }}
-                style={{ padding:'4px 12px', borderRadius:8, fontSize:12, fontWeight:600, border:`1px solid ${editing ? 'rgba(0,212,170,0.5)' : 'rgba(255,255,255,0.15)'}`, background: editing ? 'rgba(0,212,170,0.12)' : 'rgba(255,255,255,0.06)', color: editing ? '#00d4aa' : 'rgba(245,245,247,0.5)', cursor:'pointer' }}
-              >
-                {profileSaving ? 'Saving...' : savedFeedback ? '✓ Saved to Walrus' : editing ? '✓ Save' : '✏️ Edit'}
-              </button>
-            </div>
-            {/* Bio */}
-            {editing ? (
-              <textarea
-                value={editBio} onChange={e => setEditBio(e.target.value)}
-                placeholder="Short bio. Who are you as a creator?"
-                rows={2}
-                style={{ marginTop:6, width:'100%', maxWidth:380, fontSize:13, color:'rgba(245,245,247,0.7)', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'6px 10px', outline:'none', resize:'none', fontFamily:'inherit' }}
-              />
-            ) : profile?.bio ? (
-              <p style={{ fontSize:14, color:'rgba(245,245,247,0.5)', marginTop:4, maxWidth:380 }}>{profile.bio}</p>
-            ) : null}
-            {profileBlobId && !editing && (
-              <div style={{ marginTop:4 }}>
-                <a href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${profileBlobId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:'rgba(0,212,170,0.6)', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
-                  Profile stored on Walrus
-                </a>
-              </div>
-            )}
+            <h1 className={s.name}>{displayName}</h1>
 
             {/* Account rows */}
             <div className={s.accountList}>
@@ -271,7 +191,7 @@ export default function Profile() {
                   <span className={s.accountIcon}><GoogleSvg/></span>
                   <div className={s.accountDetail}>
                     <span className={s.accountType}>Google · zkLogin</span>
-                    <span className={s.accountVal}>{googleUser.email && googleUser.email !== 'undefined' ? googleUser.email : 'Google Account'}</span>
+                    <span className={s.accountVal}>{googleUser.email}</span>
                   </div>
                   <span className={s.connectedDot} title="Connected"/>
                 </div>
@@ -316,7 +236,7 @@ export default function Profile() {
                   <span className={s.suiAddrLabel}>zkLogin Sui Address</span>
                   <div className={s.suiAddrActions}>
                     <button className={s.addrBtn} onClick={()=>doCopy(googleUser.address)}>
-                      <span className={s.suiAddrVal}>{googleUser.address ? shortAddr(googleUser.address) : 'Pending first transaction'}</span>
+                      <span className={s.suiAddrVal}>{shortAddr(googleUser.address)}</span>
                       <span className={s.copyHint}>{copied ? '✓ Copied' : 'Copy'}</span>
                     </button>
                     <a
@@ -329,7 +249,7 @@ export default function Profile() {
                     </a>
                   </div>
                   <p className={s.suiAddrNote}>
-                    Appears on Suiscan after your first transaction.
+                    This address appears on Suiscan after your first transaction (e.g., minting an NFT).
                   </p>
                 </div>
               )}
@@ -356,38 +276,6 @@ export default function Profile() {
             </div>
           ))}
         </div>
-
-        {/* ── PORTFOLIO USD VALUE (always shown when wallet connected) ── */}
-        {account && (
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '16px 18px', margin: '12px 0',
-            background: 'rgba(0,212,170,0.05)',
-            border: '1px solid rgba(0,212,170,0.18)',
-            borderRadius: 14,
-          }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#00d4aa', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Portfolio Value via DeepBook
-              </div>
-              <div style={{ fontSize: 11, color: 'rgba(245,245,247,0.35)', marginTop: 3 }}>
-                {owned.length} NFT{owned.length !== 1 ? 's' : ''} at floor{floorSui ? ` · ${(owned.length * floorSui).toFixed(3)} SUI` : ''} · live rate
-              </div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 24, fontWeight: 800, color: '#00d4aa', letterSpacing: '-0.03em' }}>
-                {dbPrice && floorSui && owned.length > 0
-                  ? `$${(owned.length * floorSui * dbPrice).toFixed(2)}`
-                  : dbPrice && owned.length > 0
-                    ? `${owned.length} NFT${owned.length !== 1 ? 's' : ''}`
-                    : '$0.00'}
-              </div>
-              <div style={{ fontSize: 10, color: 'rgba(245,245,247,0.3)', fontFamily: 'Space Mono,monospace', marginTop: 2 }}>
-                {dbPrice ? `1 SUI = $${dbPrice.toFixed(3)}` : 'Loading rate...'}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ── TABS ── */}
         <div className={s.tabBar}>

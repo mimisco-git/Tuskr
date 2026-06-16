@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSuiClient } from '@mysten/dapp-kit'
@@ -251,11 +251,8 @@ export default function Home() {
   const [featured,   setFeatured]   = useState<NFT[]>([])
   const [counter,    setCounter]    = useState({ nfts: 0, vol: 0, creators: 0 })
   const [liveStats,  setLiveStats]  = useState({ minted: 0, listed: 0, walrusMB: 0 })
-  const [activeDot,  setActiveDot]  = useState(0)
-  const heroRef     = useRef<HTMLElement>(null)
-  const carouselRef = useRef<HTMLDivElement>(null)
   const { floorSui, floorUsd, totalVolumeSui } = useFloorPrice()
-  const { price: suiPrice, history: priceHistory } = useDeepBookPrice()
+  const { price: suiPrice }                    = useDeepBookPrice()
   const client   = useSuiClient()
   const feat     = FEATURES[activeFeat]
   const allPart  = [...PARTNERS, ...PARTNERS]
@@ -315,48 +312,11 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [])
 
-  // Cursor glow: update CSS variables on mouse move over hero
-  // Stats grid responsive columns with proper cleanup
-  useEffect(() => {
-    const applyGrid = () => {
-      const el = document.querySelector('[data-stats-grid]') as HTMLElement | null
-      if (!el) return
-      el.style.gridTemplateColumns = window.innerWidth >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
-    }
-    applyGrid()
-    window.addEventListener('resize', applyGrid)
-    return () => window.removeEventListener('resize', applyGrid)
-  }, [])
-
-  const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%'
-    const y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(1) + '%'
-    heroRef.current?.style.setProperty('--mouse-x', x)
-    heroRef.current?.style.setProperty('--mouse-y', y)
-  }, [])
-
-  // Carousel scroll: update active dot
-  const handleCarouselScroll = useCallback(() => {
-    const el = carouselRef.current
-    if (!el) return
-    const cardWidth = el.scrollWidth / 6
-    const dot = Math.round(el.scrollLeft / cardWidth)
-    setActiveDot(Math.min(dot, 5))
-  }, [])
-
   return (
     <main style={{ background: '#000', overflow: 'hidden' }}>
 
       {/* ════ HERO ════ */}
-      <section
-        className={s.hero}
-        ref={heroRef}
-        onMouseMove={handleHeroMouseMove}
-        style={{ position:'relative' }}
-      >
-        {/* Cursor-following ambient glow */}
-        <div className={s.cursorGlow} aria-hidden/>
+      <section className={s.hero}>
 
         {/* Aurora atmospheric background */}
         <div className={s.aurora} aria-hidden/>
@@ -373,209 +333,36 @@ export default function Home() {
               and emerging opportunities, with media permanently stored on Walrus
               and ownership enforced by Sui Move.
             </p>
-            <div className={s.ctaBtnGroup}>
+            <Link to="/marketplace" className={`btn btn-primary btn-lg ${s.ctaPrimary}`}>
+              Start discovering <Arrow/>
+            </Link>
 
-              {/* Primary CTA — full width on mobile */}
-              <Link to="/marketplace" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                height: 52, padding: '0 28px',
-                borderRadius: 14, textDecoration: 'none',
-                background: 'linear-gradient(135deg, #00d4aa 0%, #00b894 100%)',
-                color: '#000', fontSize: 15, fontWeight: 800,
-                letterSpacing: '-0.01em', whiteSpace: 'nowrap',
-                boxShadow: '0 0 32px rgba(0,212,170,0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
-                transition: 'box-shadow 0.2s, transform 0.15s',
-              }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.boxShadow = '0 0 48px rgba(0,212,170,0.45), inset 0 1px 0 rgba(255,255,255,0.2)'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.boxShadow = '0 0 32px rgba(0,212,170,0.25), inset 0 1px 0 rgba(255,255,255,0.15)'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                }}
-              >
-                Start discovering
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M2 7h10M7 2l5 5-5 5" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-
-              {/* Secondary actions — side-by-side on mobile */}
-              <div className={s.ctaBtnSecondaryGroup}>
-                            {/* Agent Wallet — gradient border glass */}
-              <Link to="/agent-wallet" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                height: 52, padding: '0 22px',
-                borderRadius: 14, textDecoration: 'none',
-                background: 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(99,102,241,0.7), rgba(139,92,246,0.3)) border-box',
-                border: '1px solid transparent',
-                color: '#a5b4fc', fontSize: 14, fontWeight: 700,
-                letterSpacing: '-0.01em', whiteSpace: 'nowrap',
-                transition: 'background 0.2s, color 0.2s, transform 0.15s',
-              }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(rgba(99,102,241,0.12), rgba(99,102,241,0.08)) padding-box, linear-gradient(135deg, rgba(99,102,241,0.9), rgba(139,92,246,0.6)) border-box'
-                  ;(e.currentTarget as HTMLElement).style.color = '#c7d2fe'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(99,102,241,0.7), rgba(139,92,246,0.3)) border-box'
-                  ;(e.currentTarget as HTMLElement).style.color = '#a5b4fc'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                }}
-              >
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                  <rect x="2" y="4" width="11" height="8" rx="2" stroke="#a5b4fc" strokeWidth="1.4"/>
-                  <path d="M2 7h11" stroke="#a5b4fc" strokeWidth="1.4"/>
-                  <circle cx="10.5" cy="9.5" r="1" fill="#a5b4fc"/>
-                </svg>
-                Agent Wallet
-              </Link>
-
-              {/* AI Generator — gradient border glass */}
-              <Link to="/mint/ai" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                height: 52, padding: '0 22px',
-                borderRadius: 14, textDecoration: 'none',
-                background: 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(0,212,170,0.5), rgba(6,182,212,0.2)) border-box',
-                border: '1px solid transparent',
-                color: 'rgba(0,212,170,0.85)', fontSize: 14, fontWeight: 700,
-                letterSpacing: '-0.01em', whiteSpace: 'nowrap',
-                transition: 'background 0.2s, color 0.2s, transform 0.15s',
-              }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(rgba(0,212,170,0.07), rgba(0,212,170,0.04)) padding-box, linear-gradient(135deg, rgba(0,212,170,0.8), rgba(6,182,212,0.5)) border-box'
-                  ;(e.currentTarget as HTMLElement).style.color = '#00d4aa'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(0,212,170,0.5), rgba(6,182,212,0.2)) border-box'
-                  ;(e.currentTarget as HTMLElement).style.color = 'rgba(0,212,170,0.85)'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                }}
-              >
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                  <path d="M7.5 1.5l1.5 3.5 3.5.5-2.5 2.5.5 3.5L7.5 10l-3 1.5.5-3.5L2.5 5.5l3.5-.5z" stroke="rgba(0,212,170,0.85)" strokeWidth="1.3" strokeLinejoin="round"/>
-                </svg>
-                AI Generator
-              </Link>
-              </div>
-
-            </div>
-
-            {/* MOBILE: Premium horizontal swipe carousel */}
-            <div className={s.statCarouselWrap} ref={carouselRef} onScroll={handleCarouselScroll}>
+            {/* Live stats — premium full-width */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4,1fr)',
+              width: '100%',
+              marginTop: 20,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 20,
+              overflow: 'hidden',
+            }}>
               {[
-                { icon: '🔮', value: liveStats.minted || '0',                                   label: 'NFTs Minted'         },
-                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',     label: 'On Walrus'           },
-                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                        label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
-                { icon: '🛍️', value: String(liveStats.listed || '0'),                           label: 'Active Listings'     },
-                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—', label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook', sparkline: priceHistory  },
-              ].map((stat) => (
-                <div key={stat.label} className={s.statCarouselCard}>
-                  <span className={s.statCarouselIcon}>{stat.icon}</span>
-                  <span className={s.statCarouselValue}>{stat.value}</span>
-                  <span className={s.statCarouselLabel}>{stat.label}</span>
-                  {(stat as any).sparkline?.length > 2 && (() => {
-                    const pts = (stat as any).sparkline as { t: number; p: number }[]
-                    const mn = Math.min(...pts.map((p: any) => p.p))
-                    const mx = Math.max(...pts.map((p: any) => p.p))
-                    const rng = mx - mn || 0.001
-                    const w = 60, h = 16
-                    const path = pts.map((p: any, i: number) => {
-                      const x = (i / (pts.length - 1)) * w
-                      const y = h - ((p.p - mn) / rng) * h
-                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
-                    }).join(' ')
-                    const rising = pts[pts.length-1].p >= pts[0].p
-                    return (
-                      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ marginTop:2 }}>
-                        <path d={path} fill="none" stroke={rising ? '#00d4aa' : '#f87171'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.8}/>
-                      </svg>
-                    )
-                  })()}
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile carousel indicator dots */}
-            <div className={s.carouselDots} aria-hidden>
-              {[0,1,2,3,4,5].map(i => (
-                <button
-                  key={i}
-                  className={`${s.carouselDot}${activeDot === i ? ' ' + s.active : ''}`}
-                  onClick={() => {
-                    const el = carouselRef.current
-                    if (!el) return
-                    const cardWidth = el.scrollWidth / 6
-                    el.scrollTo({ left: cardWidth * i, behavior:'smooth' })
-                    setActiveDot(i)
-                  }}
-                  aria-label={`Go to stat ${i+1}`}
-                />
-              ))}
-            </div>
-
-            {/* DESKTOP: 6-col grid */}
-            <div
-              className={s.statsGrid}
-              data-stats-grid=""
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3,1fr)',
-                width: '100%',
-                marginTop: 16,
-                marginBottom: 20,
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 16,
-                overflow: 'hidden',
-              }}
-              ref={el => {
-                if (!el) return
-                // Apply once on mount (cleanup handled by the resize useEffect below)
-                const w = window.innerWidth
-                el.style.gridTemplateColumns = w >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
-              }}
-            >
-              {[
-                { icon: '🔮', value: liveStats.minted || '0',                                      label: 'NFTs Minted'         },
-                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',        label: 'Stored on Walrus'    },
-                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                           label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
-                { icon: '🛍️', value: String(liveStats.listed || '0'),                              label: 'Active Listings'     },
-                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—',    label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook', sparkline: priceHistory },
-              ].map((stat, i) => (
-                <div key={stat.label} className={s.statCell} style={{
+                { icon: '🔮', value: liveStats.minted || '—', label: 'NFTs Minted' },
+                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—', label: 'On Walrus' },
+                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : (liveStats.listed ? `${liveStats.listed}` : '—'), label: floorSui ? `Floor${floorUsd ? ' · ' + floorUsd : ''}` : 'Listed' },
+                { icon: '📊', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : (suiPrice ? `$${suiPrice.toFixed(2)}` : '—'), label: totalVolumeSui ? 'Total Volume' : '1 SUI Price' },
+              ].map((s, i) => (
+                <div key={s.label} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  padding: '8px 4px',
-                  borderLeft: i % 3 !== 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
-                  borderTop: i >= 3 ? '1px solid rgba(255,255,255,0.07)' : 'none',
-                  gap: 2,
+                  padding: '5px 8px',
+                  borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                  gap: 6,
                 }}>
-                  <span className={s.statIcon} style={{ fontSize: 'clamp(12px,1.2vw,14px)', lineHeight: 1 }}>{stat.icon}</span>
-                  <span className={s.statValue} style={{ fontSize: 'clamp(11px,1.1vw,13px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>{stat.value}</span>
-                  <span className={s.statLabel} style={{ fontSize: 'clamp(8px,0.7vw,10px)', fontWeight: 700, color: 'rgba(245,245,247,0.7)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign:'center', lineHeight: 1.2 }}>{stat.label}</span>
-                  {(stat as any).sparkline?.length > 2 && (() => {
-                    const pts = (stat as any).sparkline as { t: number; p: number }[]
-                    const mn = Math.min(...pts.map(p => p.p))
-                    const mx = Math.max(...pts.map(p => p.p))
-                    const rng = mx - mn || 0.001
-                    const w = 52, h = 18
-                    const path = pts.map((p, i) => {
-                      const x = (i / (pts.length - 1)) * w
-                      const y = h - ((p.p - mn) / rng) * h
-                      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
-                    }).join(' ')
-                    const rising = pts[pts.length-1].p >= pts[0].p
-                    return (
-                      <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ marginTop:2 }}>
-                        <path d={path} fill="none" stroke={rising ? '#00d4aa' : '#f87171'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.8}/>
-                      </svg>
-                    )
-                  })()}
+                  <span style={{ fontSize: 'clamp(20px,2.5vw,28px)', lineHeight: 1 }}>{s.icon}</span>
+                  <span style={{ fontSize: 'clamp(15px,1.8vw,20px)', fontWeight: 800, color: '#fff', lineHeight: 1, letterSpacing: '-0.03em' }}>{s.value}</span>
+                  <span style={{ fontSize: 'clamp(7px,0.75vw,9px)', color: 'rgba(245,245,247,0.3)', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.12em' }}>{s.label}</span>
                 </div>
               ))}
             </div>
@@ -812,33 +599,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* ── GRADIENT BEHIND BOTTOM NAV DOCK (mobile only) ── */}
-      <div className={s.mobileNavGradient} aria-hidden/>
-
-      {/* ── PREMIUM MOBILE BOTTOM NAV DOCK ── */}
-      <nav className={s.mobileNav} aria-label="Mobile navigation">
-        <Link to="/"           className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>⌂</span>
-          Home
-        </Link>
-        <Link to="/marketplace" className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>◈</span>
-          Market
-        </Link>
-        <Link to="/mint"        className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>✦</span>
-          Mint
-        </Link>
-        <Link to="/mint/ai"     className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>✧</span>
-          AI
-        </Link>
-        <Link to="/profile"     className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>◉</span>
-          Profile
-        </Link>
-      </nav>
 
     </main>
   )

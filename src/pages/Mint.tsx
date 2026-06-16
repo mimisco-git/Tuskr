@@ -119,7 +119,7 @@ export default function Mint() {
           to:       account?.address || '',
           txDigest: r.digest,
           ts:       new Date().toISOString(),
-        })
+        }, nftId)  // pass nftId directly — state update is async
       } catch { /* provenance is best-effort */ }
       setStep('done')
       setMintPhase('idle')

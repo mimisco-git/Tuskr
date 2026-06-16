@@ -1,105 +1,89 @@
 /**
- * DeepBook Price API — SUI/USDC live price
- * Primary:  DeepBook V3 mainnet indexer (Mysten Labs)
+ * DeepBook Price API
+ * Fetches live SUI/USDC price from DeepBook V3 — Sui's native on-chain order book
+ * Primary:  DeepBook Indexer (Mysten Labs public endpoint)
  * Fallback: CoinGecko public API
- *
- * Uses native fetch (Node 18+) — more reliable in Vercel than https module.
  */
+import https from 'https'
 
-// DeepBook V3 mainnet SUI/USDC pool
-const POOL_ID = '0xe05dafb5133bcffb8d59f4e12465dc0e9faeaa05e3e342a08fe135800e3e4407'
+// DeepBook V3 Mainnet — SUI/USDC pool
+// Source: https://docs.sui.io/standards/deepbookv3/contract-information
+const DEEPBOOK_INDEXER = 'deepbook-indexer.mainnet.mystenlabs.com'
+const SUI_USDC_POOL    = '0x4e2ca3988246e1d50b9bf209abb9c1cbfec65bd95afdacc620a36c67bdb8452f'
 
-let cache = { price: null, source: null, ts: 0 }
-const TTL  = 30_000
+// Simple in-memory cache (30 second TTL for Vercel serverless)
+let cache = { price: null, ts: 0 }
+const TTL = 30_000
 
-async function fromDeepBook() {
-  // Try the DeepBook indexer summary endpoint first — most reliable
-  const endpoints = [
-    `https://deepbook-indexer.mainnet.mystenlabs.com/get_level2_ticks_from_mid?pool_id=${POOL_ID}&ticks=1`,
-    `https://deepbook-indexer.mainnet.mystenlabs.com/get_pools`,
-  ]
-
-  // Endpoint 1: level2 ticks
-  try {
-    const res  = await fetch(endpoints[0], { signal: AbortSignal.timeout(6000) })
-    if (res.ok) {
-      const d = await res.json()
-      const bid = Array.isArray(d.bids) ? Number(d.bids[0]?.[0]) : 0
-      const ask = Array.isArray(d.asks) ? Number(d.asks[0]?.[0]) : 0
-      if (bid > 0 && ask > 0) return parseFloat(((bid + ask) / 2).toFixed(4))
-    }
-  } catch { /* try next */ }
-
-  // Endpoint 2: pool list — find SUI/USDC
-  try {
-    const res = await fetch(endpoints[1], { signal: AbortSignal.timeout(6000) })
-    if (res.ok) {
-      const pools = await res.json()
-      const pool  = Array.isArray(pools)
-        ? pools.find(p => p.pool_id === POOL_ID ||
-            (p.base_type?.includes('SUI') && p.quote_type?.includes('usdc')))
-        : null
-      const mid = Number(pool?.mid_price ?? pool?.best_bid ?? 0)
-      if (mid > 0) return parseFloat(mid.toFixed(4))
-    }
-  } catch { /* fall through */ }
-
-  throw new Error('DeepBook unavailable')
+function httpsGet(host, path) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      { host, path, method: 'GET', headers: { 'Accept': 'application/json' }, timeout: 8000 },
+      res => {
+        let out = ''
+        res.on('data', c => out += c)
+        res.on('end', () => { try { resolve(JSON.parse(out)) } catch(e) { reject(e) } })
+      }
+    )
+    req.on('error', reject)
+    req.on('timeout', () => { req.destroy(); reject(new Error('timeout')) })
+    req.end()
+  })
 }
 
-async function fromCoinGecko() {
-  const res = await fetch(
-    'https://api.coingecko.com/api/v3/simple/price?ids=sui&vs_currencies=usd',
-    { signal: AbortSignal.timeout(6000) }
+async function getPriceFromDeepBook() {
+  // DeepBook Indexer — get best bid/ask for SUI/USDC pool
+  const data = await httpsGet(
+    DEEPBOOK_INDEXER,
+    `/get_level2_ticks_from_mid?pool_id=${SUI_USDC_POOL}&ticks=1`
   )
-  if (!res.ok) throw new Error('CoinGecko error')
-  const d = await res.json()
-  const p = d?.sui?.usd
-  if (!p) throw new Error('No CoinGecko price')
-  return parseFloat(Number(p).toFixed(4))
+  // Returns { bids: [[price, qty]], asks: [[price, qty]] }
+  // Price is in USDC per SUI (6 decimals tick)
+  const bids = data.bids?.[0]
+  const asks = data.asks?.[0]
+  if (bids && asks) {
+    const mid = (Number(bids[0]) + Number(asks[0])) / 2
+    return Math.round(mid * 1000) / 1000  // 3 decimal places
+  }
+  throw new Error('No DeepBook price data')
 }
 
-async function fromBinance() {
-  const res = await fetch(
-    'https://api.binance.com/api/v3/ticker/price?symbol=SUIUSDT',
-    { signal: AbortSignal.timeout(5000) }
+async function getPriceFromCoinGecko() {
+  const data = await httpsGet(
+    'api.coingecko.com',
+    '/api/v3/simple/price?ids=sui&vs_currencies=usd'
   )
-  if (!res.ok) throw new Error('Binance error')
-  const d = await res.json()
-  const p = Number(d.price)
-  if (!p) throw new Error('No Binance price')
-  return parseFloat(p.toFixed(4))
+  const price = data?.sui?.usd
+  if (!price) throw new Error('No CoinGecko price')
+  return price
 }
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=60')
+  res.setHeader('Cache-Control', 'public, max-age=30')
 
   // Serve from cache if fresh
   if (cache.price && (Date.now() - cache.ts < TTL)) {
     return res.json({ price: cache.price, source: cache.source, cached: true })
   }
 
-  // Try each source in order
-  const sources = [
-    { fn: fromDeepBook,  label: 'DeepBook'  },
-    { fn: fromCoinGecko, label: 'CoinGecko' },
-    { fn: fromBinance,   label: 'Binance'   },
-  ]
+  let price, source
 
-  for (const { fn, label } of sources) {
+  // 1. Try DeepBook first
+  try {
+    price  = await getPriceFromDeepBook()
+    source = 'DeepBook'
+  } catch(e) {
+    console.warn('[DeepBook] price fetch failed, falling back to CoinGecko:', e.message)
+    // 2. Fall back to CoinGecko
     try {
-      const price = await fn()
-      if (price > 0) {
-        cache = { price, source: label, ts: Date.now() }
-        return res.json({ price, source: label, cached: false })
-      }
-    } catch { /* try next source */ }
+      price  = await getPriceFromCoinGecko()
+      source = 'CoinGecko'
+    } catch(e2) {
+      return res.status(503).json({ error: 'Price unavailable', price: null })
+    }
   }
 
-  // All failed — return last cached value or error
-  if (cache.price) {
-    return res.json({ price: cache.price, source: cache.source + ' (stale)', cached: true })
-  }
-  return res.status(503).json({ error: 'Price unavailable', price: null })
+  cache = { price, source, ts: Date.now() }
+  return res.json({ price, source, cached: false })
 }
