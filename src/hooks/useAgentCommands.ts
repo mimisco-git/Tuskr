@@ -110,38 +110,95 @@ Format: {"action":"mint","prompt":"..."} or {"action":"buy","maxPrice":2} or {"a
 // If Groq returned unknown action, fall through to keyword matching
 // (handled below in the try block — we add this check there)
 
-// ── Canvas fallback: generates a unique gradient art image client-side ─────
+// ── Canvas fallback: premium procedural art when Pollinations is unavailable ─
 function makeCanvasBlob(name: string): Promise<Blob> {
   return new Promise(resolve => {
     const canvas = document.createElement('canvas')
     canvas.width = 512; canvas.height = 512
     const ctx = canvas.getContext('2d')!
+    const seed = name.split('').reduce((a,c)=>a+c.charCodeAt(0),0)
+    const rng = (offset=0) => ((seed*9301+49297+offset)%233280)/233280
+
+    // Deep layered background
     const palettes = [
-      ['#00d4aa','#6366f1'],['#f59e0b','#ec4899'],['#3b82f6','#8b5cf6'],
-      ['#06b6d4','#0d9488'],['#a855f7','#ec4899'],['#10b981','#3b82f6'],
+      ['#0d1117','#0a2a1a','#00d4aa'],
+      ['#0d0820','#1a0530','#6366f1'],
+      ['#1a0505','#2d0a0a','#f59e0b'],
+      ['#000d1a','#001a33','#3b82f6'],
+      ['#1a0010','#2d0020','#ec4899'],
+      ['#0a1a00','#142800','#10b981'],
     ]
-    const [c1,c2] = palettes[Math.floor(Math.random()*palettes.length)]
-    const gr = ctx.createLinearGradient(0,0,512,512)
-    gr.addColorStop(0, c1); gr.addColorStop(1, c2)
-    ctx.fillStyle = gr; ctx.fillRect(0,0,512,512)
-    // Overlay circles
-    for (let i=0;i<6;i++) {
-      ctx.beginPath()
-      ctx.arc(Math.random()*512,Math.random()*512,40+Math.random()*80,0,Math.PI*2)
-      ctx.fillStyle=`rgba(255,255,255,${0.03+Math.random()*0.07})`; ctx.fill()
+    const [bg1,bg2,accent] = palettes[Math.floor(rng()*palettes.length)]
+
+    // Background gradient
+    const bgGr = ctx.createRadialGradient(256,256,60,256,256,360)
+    bgGr.addColorStop(0, bg2); bgGr.addColorStop(1, bg1)
+    ctx.fillStyle = bgGr; ctx.fillRect(0,0,512,512)
+
+    // Layered geometric shapes — unique per name
+    for (let i=0;i<12;i++) {
+      const x = rng(i*7)*512, y = rng(i*13)*512
+      const r = 30+rng(i*3)*120
+      const gr2 = ctx.createRadialGradient(x,y,0,x,y,r)
+      gr2.addColorStop(0,accent+'22'); gr2.addColorStop(1,'transparent')
+      ctx.fillStyle=gr2; ctx.beginPath()
+      ctx.arc(x,y,r,0,Math.PI*2); ctx.fill()
     }
-    // Tuskr T mark
-    ctx.fillStyle='rgba(255,255,255,0.15)'
-    ctx.fillRect(216,160,80,24); ctx.fillRect(244,184,24,120)
-    // Name text
-    ctx.fillStyle='rgba(255,255,255,0.9)'
-    ctx.font='bold 22px Arial'
+
+    // Diagonal light sweep
+    const sweep = ctx.createLinearGradient(0,0,512,512)
+    sweep.addColorStop(0,'transparent')
+    sweep.addColorStop(0.4,accent+'0A')
+    sweep.addColorStop(0.6,accent+'18')
+    sweep.addColorStop(1,'transparent')
+    ctx.fillStyle=sweep; ctx.fillRect(0,0,512,512)
+
+    // Hexagonal pattern overlay
+    ctx.strokeStyle=accent+'1A'; ctx.lineWidth=0.8
+    for(let row=-1;row<10;row++){
+      for(let col=-1;col<8;col++){
+        const hx = col*70+(row%2)*35, hy = row*60
+        ctx.beginPath()
+        for(let s=0;s<6;s++){
+          const a=s*Math.PI/3-Math.PI/6
+          const px=hx+28*Math.cos(a), py=hy+28*Math.sin(a)
+          s===0?ctx.moveTo(px,py):ctx.lineTo(px,py)
+        }
+        ctx.closePath(); ctx.stroke()
+      }
+    }
+
+    // Central glow orb
+    const orb = ctx.createRadialGradient(256,200,0,256,200,180)
+    orb.addColorStop(0,accent+'30'); orb.addColorStop(0.5,accent+'10'); orb.addColorStop(1,'transparent')
+    ctx.fillStyle=orb; ctx.fillRect(0,0,512,512)
+
+    // NFT name — clean, prominent
     ctx.textAlign='center'
-    const short = name.length>18 ? name.slice(0,18)+'...' : name
-    ctx.fillText(short,256,380)
-    ctx.fillStyle='rgba(255,255,255,0.35)'
-    ctx.font='12px monospace'; ctx.fillText('TUSKR · WALRUS',256,408)
-    canvas.toBlob(b => resolve(b!),'image/png')
+    ctx.shadowColor=accent; ctx.shadowBlur=20
+    ctx.fillStyle='rgba(255,255,255,0.95)'
+    ctx.font='bold 28px -apple-system, Arial'
+    const words = name.split(' ')
+    if(words.length<=3){
+      ctx.fillText(name.slice(0,26),256,340)
+    } else {
+      ctx.font='bold 22px -apple-system, Arial'
+      ctx.fillText(words.slice(0,3).join(' '),256,330)
+      if(words.length>3) ctx.fillText(words.slice(3,6).join(' '),256,360)
+    }
+
+    // Tuskr badge at bottom
+    ctx.shadowBlur=0
+    ctx.fillStyle=accent+'CC'
+    ctx.font='bold 11px monospace'
+    ctx.fillText('TUSKR NFT · WALRUS STORED',256,430)
+
+    // Edge vignette
+    const vign = ctx.createRadialGradient(256,256,180,256,256,362)
+    vign.addColorStop(0,'transparent'); vign.addColorStop(1,'rgba(0,0,0,0.65)')
+    ctx.fillStyle=vign; ctx.fillRect(0,0,512,512)
+
+    canvas.toBlob(b => resolve(b!),'image/png',0.95)
   })
 }
 
@@ -169,24 +226,34 @@ async function generateConceptAndImage(
       }).then(r=>r.json()).catch(()=>null)
     : Promise.resolve(null)
 
-  // 2. Try Pollinations.ai for real AI image (up to 55s)
+  // 2. Try Pollinations.ai for real AI image — 3 models, 90s timeout, content-type check
   onStatus(`Generating AI image for "${prompt}" via Pollinations.ai...`)
   const seed = Math.floor(Math.random() * 999999)
-  const encoded = encodeURIComponent(`${prompt}, NFT digital art, vibrant, ultra detailed`)
-  const polUrl = `https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${seed}&model=flux`
+  const encoded = encodeURIComponent(`${prompt}, NFT digital art, vibrant, ultra detailed, 4k`)
+  const models = ['turbo', 'flux', 'flux-realism']
 
   let imgBlob: Blob | null = null
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 55000)
-    const r = await fetch(polUrl, { signal: controller.signal })
-    clearTimeout(timer)
-    if (r.ok) {
-      imgBlob = await r.blob()
-      onStatus('AI image ready. Uploading to Walrus...')
+  for (const model of models) {
+    if (imgBlob) break
+    try {
+      const polUrl = `https://image.pollinations.ai/prompt/${encoded}?width=512&height=512&nologo=true&seed=${seed}&model=${model}`
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 90000)
+      const r = await fetch(polUrl, { signal: controller.signal })
+      clearTimeout(timer)
+      const ct = r.headers.get('content-type') || ''
+      if (r.ok && ct.startsWith('image/')) {
+        const blob = await r.blob()
+        if (blob.size > 5000) {         // real image, not an error page
+          imgBlob = blob
+          onStatus('AI image ready. Uploading to Walrus...')
+        }
+      }
+    } catch {
+      if (model === models[models.length-1]) {
+        onStatus('Pollinations.ai unavailable. Using procedural artwork...')
+      }
     }
-  } catch {
-    onStatus('Pollinations.ai timed out. Using generated artwork instead...')
   }
 
   // 3. Canvas fallback if Pollinations fails or times out
