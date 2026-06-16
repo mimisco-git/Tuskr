@@ -27,7 +27,7 @@ export default function Swap() {
   const { executeSwap, swapping, poolId } = useDeepBookSwap()
 
   const [mode,      setMode]     = useState<SwapMode>('sui-usdc')
-  const [fromToken, setFrom]     = useState<TokenId>('SUI')
+  const [fromToken, setFrom]     = useState<TokenId>('DBUSDC')
   const [amount,    setAmount]   = useState('')
   const [txMsg,     setTxMsg]    = useState<{ ok: boolean; text: string } | null>(null)
 
@@ -258,6 +258,26 @@ export default function Swap() {
               <div style={{ ...card, textAlign: 'center' as const, color: 'rgba(245,245,247,0.4)', fontSize: 14, padding: 20 }}>
                 Connect your wallet to swap
               </div>
+            ) : fromToken === 'SUI' ? (
+              /* SUI->DBUSDC: pool does not support this direction directly */
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ padding: '14px 18px', borderRadius: 14, background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.2)', marginBottom: 8 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(245,245,247,0.8)', marginBottom: 6 }}>
+                    SUI to DBUSDC is not available directly
+                  </div>
+                  <div style={{ fontSize: 12, color: 'rgba(245,245,247,0.45)', lineHeight: 1.6 }}>
+                    The DeepBook testnet pool only supports DBUSDC in, SUI out direction for standalone swaps.
+                    To get DBUSDC, use the DeepBook UI below to mint testnet tokens, then flip to swap DBUSDC for SUI.
+                  </div>
+                </div>
+                <button onClick={flip} style={{
+                  display: 'block', width: '100%', padding: '13px', borderRadius: 14,
+                  background: 'rgba(0,212,170,0.1)', border: '1px solid rgba(0,212,170,0.25)',
+                  color: '#00d4aa', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                }}>
+                  Switch to DBUSDC → SUI instead
+                </button>
+              </div>
             ) : (
               <button onClick={handleSwap} disabled={swapping || amountNum <= 0} style={{
                 display: 'block', width: '100%', padding: 15, borderRadius: 14, marginBottom: 12,
@@ -269,8 +289,8 @@ export default function Swap() {
                 {swapping
                   ? 'Confirm in your wallet...'
                   : amountNum > 0
-                    ? `Swap ${TOKENS[fromToken].symbol} for ${TOKENS[toToken].symbol} via DeepBook`
-                    : `Enter an amount`}
+                    ? 'Swap DBUSDC for SUI via DeepBook'
+                    : 'Enter an amount'}
               </button>
             )}
 
