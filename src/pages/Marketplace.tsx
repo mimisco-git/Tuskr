@@ -46,6 +46,7 @@ export default function Marketplace() {
   const [loadingList,  setLoadingList]  = useState(false)
   const [buying,       setBuying]       = useState<string|null>(null)
   const [usdcModal,    setUsdcModal]    = useState<any>(null)  // listing for USDC modal
+  const [usdcErr,     setUsdcErr]     = useState<string | null>(null)
   const { getQuote, swapAndBuy, quote, quoting, swapping, coinLabel } = useDeepBookSwap()
   const { price: suiPrice, source: priceSource } = useDeepBookPrice()
   const { floorSui, floorUsd, count: activeCount, totalVolumeSui } = useFloorPrice()
@@ -56,19 +57,23 @@ export default function Marketplace() {
   const handleBuyWithUsdc = async (l: any) => {
     if (!account) { toastErr('Connect your wallet first'); return }
     setUsdcModal(l)
+    setUsdcErr(null)
     await getQuote(Number(l.price) / 1e9)
   }
 
   const confirmUsdcBuy = async () => {
     if (!usdcModal) return
+    setUsdcErr(null)
     try {
       await swapAndBuy(usdcModal.listingId, BigInt(usdcModal.price), quote?.usdcNeeded ?? 0)
       setListings(prev => prev.filter((x: any) => x.listingId !== usdcModal.listingId))
       setUsdcModal(null)
+      setUsdcErr(null)
       setTimeout(() => loadListings(), 3000)
-      toastErr(`✅ Bought with ${coinLabel}! NFT is now yours.`)
+      toastErr(`Bought with ${coinLabel}! NFT is now yours.`)
     } catch (e: any) {
-      toastErr(e?.message?.slice(0, 100) || 'Swap failed')
+      const msg = e?.message || 'Swap failed'
+      setUsdcErr(msg)
     }
   }
 
@@ -529,8 +534,46 @@ export default function Marketplace() {
               <span style={{ fontSize:12, color:'rgba(245,245,247,0.45)' }}>DeepBook swaps {coinLabel}→SUI then buys the NFT in one transaction block.</span>
             </div>
 
+            {/* Error — shown inline in modal with actionable guide */}
+            {usdcErr && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ padding:'12px 14px', borderRadius:12, background:'rgba(239,68,68,0.07)', border:'1px solid rgba(239,68,68,0.2)', marginBottom:8 }}>
+                  <div style={{ fontSize:12, color:'#f87171', fontFamily:'Space Mono,monospace', marginBottom:6 }}>
+                    {usdcErr.includes('No DBUSDC') || usdcErr.includes('Insufficient DBUSDC') || usdcErr.includes('No testnet')
+                      ? `No ${coinLabel} in wallet`
+                      : usdcErr.slice(0, 100)}
+                  </div>
+                  {(usdcErr.includes('No DBUSDC') || usdcErr.includes('Insufficient') || usdcErr.includes('No testnet')) && (
+                    <div>
+                      <div style={{ fontSize:12, color:'rgba(245,245,247,0.5)', marginBottom:8, lineHeight:1.5 }}>
+                        You need {coinLabel} to use this feature. Get some first:
+                      </div>
+                      <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                        <a href="/swap" onClick={() => setUsdcModal(null)}
+                          style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', borderRadius:8, background:'rgba(0,212,170,0.08)', border:'1px solid rgba(0,212,170,0.2)', textDecoration:'none' }}>
+                          <div>
+                            <div style={{ fontSize:12, fontWeight:700, color:'#00d4aa' }}>Swap SUI → {coinLabel} on Tuskr</div>
+                            <div style={{ fontSize:11, color:'rgba(245,245,247,0.35)' }}>Use the Swap page — swap your SUI for {coinLabel}</div>
+                          </div>
+                          <span style={{ color:'#00d4aa', fontSize:14 }}>→</span>
+                        </a>
+                        <a href="https://deepbook.mystenlabs.com" target="_blank" rel="noopener noreferrer"
+                          style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', borderRadius:8, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', textDecoration:'none' }}>
+                          <div>
+                            <div style={{ fontSize:12, fontWeight:700, color:'rgba(245,245,247,0.7)' }}>DeepBook Testnet UI ↗</div>
+                            <div style={{ fontSize:11, color:'rgba(245,245,247,0.35)' }}>Mint free testnet {coinLabel} directly</div>
+                          </div>
+                          <span style={{ color:'rgba(245,245,247,0.4)', fontSize:14 }}>↗</span>
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div style={{ display:'flex', gap:10 }}>
-              <button onClick={() => setUsdcModal(null)} style={{ flex:1, padding:'12px', borderRadius:10, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(245,245,247,0.6)', fontSize:14, fontWeight:600, cursor:'pointer' }}>
+              <button onClick={() => { setUsdcModal(null); setUsdcErr(null) }} style={{ flex:1, padding:'12px', borderRadius:10, background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'rgba(245,245,247,0.6)', fontSize:14, fontWeight:600, cursor:'pointer' }}>
                 Cancel
               </button>
               <button onClick={confirmUsdcBuy} disabled={swapping || quoting || !quote} style={{ flex:2, padding:'12px', borderRadius:10, background: swapping ? 'rgba(99,102,241,0.3)' : '#6366f1', color:'#fff', fontSize:14, fontWeight:700, border:'none', cursor: swapping?'not-allowed':'pointer' }}>
