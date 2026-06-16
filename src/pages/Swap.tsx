@@ -76,17 +76,17 @@ export default function Swap() {
   const Sparkline = () => {
     if (priceHistory.length < 3) return null
     const pts = priceHistory
-    const mn = Math.min(...pts.map(p => p.p))
-    const mx = Math.max(...pts.map(p => p.p))
+    const mn = Math.min(...pts.map((p: { t: number; p: number }) => p.p))
+    const mx = Math.max(...pts.map((p: { t: number; p: number }) => p.p))
     const rng = mx - mn || 0.001
     const w = 80, h = 24
-    const path = pts.map((p, i) => {
+    const path = pts.map((p: { t: number; p: number }, i: number) => {
       const x = (i / (pts.length - 1)) * w
       const y = h - ((p.p - mn) / rng) * h
       return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
     }).join(' ')
-    const rising = pts[pts.length-1].p >= pts[0].p
-    const pct = Math.abs((pts[pts.length-1].p - pts[0].p) / pts[0].p * 100).toFixed(2)
+    const rising = pts.length > 0 && pts[pts.length-1].p >= pts[0].p
+    const pct = pts.length > 1 ? Math.abs((pts[pts.length-1].p - pts[0].p) / pts[0].p * 100).toFixed(2) : '0.00'
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
