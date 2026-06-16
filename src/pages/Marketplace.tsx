@@ -247,7 +247,8 @@ export default function Marketplace() {
           const d      = o.data.display?.data   ?? {}
           const blobId = f.blob_id || d.blob_id || ''
           const rawUrl = f.media_url
-          const urlStr = typeof rawUrl === 'string' ? rawUrl : (rawUrl?.url ?? '')
+          const urlStr = typeof rawUrl === 'string' ? rawUrl
+                       : rawUrl?.url ?? rawUrl?.fields?.url ?? ''
           const img    = blobId ? walrusUrl(blobId, network.name) : (d.image_url || urlStr || '')
           if (img) nftMap[o.data.objectId] = img
         })
