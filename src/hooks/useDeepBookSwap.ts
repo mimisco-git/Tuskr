@@ -108,8 +108,63 @@ export function useDeepBookSwap() {
     }
   }, [account, cfg, signAndExecute])
 
+  // Standalone swap via DeepBook — both SUI<->DBUSDC directions
+  const executeSwap = useCallback(async (
+    fromToken: 'SUI' | 'DBUSDC',
+    amountIn:  number,
+  ) => {
+    if (!account) throw new Error('No wallet connected')
+    setSwapping(true)
+    try {
+      const tx = new Transaction()
+      tx.setSender(account.address)
+
+      if (fromToken === 'DBUSDC') {
+        // DBUSDC -> SUI: swap_exact_quote_for_base (confirmed working)
+        const usdcMicro = BigInt(Math.floor(amountIn * 1_000_000))
+        tx.moveCall({
+          target: `${cfg.PKG}::pool::swap_exact_quote_for_base`,
+          typeArguments: [cfg.SUI_TYPE, cfg.USDC_TYPE, cfg.DEEP_TYPE],
+          arguments: [
+            tx.object(cfg.POOL),
+            tx.pure.u64(usdcMicro),
+            tx.pure.u64(0),
+            tx.object(CLOCK),
+          ],
+        })
+      } else {
+        // SUI -> DBUSDC: swap_exact_base_for_quote
+        // Split SUI from gas coin, create zero DEEP coin for protocol fee
+        const suiMist = BigInt(Math.floor(amountIn * 1_000_000_000))
+        const [suiCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(suiMist)])
+        const [deepZero] = tx.moveCall({
+          target: '0x0000000000000000000000000000000000000000000000000000000000000002::coin::zero',
+          typeArguments: [cfg.DEEP_TYPE],
+          arguments: [],
+        })
+        const [, usdcOut] = tx.moveCall({
+          target: `${cfg.PKG}::pool::swap_exact_base_for_quote`,
+          typeArguments: [cfg.SUI_TYPE, cfg.USDC_TYPE, cfg.DEEP_TYPE],
+          arguments: [
+            tx.object(cfg.POOL),
+            suiCoin,
+            deepZero,
+            tx.pure.u64(0),
+            tx.object(CLOCK),
+          ],
+        })
+        // Transfer received USDC back to user
+        tx.transferObjects([usdcOut], account.address)
+      }
+
+      return await signAndExecute({ transaction: tx as never })
+    } finally {
+      setSwapping(false)
+    }
+  }, [account, cfg, signAndExecute])
+
   return {
-    getQuote, swapAndBuy, quote, quoting, swapping,
+    getQuote, swapAndBuy, executeSwap, quote, quoting, swapping,
     coinLabel: cfg.COIN_LABEL,
     poolId:    cfg.POOL,
   }
