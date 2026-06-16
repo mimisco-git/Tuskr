@@ -59,7 +59,7 @@
 
 /* Table */
 .tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch }
-.table { width: 100%; border-collapse: collapse }
+.table { width: 100%; border-collapse: collapse; }
 .table th {
   font-family: 'Space Mono', monospace; font-size: 10px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.10em;
@@ -141,4 +141,17 @@
   .table td:nth-child(5),
   .table td:nth-child(6),
   .table td:nth-child(7) { display: none }
+}
+
+
+/* Premium table row hover */
+.table tbody tr {
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.table tbody tr:hover {
+  background: rgba(0,212,170,0.04);
+}
+.table tbody tr:hover td:first-child {
+  color: #00d4aa;
 }

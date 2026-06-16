@@ -49,9 +49,9 @@
 .searchInput:focus { border-color: var(--a) }
 .searchInput::placeholder { color: rgba(245,245,247,0.2) }
 .sortBtns { display: flex; gap: 6px }
-.sortBtn { padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); color: rgba(245,245,247,0.5); cursor: pointer; transition: all 0.15s }
-.sortBtn:hover { color: #f5f5f7 }
-.sortActive { background: rgba(0,212,170,0.10); border-color: rgba(0,212,170,0.25); color: var(--a) }
+.sortBtn { padding: 8px 16px; border-radius: 99px; font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: rgba(245,245,247,0.45); cursor: pointer; transition: all 0.2s; letter-spacing: 0.01em; }
+.sortBtn:hover { color: #f5f5f7; background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); }
+.sortActive { background: rgba(0,212,170,0.1); border-color: rgba(0,212,170,0.3); color: #00d4aa; box-shadow: 0 0 12px rgba(0,212,170,0.1); }
 
 /* NFT grid for Tuskr tab */
 .nftGrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px }
@@ -69,8 +69,8 @@
 
 /* Empty state */
 .empty { text-align: center; padding: 60px 24px }
-.emptyIcon { font-size: 48px; margin-bottom: 12px }
-.emptyTitle { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px }
+.emptyIcon { font-size: 52px; margin-bottom: 16px; filter: drop-shadow(0 0 20px rgba(0,212,170,0.2)); }
+.emptyTitle { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; }
 .emptySub { font-size: 15px; color: rgba(245,245,247,0.4); margin-bottom: 20px }
 
 /* ══════════════════════════════════

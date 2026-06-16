@@ -1,30 +1,32 @@
 .card{
-  background:#111;
-  border-radius:var(--r-xl);
-  overflow:hidden;
-  transition:transform var(--dur) var(--ease),box-shadow var(--dur);
-  animation:up 0.4s var(--ease) both;
-  border:1px solid rgba(255,255,255,0.07);
+  background: linear-gradient(160deg, #141414 0%, #0d0d0d 100%);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform 0.38s cubic-bezier(0.16,1,0.3,1), box-shadow 0.38s, border-color 0.38s;
+  animation: up 0.4s var(--ease) both;
+  border: 1px solid rgba(255,255,255,0.07);
+  position: relative;
 }
-.card:hover{
-  transform:translateY(-5px);
-  box-shadow:0 24px 64px rgba(0,0,0,0.6);
-  border-color:rgba(255,255,255,0.12);
+.card:hover {
+  transform: translateY(-8px) scale(1.008);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(0,212,170,0.18), 0 0 40px rgba(0,212,170,0.05);
+  border-color: rgba(0,212,170,0.22);
 }
 .imgWrap{display:block;aspect-ratio:1;overflow:hidden;position:relative;background:#0a0a0a;}
 .lazyImg{width:100%;height:100%;}
 .overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,transparent 55%);
-  opacity:0;transition:opacity 0.3s;
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.2) 40%, transparent 70%);
+  opacity: 0; transition: opacity 0.35s;
 }
-.card:hover .overlay{opacity:1;}
+.card:hover .overlay{ opacity: 1; }
 .walrusBadge{
-  position:absolute;top:12px;right:12px;
-  font-family:var(--f-mono);font-size:9px;font-weight:500;
-  letter-spacing:0.1em;color:var(--teal);padding:4px 9px;
-  background:rgba(0,0,0,0.75);border:1px solid rgba(0,212,170,0.25);
-  border-radius:99px;backdrop-filter:blur(8px);
+  position: absolute; top: 12px; right: 12px;
+  font-family: var(--f-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 0.12em; color: #00d4aa; padding: 4px 10px;
+  background: rgba(0,0,0,0.82); border: 1px solid rgba(0,212,170,0.3);
+  border-radius: 99px; backdrop-filter: blur(12px);
+  text-transform: uppercase; box-shadow: 0 0 12px rgba(0,212,170,0.1);
 }
 .quickBuy{
   position:absolute;bottom:14px;left:50%;
@@ -39,13 +41,13 @@
   color:var(--text-3);letter-spacing:0.06em;margin-bottom:6px;
 }
 .name{
-  font-size:16px;font-weight:700;color:var(--text);
-  line-height:1.3;margin-bottom:14px;
-  display:-webkit-box;-webkit-line-clamp:2;
-  -webkit-box-orient:vertical;overflow:hidden;
-  transition:color var(--dur);
+  font-size:16px; font-weight:700; color:var(--text);
+  line-height:1.3; margin-bottom:12px;
+  display:-webkit-box; -webkit-line-clamp:2;
+  -webkit-box-orient:vertical; overflow:hidden;
+  transition: color 0.3s; letter-spacing: -0.01em;
 }
-.card:hover .name{color:var(--teal);}
+.card:hover .name{ color: #00d4aa; }
 .footer{
   display:flex;align-items:flex-end;justify-content:space-between;
   gap:8px;padding-top:12px;
@@ -56,10 +58,10 @@
   letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px;
 }
 .price{
-  font-size:20px;font-weight:800;color:var(--text);
-  letter-spacing:-0.02em;line-height:1;
+  font-size: 19px; font-weight: 800; color: #fff;
+  letter-spacing: -0.03em; line-height: 1;
 }
-.priceSuf{font-size:12px;color:var(--text-2);margin-left:3px;font-weight:500;}
+.priceSuf{ font-size: 11px; color: rgba(245,245,247,0.45); margin-left: 3px; font-weight: 600; }
 
 .rarityBadge {
   display: inline-flex; align-items: center; gap: 4px;
