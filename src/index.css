@@ -1,3 +1,15 @@
+/* ── Border beam animation (ConnectButton glow ring) ── */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes spin-beam {
+  0%   { --gradient-angle: 0deg; }
+  100% { --gradient-angle: 360deg; }
+}
+
 /* ════════════════════════════════════════════════════════════
    TUSKR — Emerald Intelligence Design System
    Bloomberg Terminal × OpenAI × Apple Vision Pro
