@@ -85,6 +85,7 @@ function useGoogleUser() {
 const LINKS = [
   { label: 'Explore',   sub: [
     { label: 'Browse NFTs',  to: '/marketplace' },
+    { label: 'Swap',         to: '/swap' },
     { label: 'Collections',  to: '/collections' },
     { label: 'Live Auctions',to: '/auction' },
     { label: 'Activity',     to: '/activity' },

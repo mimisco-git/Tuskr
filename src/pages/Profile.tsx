@@ -357,6 +357,38 @@ export default function Profile() {
           ))}
         </div>
 
+        {/* ── PORTFOLIO USD VALUE (always shown when wallet connected) ── */}
+        {account && (
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '16px 18px', margin: '12px 0',
+            background: 'rgba(0,212,170,0.05)',
+            border: '1px solid rgba(0,212,170,0.18)',
+            borderRadius: 14,
+          }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#00d4aa', fontFamily: 'Space Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                Portfolio Value via DeepBook
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(245,245,247,0.35)', marginTop: 3 }}>
+                {owned.length} NFT{owned.length !== 1 ? 's' : ''} at floor{floorSui ? ` · ${(owned.length * floorSui).toFixed(3)} SUI` : ''} · live rate
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 24, fontWeight: 800, color: '#00d4aa', letterSpacing: '-0.03em' }}>
+                {dbPrice && floorSui && owned.length > 0
+                  ? `$${(owned.length * floorSui * dbPrice).toFixed(2)}`
+                  : dbPrice && owned.length > 0
+                    ? `${owned.length} NFT${owned.length !== 1 ? 's' : ''}`
+                    : '$0.00'}
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(245,245,247,0.3)', fontFamily: 'Space Mono,monospace', marginTop: 2 }}>
+                {dbPrice ? `1 SUI = $${dbPrice.toFixed(3)}` : 'Loading rate...'}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ── TABS ── */}
         <div className={s.tabBar}>
           {(['owned','listed','sold'] as Tab[]).map(t => (
