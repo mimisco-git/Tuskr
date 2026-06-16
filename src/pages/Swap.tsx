@@ -258,6 +258,45 @@ export default function Swap() {
               <div style={{ ...card, textAlign: 'center' as const, color: 'rgba(245,245,247,0.4)', fontSize: 14, padding: 20 }}>
                 Connect your wallet to swap
               </div>
+            ) : fromToken === 'SUI' ? (
+              /* SUI->DBUSDC: function signature unverified — show guide */
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ padding:'14px 18px', borderRadius:14,
+                  background:'rgba(245,158,11,0.06)', border:'1px solid rgba(245,158,11,0.2)',
+                  marginBottom:8 }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:'#fbbf24', marginBottom:6 }}>
+                    SUI to DBUSDC requires DBUSDC first
+                  </div>
+                  <div style={{ fontSize:12, color:'rgba(245,245,247,0.5)', lineHeight:1.6 }}>
+                    To swap SUI for DBUSDC on DeepBook testnet, you first need some DBUSDC in your wallet.
+                    Get free testnet DBUSDC from the DeepBook faucet, then use the DBUSDC → SUI direction here.
+                  </div>
+                </div>
+                <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                  <a href="https://deepbook.mystenlabs.com" target="_blank" rel="noopener noreferrer"
+                    style={{ display:'flex', alignItems:'center', justifyContent:'space-between',
+                      padding:'13px 18px', borderRadius:12,
+                      background:'linear-gradient(135deg,rgba(0,212,170,0.12),rgba(0,212,170,0.06))',
+                      border:'1px solid rgba(0,212,170,0.3)', textDecoration:'none' }}>
+                    <div>
+                      <div style={{ fontSize:14, fontWeight:700, color:'#00d4aa' }}>
+                        Get free testnet DBUSDC ↗
+                      </div>
+                      <div style={{ fontSize:11, color:'rgba(245,245,247,0.4)', marginTop:2 }}>
+                        deepbook.mystenlabs.com · Connect wallet · Mint DBUSDC
+                      </div>
+                    </div>
+                    <span style={{ fontSize:22 }}>🪙</span>
+                  </a>
+                  <button onClick={flip} style={{
+                    padding:'12px', borderRadius:12,
+                    background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)',
+                    color:'rgba(245,245,247,0.55)', fontSize:13, fontWeight:600, cursor:'pointer',
+                  }}>
+                    I have DBUSDC — switch to DBUSDC → SUI
+                  </button>
+                </div>
+              </div>
             ) : (
               <button onClick={handleSwap} disabled={swapping || amountNum <= 0} style={{
                 display: 'block', width: '100%', padding: 15, borderRadius: 14, marginBottom: 12,
@@ -269,7 +308,7 @@ export default function Swap() {
                 {swapping
                   ? 'Confirm in your wallet...'
                   : amountNum > 0
-                    ? `Swap ${TOKENS[fromToken].symbol} for ${TOKENS[toToken].symbol} via DeepBook`
+                    ? 'Swap DBUSDC for SUI via DeepBook'
                     : 'Enter an amount'}
               </button>
             )}
