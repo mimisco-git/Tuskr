@@ -130,7 +130,10 @@ export default function NFTDetail() {
         id:         objectId,
         name:       fields.name        || display.name       || 'Tuskr NFT',
         description:fields.description || display.description || '',
-        image:      display.image_url  || fields._media_url_resolved || '',
+        image:      display.image_url  ||
+                    (typeof fields.media_url === 'string' ? fields.media_url :
+                     fields.media_url?.url || fields.media_url?.fields?.url || '') ||
+                    (fields.blob_id ? `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${fields.blob_id}` : '') || '',
         blobId:     fields.blob_id     || '',
         sealedBlobId: fields.sealed_blob_id || '',
         creator:    fields.creator     || '',
@@ -235,7 +238,7 @@ export default function NFTDetail() {
           <div className={s.imgCol}>
             <div className={s.imgWrap}>
               {nft.image ? (
-                <img src={nft.image} alt={nft.name} className={s.img}/>
+                <img src={nft.image ? `/api/img?url=${encodeURIComponent(nft.image)}` : ''} alt={nft.name} className={s.img} onError={e => { (e.target as HTMLImageElement).src = nft.image }}/>
               ) : (
                 <div className={s.imgPlaceholder}>
                   <span>{nft.name.slice(0,2).toUpperCase()}</span>

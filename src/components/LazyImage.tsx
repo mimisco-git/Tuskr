@@ -35,13 +35,19 @@ export default function LazyImage({ src, alt, className = '', aspectRatio = '1' 
       {/* Shimmer placeholder */}
       {!loaded && <div className={`${s.shimmer} skeleton`} />}
 
-      {/* Real image, only loads when in viewport */}
+      {/* Real image — proxied through /api/img to avoid CORS on Walrus/IPFS URLs */}
       {inView && (
         <img
-          src={src}
+          src={src && src.startsWith('http') ? `/api/img?url=${encodeURIComponent(src)}` : src}
           alt={alt}
           className={`${s.img} ${loaded ? s.visible : s.hidden}`}
           onLoad={() => setLoaded(true)}
+          onError={e => {
+            // If proxy fails, try the raw URL directly as last resort
+            const t = e.target as HTMLImageElement
+            if (!t.src.startsWith('/api/img')) return
+            t.src = src
+          }}
           loading="lazy"
           decoding="async"
         />
