@@ -208,9 +208,23 @@ async function generateConceptAndImage(
   onStatus: (msg: string) => void
 ): Promise<{ name: string; description: string; blobId: string; mediaUrl: string } | null> {
 
-  // 1. Generate NFT concept with Groq (fast, parallel)
-  let name = prompt.slice(0,30)
+  // 1. Extract user-given name from command if present
+  // Supports: "called X", "named X", "titled X", or quoted: called "Storm Fang"
+  const nameMatch = prompt.match(
+    /(?:called|named|titled)\s+["']?([A-Za-z0-9 _'-]{2,35})["']?/i
+  )
+  const userGivenName = nameMatch
+    ? nameMatch[1].trim().replace(/['"]/g,'')
+    : null
+
+  let name        = userGivenName || prompt.slice(0,30)
   let description = `A unique Tuskr NFT: ${prompt}`
+
+  // Strip the "called X" part from the image prompt so Pollinations
+  // generates art for the concept, not the name label
+  const imagePrompt = prompt
+    .replace(/(?:called|named|titled)\s+["']?[A-Za-z0-9 _'-]{2,35}["']?/i, '')
+    .trim()
 
   const conceptPromise = GROQ_KEY
     ? fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -219,8 +233,14 @@ async function generateConceptAndImage(
         body: JSON.stringify({
           model:'llama-3.3-70b-versatile', max_tokens:150, temperature:0.85,
           messages:[
-            {role:'system',content:'Reply ONLY with JSON: {"name":"...max 30 chars","description":"...max 100 chars"}'},
-            {role:'user',content:`NFT name and description for: "${prompt}"`}
+            { role:'system', content: userGivenName
+                ? 'Reply ONLY with JSON: {"name":"USE_PROVIDED_NAME","description":"...max 100 chars creative description"}. The name is already decided — only write the description.'
+                : 'Reply ONLY with JSON: {"name":"...max 30 chars, creative and unique, NO Neo prefix","description":"...max 100 chars"}. Never use Neo as a prefix. Be creative and specific to the concept.'
+            },
+            { role:'user', content: userGivenName
+                ? `NFT name is "${userGivenName}". Write a vivid description for this NFT concept: "${imagePrompt || prompt}". Return JSON with name="${userGivenName}" exactly.`
+                : `NFT name and description for concept: "${prompt}"`
+            }
           ]
         })
       }).then(r=>r.json()).catch(()=>null)
@@ -229,7 +249,7 @@ async function generateConceptAndImage(
   // 2. Try Pollinations.ai for real AI image — 3 models, 90s timeout, content-type check
   onStatus(`Generating AI image for "${prompt}" via Pollinations.ai...`)
   const seed = Math.floor(Math.random() * 999999)
-  const encoded = encodeURIComponent(`${prompt}, NFT digital art, vibrant, ultra detailed, 4k`)
+  const encoded = encodeURIComponent(`${imagePrompt || prompt}, NFT digital art, vibrant, ultra detailed, 4k`)
   const models = ['turbo', 'flux', 'flux-realism']
 
   let imgBlob: Blob | null = null
@@ -265,7 +285,9 @@ async function generateConceptAndImage(
       try {
         const text = conceptRes.choices?.[0]?.message?.content ?? ''
         const c = JSON.parse(text.replace(/```json|```/g,'').trim())
-        name = c.name || name; description = c.description || description
+        // Never override a name the user explicitly gave
+        if (!userGivenName) name = c.name || name
+        description = c.description || description
       } catch { /* use defaults */ }
     }
     imgBlob = await makeCanvasBlob(name)
@@ -276,7 +298,9 @@ async function generateConceptAndImage(
       try {
         const text = conceptRes.choices?.[0]?.message?.content ?? ''
         const c = JSON.parse(text.replace(/```json|```/g,'').trim())
-        name = c.name || name; description = c.description || description
+        // Never override a name the user explicitly gave
+        if (!userGivenName) name = c.name || name
+        description = c.description || description
       } catch { /* use defaults */ }
     }
   }
