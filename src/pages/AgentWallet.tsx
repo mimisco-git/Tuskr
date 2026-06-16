@@ -14,7 +14,7 @@ export default function AgentWallet() {
   const {
     agentAddr, derived, deriving, policy, log, saving,
     remainingBudget, budgetPct, isExpired, logBlobId,
-    deriveKeypair, activatePolicy, revoke, executeAutonomously, logAction,
+    deriveKeypair, activatePolicy, revoke, executeAutonomously,
   } = useAgentWallet(account?.address)
 
   const [maxSpend,  setMaxSpend]  = useState('0.5')
@@ -99,7 +99,7 @@ const handleActivate = () => {
   }
 
   const { runCommand, result: cmdResult, running: cmdRunning } =
-    useAgentCommands(agentAddr, policy, executeAutonomously, logAction)
+    useAgentCommands(agentAddr, policy, executeAutonomously)
 
   const statusColor = policy.revoked ? '#f87171' : isExpired ? '#f59e0b' : policy.active ? '#00d4aa' : 'rgba(245,245,247,0.3)'
   const statusLabel = policy.revoked ? 'Revoked' : isExpired ? 'Expired' : policy.active ? 'Active' : 'Inactive'
@@ -313,7 +313,7 @@ const handleActivate = () => {
               {[
                 'mint a cyberpunk elephant NFT',
                 'buy cheapest NFT under 2 SUI',
-                'alert me when SUI drops below $0.50',
+                'mint a glowing ocean sunset',
               ].map(ex => (
                 <button key={ex} onClick={() => setCmdInput(ex)} style={{
                   padding:'5px 12px', borderRadius:20, fontSize:11, cursor:'pointer',

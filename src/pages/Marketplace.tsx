@@ -177,7 +177,6 @@ export default function Marketplace() {
             ? walrusUrl(effectiveBlobId, network.name)   // Always prefer Walrus blob
             : (d.image_url || urlStr || '')               // Fallback to Display or raw URL
 
-          console.log(`[NFT] ${(f.name||'?').slice(0,20)} | blob=${effectiveBlobId.slice(0,12)||'none'} | url=${mediaUrl.slice(0,60)||'EMPTY'}`)
 
           return {
             objectId: o.data.objectId,
@@ -205,7 +204,6 @@ export default function Marketplace() {
       const res = await fetch(`/api/tuskr-nfts?type=listings&network=${net}`)
       const { activeIds } = await res.json()
 
-      console.log('[Listings] active:', activeIds?.length ?? 0)
 
       if (!activeIds.length) { setListings([]); return }
 
@@ -229,7 +227,6 @@ export default function Marketplace() {
         })
         .filter(l => l.seller)
 
-      console.log('[Listings] parsed:', parsed.length)
 
       // Fetch NFT images for each listing using nft_id
       const nftIds = parsed.map((l: any) => l.nftId).filter(Boolean)

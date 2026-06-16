@@ -49,3 +49,5 @@
   .tableHead{display:none;}.tableRow{grid-template-columns:1fr 80px;}
   .tableBuyer,.tableDate{display:none;}
 }
+
+.price { font-size:18px;font-weight:800;color:#fff;letter-spacing:-0.02em; }

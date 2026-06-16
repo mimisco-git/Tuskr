@@ -50,8 +50,6 @@ export default function CollectionDetail() {
             })
             .filter(id => id.length > 2)
 
-          console.log('[Tuskr] Fetching Sui images for', ids.length, 'NFTs')
-          console.log('[Tuskr] First token_id sample:', missing[0]?.token_id)
 
           const objects = await client.multiGetObjects({
             ids,
@@ -70,7 +68,6 @@ export default function CollectionDetail() {
               || fields.media_url  || fields.image   || fields.thumbnail
               || ''
 
-            console.log('[Tuskr] NFT', i, 'image:', img || 'null', '| display keys:', Object.keys(display))
             
             if (img) imgMap[missing[i].token_id] = img
           })
@@ -81,7 +78,6 @@ export default function CollectionDetail() {
               : nft
           )
           
-          console.log('[Tuskr] Enriched', Object.keys(imgMap).length, 'NFTs with Sui images')
           setNfts(enriched)
         } catch (err) {
           console.error('[Tuskr] Sui image fetch failed:', err)
