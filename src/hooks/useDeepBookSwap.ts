@@ -108,10 +108,11 @@ export function useDeepBookSwap() {
     }
   }, [account, cfg, signAndExecute])
 
-  // Standalone SUI<->USDC swap — no NFT buy
+  // Standalone DBUSDC -> SUI swap via DeepBook (proven working direction)
+  // Uses swap_exact_quote_for_base — same as marketplace Buy with USDC
   const executeSwap = useCallback(async (
-    fromToken: 'SUI' | 'DBUSDC',
-    amountIn:  number,
+    _fromToken: 'SUI' | 'DBUSDC',
+    amountIn:   number,
   ) => {
     if (!account) throw new Error('No wallet connected')
     setSwapping(true)
@@ -119,35 +120,18 @@ export function useDeepBookSwap() {
       const tx = new Transaction()
       tx.setSender(account.address)
 
-      if (fromToken === 'SUI') {
-        // SUI -> USDC:  swap_exact_base_for_quote
-        const suiMist = BigInt(Math.floor(amountIn * 1_000_000_000))
-        const minUsdc = BigInt(0) // 0 min — testnet only
-        tx.moveCall({
-          target: `${cfg.PKG}::pool::swap_exact_base_for_quote`,
-          typeArguments: [cfg.SUI_TYPE, cfg.USDC_TYPE, cfg.DEEP_TYPE],
-          arguments: [
-            tx.object(cfg.POOL),
-            tx.pure.u64(suiMist),
-            tx.pure.u64(minUsdc),
-            tx.object(CLOCK),
-          ],
-        })
-      } else {
-        // USDC -> SUI:  swap_exact_quote_for_base
-        const usdcMicro = BigInt(Math.floor(amountIn * 1_000_000))
-        const minSui    = BigInt(0) // 0 min — testnet only
-        tx.moveCall({
-          target: `${cfg.PKG}::pool::swap_exact_quote_for_base`,
-          typeArguments: [cfg.SUI_TYPE, cfg.USDC_TYPE, cfg.DEEP_TYPE],
-          arguments: [
-            tx.object(cfg.POOL),
-            tx.pure.u64(usdcMicro),
-            tx.pure.u64(minSui),
-            tx.object(CLOCK),
-          ],
-        })
-      }
+      // DBUSDC -> SUI via DeepBook pool::swap_exact_quote_for_base
+      const usdcMicro = BigInt(Math.floor(amountIn * 1_000_000))
+      tx.moveCall({
+        target: `${cfg.PKG}::pool::swap_exact_quote_for_base`,
+        typeArguments: [cfg.SUI_TYPE, cfg.USDC_TYPE, cfg.DEEP_TYPE],
+        arguments: [
+          tx.object(cfg.POOL),
+          tx.pure.u64(usdcMicro),  // exact DBUSDC in
+          tx.pure.u64(0),           // min SUI out (testnet: 0 slippage protection)
+          tx.object(CLOCK),
+        ],
+      })
 
       return await signAndExecute({ transaction: tx as never })
     } finally {
