@@ -23,6 +23,16 @@
     min-height: auto;
   }
 }
+@media (min-width: 1024px) {
+  .hero {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 0;
+    overflow: visible; /* Safely overlap mascot into the statement section */
+  }
+}
 
 /* Point-light: scales with viewport */
 .hero::before {
@@ -46,13 +56,25 @@
   z-index: 1;
 }
 
-/* ── TEXT ── */
+/* ── TEXT & GRID LAYOUT ── */
 .heroContent {
   position: relative;
   z-index: 5;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+@media (min-width: 1024px) {
+  .heroContent {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr; /* Balanced layout for copy and mascot */
+    align-items: center;
+    gap: 40px;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
 }
 
 .heroTitle {
@@ -68,6 +90,13 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+@media (min-width: 1024px) {
+  .heroTitle {
+    line-height: 1.0;
+    margin-bottom: 12px;
+  }
+}
+
 .heroTitleAccent {
   display: block;
   background: linear-gradient(135deg, rgba(0,212,170,1) 0%, rgba(0,184,148,0.9) 60%, rgba(99,102,241,0.7) 100%);
@@ -81,6 +110,11 @@
   max-width: 560px;
   line-height: 1.7;
   margin-bottom: 4px;
+}
+@media (min-width: 1024px) {
+  .heroDesc {
+    margin-bottom: 24px;
+  }
 }
 
 /* ── CURSOR GLOW OVERLAY ── */
@@ -196,6 +230,14 @@
   padding: clamp(40px, 5svh, 64px) clamp(20px, 5vw, 40px) clamp(14px, 2vh, 20px);
   gap: clamp(10px, 1.5vh, 16px);
 }
+@media (min-width: 1024px) {
+  .heroInner {
+    text-align: left;
+    align-items: flex-start;
+    padding: 0;
+    margin: 0;
+  }
+}
 
 /* ── CTA BUTTON ── */
 .ctaPrimary {
@@ -217,7 +259,7 @@
   transform: translateY(-2px) !important;
 }
 
-/* ── MASCOT ── */
+/* ── MASCOT CONTAINER LAYER ── */
 .mascotWrap {
   position: relative;
   z-index: 2;
@@ -227,6 +269,20 @@
   /* Fade mascot bottom into the glass section */
   -webkit-mask-image: linear-gradient(to bottom, black 55%, rgba(0,0,0,0.7) 78%, rgba(0,0,0,0.15) 92%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 55%, rgba(0,0,0,0.7) 78%, rgba(0,0,0,0.15) 92%, transparent 100%);
+}
+@media (min-width: 1024px) {
+  .mascotWrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-top: 0;
+    overflow: visible;
+    z-index: 10;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 /* Ambient teal underglow behind the mascot */
@@ -266,9 +322,22 @@
   margin: 0 auto;
   animation: mascotFloat 5s ease-in-out infinite;
 }
+@media (min-width: 1024px) {
+  .mascot {
+    position: absolute;
+    bottom: -140px; /* Bleeds downward through section fold to intersect Statement */
+    right: 0;
+    width: 110%;
+    max-width: 540px;
+    height: auto;
+    margin: 0;
+    pointer-events: none;
+    filter: drop-shadow(0px 25px 50px rgba(0, 212, 170, 0.18));
+  }
+}
 
 /* ═══════════════════════════════════════════════
-   SMALL PHONES  ≤ 480px
+   SMALL PHONES   ≤ 480px
    Very tight. Mascot wide. Statement aggressive.
 ═══════════════════════════════════════════════ */
 @media (max-width: 480px) {
@@ -291,7 +360,6 @@
     width: 100%;
     max-width: 100%;
     width: 95%;
-    height: auto;
     transform: none;
     display: block;
     margin: 0 auto;
@@ -299,7 +367,7 @@
 }
 
 /* ═══════════════════════════════════════════════
-   PHONES  481px–768px
+   PHONES   481px–768px
    Slightly more breathing room.
 ═══════════════════════════════════════════════ */
 @media (min-width: 481px) and (max-width: 768px) {
@@ -326,7 +394,7 @@
 }
 
 /* ═══════════════════════════════════════════════
-   TABLET  769px–1023px
+   TABLET   769px–1023px
 ═══════════════════════════════════════════════ */
 @media (min-width: 769px) and (max-width: 1023px) {
   .mascot {
@@ -335,7 +403,7 @@
 }
 
 /* ═══════════════════════════════════════════════
-   DESKTOP  ≥ 1024px
+   DESKTOP   ≥ 1024px
 ═══════════════════════════════════════════════ */
 @media (min-width: 1024px) {
   .mascot {
@@ -377,9 +445,15 @@
     margin-top: -60px;
   }
 }
+@media (min-width: 1024px) {
+  .statement {
+    border-radius: 48px 48px 0 0;
+    margin-top: 40px; /* Balances the absolute layout position of the mascot above */
+  }
+}
 @media (min-width: 1280px) {
   .statement {
-    margin-top: -60px;
+    margin-top: 60px;
   }
 }
 
@@ -477,15 +551,6 @@
   text-align: center; margin-bottom: 44px; width: 100%;
 }
 
-/* ════════════════════════════════════════════════════════
-   FEATURE TAB STRIP — Walrus.xyz quality
-   
-   2x2 grid of large rounded rectangles.
-   Secret: 40% spacing, 30% typography, 20% proportions.
-   No glows. No gradients. Pure restraint.
-   Active = soft off-white. Inactive = dark charcoal.
-════════════════════════════════════════════════════════ */
-
 /* Outer container — centered, 2x2 grid */
 .featureTabs {
   display: grid;
@@ -507,7 +572,6 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  /* Generous height and padding — Walrus proportions */
   padding: 18px 28px;
   min-height: 58px;
   border-radius: 16px;
@@ -518,27 +582,20 @@
   font-weight: 500;
   letter-spacing: -0.02em;
   white-space: nowrap;
-
-  /* Inactive: dark navy-charcoal */
   background: #161D2B;
   color: #8A8F98;
-
-  /* Extremely subtle depth — no neon, no glow */
   box-shadow:
     0 1px 2px rgba(0,0,0,0.4),
     0 0 0 1px rgba(255,255,255,0.04) inset;
-
   transition:
     background 0.18s ease,
     color      0.18s ease,
     box-shadow 0.18s ease,
     transform  0.12s ease;
-
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-/* Hover — slightly brighter charcoal */
 .featureTab:not(.featureTabActive):hover {
   background: #1e2736;
   color: #b8bdc8;
@@ -549,7 +606,6 @@
 }
 .featureTab:active { transform: scale(0.98) !important }
 
-/* Active — soft off-white, dark text. Clean. No glow. */
 .featureTabActive {
   background: #F4F4F4 !important;
   color: #111111 !important;
@@ -558,7 +614,6 @@
     0 0 0 1px rgba(0,0,0,0.08) inset;
 }
 
-/* Icon inside tab */
 .featureTabIcon {
   display: flex;
   align-items: center;
@@ -569,7 +624,6 @@
 }
 .featureTabIconActive { transform: scale(1.05) }
 
-/* Icon color: active tabs show icon in dark (tab bg is white) */
 .featureTabActive .featureTabIcon svg {
   stroke: #111111 !important;
 }
@@ -691,7 +745,7 @@
   background:linear-gradient(150deg,rgba(255,255,255,0.06) 0%,rgba(255,255,255,0.02) 50%,rgba(0,0,0,0.08) 100%);
   border:1px solid rgba(255,255,255,0.09);
   backdrop-filter:blur(24px) saturate(150%); -webkit-backdrop-filter:blur(24px) saturate(150%);
-  box-shadow:0 0 0 1px rgba(255,255,255,0.04) inset,0 1px 0 rgba(255,255,255,0.1) inset,0 24px 60px rgba(0,0,0,0.32);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.05) inset,0 1px 0 rgba(255,255,255,0.1) inset,0 24px 60px rgba(0,0,0,0.32);
   transition:transform .28s cubic-bezier(0.22,1,0.36,1),border-color .28s,box-shadow .28s;
 }
 .ucCard:hover {
@@ -768,6 +822,11 @@
   width:600px; height:400px; border-radius:50%;
   background:radial-gradient(ellipse,rgba(0,212,170,0.07) 0%,transparent 65%);
 }
+.ctaGlow {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:600px; height:400px; border-radius:50%;
+  background:radial-gradient(ellipse,rgba(0,212,170,0.07) 0%,transparent 65%);
+}
 .ctaSignal {
   display:inline-flex; align-items:center; gap:8px; margin-bottom:20px;
   font-family:'Space Mono',monospace; font-size:10px; color:#00d4aa;
@@ -784,7 +843,7 @@
 }
 .ctaButtons { position:relative; z-index:2; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap }
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE BREAKPOINTS ── */
 @media(max-width:1060px) {
   .featureCarousel{flex-direction:column;} .featureCardSide{display:none;}
   .nftGrid{grid-template-columns:repeat(2,1fr);}
@@ -813,12 +872,7 @@
   .nftGrid{grid-template-columns:1fr 1fr;}
   .statsGrid{grid-template-columns:1fr 1fr;}
   .featureTabs{grid-template-columns:1fr;width:100%;} .featureTab{min-height:48px;}
-}/* ════════════════════════════════════════════════════════════
-   HERO — Clean. Mobile in-flow. Desktop absolute to .hero.
-════════════════════════════════════════════════════════════ */
-
-
-
+}
 
 /* ════ WALRUS PROOF SECTION ════ */
 .walrusSection {
@@ -943,131 +997,4 @@
     padding: 0 24px !important;
     box-sizing: border-box !important;
   }
-  /* Secondary buttons: side by side in 2-col grid */
-  .ctaBtnSecondaryGroup {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-    width: 100% !important;
-  }
-  .ctaBtnSecondaryGroup a {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    height: 46px !important;
-    padding: 0 12px !important;
-    box-sizing: border-box !important;
-    font-size: 13px !important;
-    gap: 6px !important;
-  }
-}
-
-/* ── STAT CAROUSEL: horizontal scroll on mobile ── */
-.statCarouselWrap {
-  display: none;    /* hidden on desktop */
-}
-.statsGrid {
-  display: grid;   /* shown on desktop */
-}
-
-@media (max-width: 600px) {
-  /* Hide desktop grid */
-  .statsGrid {
-    display: none !important;
-  }
-  /* Show mobile carousel */
-  .statCarouselWrap {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    gap: 10px;
-    padding: 2px 4px 12px 4px;
-    margin-top: 16px;
-    margin-bottom: 8px;
-    width: 100%;
-    scrollbar-width: none;         /* Firefox */
-    -ms-overflow-style: none;      /* IE/Edge */
-  }
-  .statCarouselWrap::-webkit-scrollbar {
-    display: none;                 /* Chrome/Safari/Webkit */
-  }
-  .statCarouselCard {
-    flex: 0 0 auto;
-    min-width: 130px;
-    width: 42vw;
-    max-width: 160px;
-    scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 14px 10px;
-    border-radius: 16px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-  .statCarouselIcon  { font-size: 18px; line-height: 1; }
-  .statCarouselValue { font-size: 16px; font-weight: 800; color: #fff; line-height: 1; letter-spacing: -0.02em; }
-  .statCarouselLabel { font-size: 9px; font-weight: 700; color: rgba(245,245,247,0.55); font-family: 'Space Mono',monospace; text-transform: uppercase; letter-spacing: 0.07em; text-align: center; line-height: 1.3; }
-}
-
-.statIcon { font-size:18px;margin-bottom:4px;display:block; }
-
-.statCell { display:flex;flex-direction:column;align-items:center;gap:4px; }
-
-.statValue { font-size:15px;font-weight:700;color:#fff; }
-
-.signalDot { width:6px;height:6px;border-radius:50%;background:#00d4aa;display:inline-block;box-shadow:0 0 6px #00d4aa; }
-
-
-/* === Desktop Mascot Fix === */
-@media (min-width: 1024px) {
-  .heroMascot {
-    position: absolute;
-    right: 5%;
-    bottom: 0;
-    display: flex;
-    justify-content: flex-end;
-    pointer-events: none;
-  }
-
-  .heroMascot img {
-    width: 420px;
-    opacity: 0.95;
-    filter: drop-shadow(0 20px 60px rgba(0,0,0,0.6));
-  }
-
-  .heroMascot::after {
-    content: "";
-    position: absolute;
-    bottom: -40px;
-    width: 100%;
-    height: 300px;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0) 10%,
-      #020617 80%
-    );
-  }
-}
-
-/* Glow */
-.heroGlow {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 400px;
-  background: radial-gradient(
-    circle at center,
-    rgba(20, 184, 166, 0.25),
-    transparent 70%
-  );
-  filter: blur(80px);
-  z-index: 1;
 }

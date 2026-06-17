@@ -20,7 +20,7 @@ const FEATURES = [
     color: '#00d4aa',
     tag: 'WALRUS BLOB',
     title: 'Always\npermanent.',
-    desc: 'Every NFT\'s media is certified on Walrus, erasure-coded across hundreds of nodes. Not IPFS. Not a server. A blob that outlasts any single point of failure.',
+    desc: "Every NFT's media is certified on Walrus, erasure-coded across hundreds of nodes. Not IPFS. Not a server. A blob that outlasts any single point of failure.",
     points: ['On-chain blob certification for every file', 'Erasure-coded across hundreds of nodes', 'Media survives as long as Walrus runs'],
   },
   {
@@ -157,14 +157,12 @@ function NeuralHero() {
       ctx.clearRect(0, 0, W, H)
       frame++
 
-      // Move nodes
       nodes.forEach(n => {
         n.x += n.vx; n.y += n.vy; n.pulse += n.speed
         if (n.x < 0 || n.x > W) n.vx *= -1
         if (n.y < 0 || n.y > H) n.vy *= -1
       })
 
-      // Draw connections: signal flow
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[j].x - nodes[i].x
@@ -173,7 +171,6 @@ function NeuralHero() {
           if (dist > CONNECTION_DIST) continue
 
           const alpha = (1 - dist / CONNECTION_DIST) * 0.35
-          // Signal traveling along edge
           const sig = (Math.sin(frame * 0.03 + i * 0.5) + 1) / 2
 
           const grd = ctx.createLinearGradient(nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y)
@@ -190,13 +187,11 @@ function NeuralHero() {
         }
       }
 
-      // Draw nodes
       nodes.forEach((n, i) => {
         const glow = (Math.sin(n.pulse) + 1) / 2
         const bright = 0.5 + glow * 0.5
         const isHub = i % 6 === 0
 
-        // Outer ring
         if (isHub) {
           ctx.beginPath()
           ctx.arc(n.x, n.y, n.r * 3.5, 0, Math.PI * 2)
@@ -204,7 +199,6 @@ function NeuralHero() {
           ctx.fill()
         }
 
-        // Glow
         const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * (isHub ? 5 : 3))
         grad.addColorStop(0, `rgba(0,212,170,${0.7 * bright})`)
         grad.addColorStop(1, 'rgba(0,212,170,0)')
@@ -213,7 +207,6 @@ function NeuralHero() {
         ctx.fillStyle = grad
         ctx.fill()
 
-        // Core dot
         ctx.beginPath()
         ctx.arc(n.x, n.y, n.r * (isHub ? 1.6 : 1), 0, Math.PI * 2)
         ctx.fillStyle = `rgba(0,212,170,${0.8 * bright})`
@@ -260,7 +253,6 @@ export default function Home() {
   const feat     = FEATURES[activeFeat]
   const allPart  = [...PARTNERS, ...PARTNERS]
 
-  // Load live stats
   useEffect(() => {
     fetch('/api/tuskr-nfts?type=minted&network=testnet')
       .then(r => r.json())
@@ -275,7 +267,6 @@ export default function Home() {
       }).catch(() => {})
   }, [])
 
-  // Load real featured listings
   useEffect(() => {
     client.queryEvents({
       query: { MoveEventType: `${PACKAGE_ID}::tuskr_marketplace::ListedEvent` },
@@ -302,20 +293,18 @@ export default function Home() {
     }).catch(() => {})
   }, [client])
 
-  // Counter animation
   useEffect(() => {
     const targets = { nfts: 2841, vol: 14200, creators: 390 }
     const timer = setInterval(() => {
       setCounter(prev => ({
-        nfts:     Math.min(prev.nfts + 112,   targets.nfts),
-        vol:      Math.min(prev.vol + 550,     targets.vol),
+        nfts:      Math.min(prev.nfts + 112,   targets.nfts),
+        vol:       Math.min(prev.vol + 550,     targets.vol),
         creators: Math.min(prev.creators + 15, targets.creators),
       }))
     }, 28)
     return () => clearInterval(timer)
   }, [])
 
-  // Cursor glow: update CSS variables on mouse move over hero
   const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%'
@@ -324,7 +313,6 @@ export default function Home() {
     heroRef.current?.style.setProperty('--mouse-y', y)
   }, [])
 
-  // Carousel scroll: update active dot
   const handleCarouselScroll = useCallback(() => {
     const el = carouselRef.current
     if (!el) return
@@ -341,15 +329,10 @@ export default function Home() {
         className={s.hero}
         ref={heroRef}
         onMouseMove={handleHeroMouseMove}
-        style={{ position:'relative' }}
       >
-        {/* Cursor-following ambient glow */}
         <div className={s.cursorGlow} aria-hidden/>
-
-        {/* Aurora atmospheric background */}
         <div className={s.aurora} aria-hidden/>
 
-        {/* Content column */}
         <div className={s.heroContent}>
           <div className={s.heroInner}>
             <h1 className={s.heroTitle}>
@@ -363,7 +346,6 @@ export default function Home() {
             </p>
             <div className={s.ctaBtnGroup}>
 
-              {/* Primary CTA — full width on mobile */}
               <Link to="/marketplace" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
                 height: 52, padding: '0 28px',
@@ -389,78 +371,74 @@ export default function Home() {
                 </svg>
               </Link>
 
-              {/* Secondary actions — side-by-side on mobile */}
               <div className={s.ctaBtnSecondaryGroup}>
-                            {/* Agent Wallet — gradient border glass */}
-              <Link to="/agent-wallet" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                height: 52, padding: '0 22px',
-                borderRadius: 14, textDecoration: 'none',
-                background: 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(99,102,241,0.7), rgba(139,92,246,0.3)) border-box',
-                border: '1px solid transparent',
-                color: '#a5b4fc', fontSize: 14, fontWeight: 700,
-                letterSpacing: '-0.01em', whiteSpace: 'nowrap',
-                transition: 'background 0.2s, color 0.2s, transform 0.15s',
-              }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(rgba(99,102,241,0.12), rgba(99,102,241,0.08)) padding-box, linear-gradient(135deg, rgba(99,102,241,0.9), rgba(139,92,246,0.6)) border-box'
-                  ;(e.currentTarget as HTMLElement).style.color = '#c7d2fe'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+                <Link to="/agent-wallet" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  height: 52, padding: '0 22px',
+                  borderRadius: 14, textDecoration: 'none',
+                  background: 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(99,102,241,0.7), rgba(139,92,246,0.3)) border-box',
+                  border: '1px solid transparent',
+                  color: '#a5b4fc', fontSize: 14, fontWeight: 700,
+                  letterSpacing: '-0.01em', whiteSpace: 'nowrap',
+                  transition: 'background 0.2s, color 0.2s, transform 0.15s',
                 }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(99,102,241,0.7), rgba(139,92,246,0.3)) border-box'
-                  ;(e.currentTarget as HTMLElement).style.color = '#a5b4fc'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                }}
-              >
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                  <rect x="2" y="4" width="11" height="8" rx="2" stroke="#a5b4fc" strokeWidth="1.4"/>
-                  <path d="M2 7h11" stroke="#a5b4fc" strokeWidth="1.4"/>
-                  <circle cx="10.5" cy="9.5" r="1" fill="#a5b4fc"/>
-                </svg>
-                Agent Wallet
-              </Link>
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(rgba(99,102,241,0.12), rgba(99,102,241,0.08)) padding-box, linear-gradient(135deg, rgba(99,102,241,0.9), rgba(139,92,246,0.6)) border-box'
+                    ;(e.currentTarget as HTMLElement).style.color = '#c7d2fe'
+                    ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(99,102,241,0.7), rgba(139,92,246,0.3)) border-box'
+                    ;(e.currentTarget as HTMLElement).style.color = '#a5b4fc'
+                    ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+                  }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                    <rect x="2" y="4" width="11" height="8" rx="2" stroke="#a5b4fc" strokeWidth="1.4"/>
+                    <path d="M2 7h11" stroke="#a5b4fc" strokeWidth="1.4"/>
+                    <circle cx="10.5" cy="9.5" r="1" fill="#a5b4fc"/>
+                  </svg>
+                  Agent Wallet
+                </Link>
 
-              {/* AI Generator — gradient border glass */}
-              <Link to="/mint/ai" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                height: 52, padding: '0 22px',
-                borderRadius: 14, textDecoration: 'none',
-                background: 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(0,212,170,0.5), rgba(6,182,212,0.2)) border-box',
-                border: '1px solid transparent',
-                color: 'rgba(0,212,170,0.85)', fontSize: 14, fontWeight: 700,
-                letterSpacing: '-0.01em', whiteSpace: 'nowrap',
-                transition: 'background 0.2s, color 0.2s, transform 0.15s',
-              }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(rgba(0,212,170,0.07), rgba(0,212,170,0.04)) padding-box, linear-gradient(135deg, rgba(0,212,170,0.8), rgba(6,182,212,0.5)) border-box'
-                  ;(e.currentTarget as HTMLElement).style.color = '#00d4aa'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+                <Link to="/mint/ai" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  height: 52, padding: '0 22px',
+                  borderRadius: 14, textDecoration: 'none',
+                  background: 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(0,212,170,0.5), rgba(6,182,212,0.2)) border-box',
+                  border: '1px solid transparent',
+                  color: 'rgba(0,212,170,0.85)', fontSize: 14, fontWeight: 700,
+                  letterSpacing: '-0.01em', whiteSpace: 'nowrap',
+                  transition: 'background 0.2s, color 0.2s, transform 0.15s',
                 }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.background = 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(0,212,170,0.5), rgba(6,182,212,0.2)) border-box'
-                  ;(e.currentTarget as HTMLElement).style.color = 'rgba(0,212,170,0.85)'
-                  ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                }}
-              >
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-                  <path d="M7.5 1.5l1.5 3.5 3.5.5-2.5 2.5.5 3.5L7.5 10l-3 1.5.5-3.5L2.5 5.5l3.5-.5z" stroke="rgba(0,212,170,0.85)" strokeWidth="1.3" strokeLinejoin="round"/>
-                </svg>
-                AI Generator
-              </Link>
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(rgba(0,212,170,0.07), rgba(0,212,170,0.04)) padding-box, linear-gradient(135deg, rgba(0,212,170,0.8), rgba(6,182,212,0.5)) border-box'
+                    ;(e.currentTarget as HTMLElement).style.color = '#00d4aa'
+                    ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.background = 'linear-gradient(#0d0f14, #0d0f14) padding-box, linear-gradient(135deg, rgba(0,212,170,0.5), rgba(6,182,212,0.2)) border-box'
+                    ;(e.currentTarget as HTMLElement).style.color = 'rgba(0,212,170,0.85)'
+                    ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
+                  }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                    <path d="M7.5 1.5l1.5 3.5 3.5.5-2.5 2.5.5 3.5L7.5 10l-3 1.5.5-3.5L2.5 5.5l3.5-.5z" stroke="rgba(0,212,170,0.85)" strokeWidth="1.3" strokeLinejoin="round"/>
+                  </svg>
+                  AI Generator
+                </Link>
               </div>
 
             </div>
 
-            {/* MOBILE: Premium horizontal swipe carousel */}
             <div className={s.statCarouselWrap} ref={carouselRef} onScroll={handleCarouselScroll}>
               {[
                 { icon: '🔮', value: liveStats.minted || '0',                                   label: 'NFTs Minted'         },
-                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',     label: 'On Walrus'           },
-                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                        label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
+                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : ':',     label: 'On Walrus'           },
+                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : ':',                        label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
                 { icon: '🛍️', value: String(liveStats.listed || '0'),                           label: 'Active Listings'     },
-                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—', label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook', sparkline: priceHistory  },
+                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : ':', label: 'Total Volume'        },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : ':',                label: 'SUI/USDC DeepBook', sparkline: priceHistory  },
               ].map((stat) => (
                 <div key={stat.label} className={s.statCarouselCard}>
                   <span className={s.statCarouselIcon}>{stat.icon}</span>
@@ -488,7 +466,6 @@ export default function Home() {
               ))}
             </div>
 
-            {/* Mobile carousel indicator dots */}
             <div className={s.carouselDots} aria-hidden>
               {[0,1,2,3,4,5].map(i => (
                 <button
@@ -506,7 +483,6 @@ export default function Home() {
               ))}
             </div>
 
-            {/* DESKTOP: 6-col grid */}
             <div
               className={s.statsGrid}
               style={{
@@ -533,11 +509,11 @@ export default function Home() {
             >
               {[
                 { icon: '🔮', value: liveStats.minted || '0',                                      label: 'NFTs Minted'         },
-                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',        label: 'Stored on Walrus'    },
-                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                           label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
+                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : ':',        label: 'Stored on Walrus'    },
+                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : ':',                           label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
                 { icon: '🛍️', value: String(liveStats.listed || '0'),                              label: 'Active Listings'     },
-                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—',    label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook', sparkline: priceHistory },
+                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : ':',    label: 'Total Volume'        },
+                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : ':',                   label: 'SUI/USDC · DeepBook', sparkline: priceHistory },
               ].map((stat, i) => (
                 <div key={stat.label} className={s.statCell} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -572,7 +548,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Mascot — in flow on mobile, absolute on desktop via CSS */}
+          {/* Mascot Container */}
           <div className={s.mascotWrap}>
             <img
               src="/mascot-hold.png"
@@ -606,8 +582,6 @@ export default function Home() {
         </div>
       </section>
 
-
-
       {/* ════ POWER TO THE COLLECTOR ════ */}
       <section className={s.powerSection}>
         <div className="container">
@@ -616,7 +590,6 @@ export default function Home() {
           </div>
           <h2 className={s.powerTitle}>Power to the<br/>collector.</h2>
 
-          {/* Tab strip */}
           <div className={s.featureTabs}>
             {FEATURES.map((f, i) => {
               const isActive = i === activeFeat
@@ -637,7 +610,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Feature carousel */}
         <div className={s.featureCarousel}>
           <div className={s.featureCardSide} onClick={() => setActiveFeat((activeFeat + 3) % 4)}>
             <div className={s.featureSideIcon}><FeatureIcon type={FEATURES[(activeFeat + 3) % 4].icon} size={26} color={FEATURES[(activeFeat + 3) % 4].color}/></div>
@@ -677,160 +649,7 @@ export default function Home() {
             <div className={s.featureSideDesc}>Click to view</div>
           </div>
         </div>
-
-        <div className={s.powerCta}>
-          <Link to="/marketplace" className={`btn btn-outline btn-lg`}>
-            Explore marketplace <Arrow/>
-          </Link>
-        </div>
       </section>
-
-      {/* ════ PARTNER MARQUEE ════ */}
-      <section className={s.partnerSection}>
-        <p className={s.partnerPre}>Ecosystem Partners</p>
-        <div className={s.marqueeOuter}>
-          <div className={s.marqueeTrack}>
-            {allPart.map((name, i) => (
-              <div key={i} className={s.partnerPill}>
-                <span className={s.partnerName}>{name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════ USE CASES ════ */}
-      <section className={s.usecaseSection}>
-        <div className="container">
-          <div className={s.usecaseHead}>
-            <div className={s.usecasePre}>What you can do</div>
-            <h2 className={s.usecaseTitle}>Built for<br/>what's next.</h2>
-          </div>
-          <div className={s.usecaseCarousel}>
-            {USE_CASES.map((u, i) => (
-              <div key={i} className={s.ucCard} style={{ '--uc-color': u.color } as React.CSSProperties}>
-                <div className={s.ucIcon}><FeatureIcon type={u.icon} size={28} color={u.color}/></div>
-                <div className={s.ucPre}>{u.pre}</div>
-                <div className={s.ucTitle}>{u.title}</div>
-                <p className={s.ucDesc}>{u.desc}</p>
-                <div className={s.ucTags}>{u.tags.map(t => <span key={t} className={s.ucTag}>{t}</span>)}</div>
-                <Link to={u.to} className={s.ucLink}>{u.cta}</Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ════ FEATURED NFTS ════ */}
-      <section className={s.nftSection}>
-        <div className="container">
-          <div className={s.secHead}>
-            <div>
-              <p className={s.secPre}>On the block</p>
-              <h2 className={s.secTitle}>Live listings</h2>
-            </div>
-            <Link to="/marketplace" className="btn btn-ghost">View all →</Link>
-          </div>
-          <div className={s.nftGrid}>
-            {featured.length > 0
-              ? featured.map((nft, i) => <NFTCard key={nft.id} nft={nft} delay={i * 0.07}/>)
-              : Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="skeleton" style={{ aspectRatio: '1', borderRadius: 20 }}/>
-              ))
-            }
-          </div>
-        </div>
-      </section>
-
-
-      {/* ════ WALRUS PROOF ════ */}
-      <section className={s.walrusSection}>
-        <div className="container">
-          <div className={s.walrusBadge}>
-            <span className={s.walrusDot}/>
-            <span>Powered by Walrus</span>
-          </div>
-          <h2 className={s.walrusTitle}>Every NFT. Verified on Walrus.</h2>
-          <p className={s.walrusSub}>
-            Unlike IPFS or AWS, Walrus stores your NFT media permanently with
-            erasure-coding across hundreds of nodes. Every Tuskr NFT has a
-            verifiable blob ID written on-chain at mint time.
-          </p>
-          <div className={s.walrusFlow}>
-            <div className={s.wFlowStep}><div className={s.wFlowIcon}>📁</div><div className={s.wFlowLabel}>Your File</div></div>
-            <div className={s.wFlowArrow}>→</div>
-            <div className={s.wFlowStep}><div className={s.wFlowIcon}>🌊</div><div className={s.wFlowLabel}>Walrus Upload</div></div>
-            <div className={s.wFlowArrow}>→</div>
-            <div className={s.wFlowStep}><div className={s.wFlowIcon}>🔑</div><div className={s.wFlowLabel}>Blob ID</div></div>
-            <div className={s.wFlowArrow}>→</div>
-            <div className={s.wFlowStep}><div className={s.wFlowIcon}>⛓</div><div className={s.wFlowLabel}>On-chain Record</div></div>
-          </div>
-          <div className={s.walrusProof}>
-            <p className={s.walrusProofLabel}>Verify any Tuskr NFT's media</p>
-            <div className={s.walrusProofUrl}>
-              <code className={s.walrusProofCode}>aggregator.walrus.space/v1/blobs/<span className={s.walrusProofBlob}>{'<blobId>'}</span></code>
-              <a href="https://aggregator.walrus.space" target="_blank" rel="noopener noreferrer" className={s.walrusProofLink}>Open Walrus ↗</a>
-            </div>
-          </div>
-          <div className={s.walrusStats}>
-            <div className={s.wStat}><div className={s.wStatVal}>∞</div><div className={s.wStatLabel}>Permanent Storage</div></div>
-            <div className={s.wStat}><div className={s.wStatVal}>100+</div><div className={s.wStatLabel}>Storage Nodes</div></div>
-            <div className={s.wStat}><div className={s.wStatVal}>0x</div><div className={s.wStatLabel}>Centralized Servers</div></div>
-            <div className={s.wStat}><div className={s.wStatVal}>✓</div><div className={s.wStatLabel}>On-chain Verified</div></div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* ════ CTA ════ */}
-      <section className={s.ctaSection}>
-        <div className="container">
-          <div className={s.ctaCard}>
-            <div className={s.ctaGlow}/>
-            <div className={s.ctaSignal}>
-              <div className={s.signalDot}/>Intelligence finds value
-            </div>
-            <h2 className={s.ctaTitle}>Your media.<br/>Forever on Walrus.</h2>
-            <p className={s.ctaSub}>
-              No middlemen. No centralized servers. Your NFT, your ownership,
-              secured by Sui and stored on Walrus.
-            </p>
-            <div className={s.ctaButtons}>
-              <Link to="/mint"        className="btn btn-primary btn-lg">Start minting</Link>
-              <Link to="/mint/ai"     className="btn btn-ghost btn-lg">✦ AI Generator</Link>
-              <Link to="/leaderboard" className="btn btn-ghost btn-lg">⬡ Leaderboard</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── GRADIENT BEHIND BOTTOM NAV DOCK (mobile only) ── */}
-      <div className={s.mobileNavGradient} aria-hidden/>
-
-      {/* ── PREMIUM MOBILE BOTTOM NAV DOCK ── */}
-      <nav className={s.mobileNav} aria-label="Mobile navigation">
-        <a href="/"           className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>⌂</span>
-          Home
-        </a>
-        <a href="/marketplace" className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>◈</span>
-          Market
-        </a>
-        <a href="/mint"        className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>✦</span>
-          Mint
-        </a>
-        <a href="/mint/ai"     className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>✧</span>
-          AI
-        </a>
-        <a href="/profile"     className={s.mobileNavItem}>
-          <span className={s.mobileNavIcon}>◉</span>
-          Profile
-        </a>
-      </nav>
-
     </main>
   )
 }
