@@ -23,13 +23,7 @@ function parseNFT(obj: SuiObjectData): ParsedNFT {
     objectId: obj.objectId,
     name:     f.name        || d.name        || 'Tuskr NFT',
     description: f.description || d.description || '',
-    mediaUrl: (() => {
-      // media_url is a Sui Url type — can come as string, {url:...}, or {fields:{url:...}}
-      const raw = f.media_url
-      const fromField = typeof raw === 'string' ? raw
-                      : raw?.url ?? raw?.fields?.url ?? ''
-      return fromField || d.image_url || ''
-    })(),
+    mediaUrl: f.media_url   || d.image_url   || '',
     blobId:   f.blob_id     || '',
     creator:  f.creator     || '',
     royaltyBps: Number(f.royalty_bps ?? 0),
@@ -64,15 +58,7 @@ function NFTCard({ nft, badge }: { nft: ParsedNFT; badge?: string }) {
     <Link to={`/nft/${nft.objectId}`} className={s.nftCard}>
       <div className={s.nftImg}>
         {nft.mediaUrl
-          ? <img
-              src={`/api/img?url=${encodeURIComponent(nft.mediaUrl)}`}
-              alt={nft.name}
-              onError={e => {
-                const t = e.target as HTMLImageElement
-                if (t.src.includes('/api/img')) t.src = nft.mediaUrl
-                else t.style.display = 'none'
-              }}
-            />
+          ? <img src={nft.mediaUrl} alt={nft.name} onError={e=>{(e.target as HTMLImageElement).style.display='none'}}/>
           : <div className={s.nftImgFallback}>{nft.name.slice(0,2).toUpperCase()}</div>
         }
         {badge && <span className={s.nftBadge}>{badge}</span>}
@@ -271,9 +257,9 @@ export default function Profile() {
             ) : null}
             {profileBlobId && !editing && (
               <div style={{ marginTop:4 }}>
-                <span style={{ fontSize:11, color:'rgba(0,212,170,0.6)', fontFamily:'Space Mono,monospace', cursor:'default' }}>
-                  Profile stored on Walrus ✓
-                </span>
+                <a href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${profileBlobId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:'rgba(0,212,170,0.6)', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
+                  Profile stored on Walrus
+                </a>
               </div>
             )}
 

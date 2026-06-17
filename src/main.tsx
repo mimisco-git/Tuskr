@@ -19,7 +19,7 @@ const savedNetwork = localStorage.getItem('tuskr_network')
 const defaultNetwork: 'mainnet' | 'testnet' =
   savedNetwork === 'mainnet' ? 'mainnet' : 'testnet'
 
-// SuiClient requires both url AND network fields in v2
+// SuiJsonRpcClient requires both url AND network fields in v2
 const networks = {
   testnet: new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl('testnet'), network: 'testnet' }),
   mainnet: new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl('mainnet'), network: 'mainnet' }),
