@@ -104,8 +104,19 @@ export default async function handler(req, res) {
       }
 
       if (result.status === 200) {
-        res.setHeader('Content-Type',  result.contentType)
-        res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600')
+        // Detect real content type from magic bytes — Walrus sometimes sends wrong type
+        let ct = result.contentType || ''
+        const buf = result.body
+        if (buf && buf.length >= 4) {
+          if (buf[0]===0x89 && buf[1]===0x50 && buf[2]===0x4E && buf[3]===0x47) ct = 'image/png'
+          else if (buf[0]===0xFF && buf[1]===0xD8) ct = 'image/jpeg'
+          else if (buf[0]===0x47 && buf[1]===0x49 && buf[2]===0x46) ct = 'image/gif'
+          else if (buf[0]===0x52 && buf[1]===0x49 && buf[2]===0x46 && buf[3]===0x46) ct = 'image/webp'
+          else if (!ct.startsWith('image/')) ct = 'image/jpeg'
+        }
+        res.setHeader('Content-Type',        ct)
+        res.setHeader('Content-Disposition', 'inline')
+        res.setHeader('Cache-Control',       'public, max-age=86400, stale-while-revalidate=3600')
         res.status(200).send(result.body)
         return
       }
