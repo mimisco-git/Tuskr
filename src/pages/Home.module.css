@@ -223,10 +223,10 @@
   z-index: 2;
   width: 100%;
   overflow: hidden;
-  margin-top: 12px;
+  margin-top: -8px;
   /* Fade mascot bottom into the glass section */
-  -webkit-mask-image: linear-gradient(to bottom, black 40%, rgba(0,0,0,0.6) 68%, rgba(0,0,0,0.15) 88%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 40%, rgba(0,0,0,0.6) 68%, rgba(0,0,0,0.15) 88%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, rgba(0,0,0,0.7) 78%, rgba(0,0,0,0.15) 92%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 55%, rgba(0,0,0,0.7) 78%, rgba(0,0,0,0.15) 92%, transparent 100%);
 }
 
 /* Ambient teal underglow behind the mascot */
@@ -260,11 +260,10 @@
 
 .mascot {
   display: block;
-  /* Wide enough to look substantial — 70vw on desktop, caps at 920px */
-  width: clamp(480px, 68vw, 920px);
-  height: auto;                  /* natural aspect ratio — no squishing */
+  /* Dominant hero size — nearly full viewport width */
+  width: clamp(720px, 90vw, 1300px);
+  height: auto;
   margin: 0 auto;
-  /* Subtle float */
   animation: mascotFloat 5s ease-in-out infinite;
 }
 
@@ -291,7 +290,7 @@
     height: auto;
     width: 100%;
     max-width: 100%;
-    width: 90%;
+    width: 95%;
     height: auto;
     transform: none;
     display: block;
