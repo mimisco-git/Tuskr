@@ -4,7 +4,7 @@
  * Docs: https://docs.sui.io/concepts/cryptography/zklogin
  */
 import { useState } from 'react'
-import { getJsonRpcFullnodeUrl } from '@mysten/sui/jsonRpc'
+import { getFullnodeUrl as getJsonRpcFullnodeUrl } from '@mysten/sui/client'
 
 const PROVER_URL    = 'https://prover-dev.mystenlabs.com/v1'
 const REDIRECT_URI  = typeof window !== 'undefined' ? window.location.origin + '/zklogin-callback' : ''

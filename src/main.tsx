@@ -7,7 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit'
 import { NetworkProvider } from './hooks/useNetwork'
-import { SuiJsonRpcClient, getJsonRpcFullnodeUrl } from '@mysten/sui/jsonRpc'
+import { SuiClient, getFullnodeUrl as getJsonRpcFullnodeUrl } from '@mysten/sui/client'
 import { registerEnokiWallets } from '@mysten/enoki'
 import '@mysten/dapp-kit/dist/index.css'
 import App from './App'
@@ -19,10 +19,10 @@ const savedNetwork = localStorage.getItem('tuskr_network')
 const defaultNetwork: 'mainnet' | 'testnet' =
   savedNetwork === 'mainnet' ? 'mainnet' : 'testnet'
 
-// SuiJsonRpcClient requires both url AND network fields in v2
+// SuiClient requires both url AND network fields in v2
 const networks = {
-  testnet: new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl('testnet'), network: 'testnet' }),
-  mainnet: new SuiJsonRpcClient({ url: getJsonRpcFullnodeUrl('mainnet'), network: 'mainnet' }),
+  testnet: new SuiClient({ url: getJsonRpcFullnodeUrl('testnet') }),
+  mainnet: new SuiClient({ url: getJsonRpcFullnodeUrl('mainnet') }),
 }
 
 // Enoki — Google becomes a wallet in the dApp Kit wallet selector

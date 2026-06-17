@@ -41,7 +41,7 @@
 .brand {
   /* Full viewport width — NO container, NO max-width, NO padding */
   width: 100%;
-  background: #000;
+  background: transparent;
   overflow: hidden;
   position: relative;
 
@@ -65,9 +65,11 @@
   width: auto;
   /* Behind the text letters */
   z-index: 1;
+  /* Make black pixels in the image transparent */
+  mix-blend-mode: screen;
   /* Glow effect */
-  filter: drop-shadow(0 0 6vw rgba(0,212,170,0.25))
-          drop-shadow(0 0 2vw rgba(130,60,220,0.20));
+  filter: drop-shadow(0 0 6vw rgba(0,212,170,0.3))
+          drop-shadow(0 0 2vw rgba(0,212,170,0.15));
 }
 
 /* Giant "tuskr" — fills full width like walrus.xyz */
