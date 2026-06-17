@@ -261,11 +261,10 @@
 .mascot {
   display: block;
   width: 100%;
-  max-width: 1400px;
-  /* clamp prevents runaway sizes on ultrawide / very tall screens */
-  height: clamp(420px, 72svh, 860px);
-  object-fit: cover;
-  object-position: center top;
+  max-width: 900px;              /* constrain width so character isn't tiny */
+  height: clamp(380px, 65svh, 780px);
+  object-fit: contain;           /* show full character without cropping */
+  object-position: center bottom; /* feet at bottom, head rises up into hero */
   margin: 0 auto;
 }
 
@@ -292,8 +291,8 @@
     height: auto;
     width: 100%;
     max-width: 100%;
-    object-fit: cover;
-    object-position: center top;
+    object-fit: contain;
+    object-position: center bottom;
     transform: none;
     display: block;
     margin: 0 auto;

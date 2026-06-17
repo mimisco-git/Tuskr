@@ -575,7 +575,7 @@ export default function Home() {
           {/* Mascot — in flow on mobile, absolute on desktop via CSS */}
           <div className={s.mascotWrap}>
             <img
-              src="/mascot.png"
+              src="/mascot-hold.png"
               alt="Tuskr mascot"
               className={s.mascot}
               draggable={false}
