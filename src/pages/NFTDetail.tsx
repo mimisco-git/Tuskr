@@ -538,11 +538,12 @@ export default function NFTDetail() {
                   View on Walrus Verifier
                 </a>
                 <a
-                  href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${nft!.blobId}`}
+                  href={`/api/img?url=${encodeURIComponent('https://aggregator.walrus-testnet.walrus.space/v1/blobs/' + nft!.blobId)}`}
                   target="_blank" rel="noopener noreferrer"
+                  download={`${nft!.name || 'tuskr-nft'}.png`}
                   style={{ fontSize:12, color:'rgba(245,245,247,0.35)', textDecoration:'none', fontFamily:'Space Mono,monospace', display:'inline-flex', alignItems:'center', gap:6 }}
                 >
-                  Raw blob URL
+                  Download from Walrus
                 </a>
               </div>
             </div>
