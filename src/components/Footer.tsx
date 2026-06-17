@@ -74,7 +74,7 @@ export default function Footer() {
       <div className={s.brand} aria-hidden="true">
         {/* Mascot — positioned so head rises above the text */}
         <img
-          src="/mascot-logo.png"
+          src="/mascot-logo.webp"
           alt=""
           className={s.brandMascot}
           draggable={false}
