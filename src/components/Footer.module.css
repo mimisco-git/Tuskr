@@ -65,8 +65,7 @@
   width: auto;
   /* Behind the text letters */
   z-index: 1;
-  /* Make black pixels in the image transparent */
-  mix-blend-mode: screen;
+  /* True transparent PNG — no blend mode needed */
   /* Glow effect */
   filter: drop-shadow(0 0 6vw rgba(0,212,170,0.3))
           drop-shadow(0 0 2vw rgba(0,212,170,0.15));
