@@ -316,6 +316,18 @@ export default function Home() {
   }, [])
 
   // Cursor glow: update CSS variables on mouse move over hero
+  // Stats grid responsive columns with proper cleanup
+  useEffect(() => {
+    const applyGrid = () => {
+      const el = document.querySelector('[data-stats-grid]') as HTMLElement | null
+      if (!el) return
+      el.style.gridTemplateColumns = window.innerWidth >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
+    }
+    applyGrid()
+    window.addEventListener('resize', applyGrid)
+    return () => window.removeEventListener('resize', applyGrid)
+  }, [])
+
   const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%'
@@ -509,6 +521,7 @@ export default function Home() {
             {/* DESKTOP: 6-col grid */}
             <div
               className={s.statsGrid}
+              data-stats-grid=""
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3,1fr)',
@@ -522,13 +535,9 @@ export default function Home() {
               }}
               ref={el => {
                 if (!el) return
-                const applyGrid = () => {
-                  const w = window.innerWidth
-                  if (w >= 640) el.style.gridTemplateColumns = 'repeat(6,1fr)'
-                  else el.style.gridTemplateColumns = 'repeat(3,1fr)'
-                }
-                applyGrid()
-                window.addEventListener('resize', applyGrid)
+                // Apply once on mount (cleanup handled by the resize useEffect below)
+                const w = window.innerWidth
+                el.style.gridTemplateColumns = w >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
               }}
             >
               {[
@@ -809,26 +818,26 @@ export default function Home() {
 
       {/* ── PREMIUM MOBILE BOTTOM NAV DOCK ── */}
       <nav className={s.mobileNav} aria-label="Mobile navigation">
-        <a href="/"           className={s.mobileNavItem}>
+        <Link to="/"           className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>⌂</span>
           Home
-        </a>
-        <a href="/marketplace" className={s.mobileNavItem}>
+        </Link>
+        <Link to="/marketplace" className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>◈</span>
           Market
-        </a>
-        <a href="/mint"        className={s.mobileNavItem}>
+        </Link>
+        <Link to="/mint"        className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>✦</span>
           Mint
-        </a>
-        <a href="/mint/ai"     className={s.mobileNavItem}>
+        </Link>
+        <Link to="/mint/ai"     className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>✧</span>
           AI
-        </a>
-        <a href="/profile"     className={s.mobileNavItem}>
+        </Link>
+        <Link to="/profile"     className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>◉</span>
           Profile
-        </a>
+        </Link>
       </nav>
 
     </main>
