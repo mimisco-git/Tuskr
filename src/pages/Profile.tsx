@@ -23,7 +23,13 @@ function parseNFT(obj: SuiObjectData): ParsedNFT {
     objectId: obj.objectId,
     name:     f.name        || d.name        || 'Tuskr NFT',
     description: f.description || d.description || '',
-    mediaUrl: f.media_url   || d.image_url   || '',
+    mediaUrl: (() => {
+      // media_url is a Sui Url type — can come as string, {url:...}, or {fields:{url:...}}
+      const raw = f.media_url
+      const fromField = typeof raw === 'string' ? raw
+                      : raw?.url ?? raw?.fields?.url ?? ''
+      return fromField || d.image_url || ''
+    })(),
     blobId:   f.blob_id     || '',
     creator:  f.creator     || '',
     royaltyBps: Number(f.royalty_bps ?? 0),
@@ -58,7 +64,15 @@ function NFTCard({ nft, badge }: { nft: ParsedNFT; badge?: string }) {
     <Link to={`/nft/${nft.objectId}`} className={s.nftCard}>
       <div className={s.nftImg}>
         {nft.mediaUrl
-          ? <img src={nft.mediaUrl} alt={nft.name} onError={e=>{(e.target as HTMLImageElement).style.display='none'}}/>
+          ? <img
+              src={`/api/img?url=${encodeURIComponent(nft.mediaUrl)}`}
+              alt={nft.name}
+              onError={e => {
+                const t = e.target as HTMLImageElement
+                if (t.src.includes('/api/img')) t.src = nft.mediaUrl
+                else t.style.display = 'none'
+              }}
+            />
           : <div className={s.nftImgFallback}>{nft.name.slice(0,2).toUpperCase()}</div>
         }
         {badge && <span className={s.nftBadge}>{badge}</span>}
