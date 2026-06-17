@@ -271,9 +271,9 @@ export default function Profile() {
             ) : null}
             {profileBlobId && !editing && (
               <div style={{ marginTop:4 }}>
-                <a href={`https://aggregator.walrus-testnet.walrus.space/v1/blobs/${profileBlobId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize:11, color:'rgba(0,212,170,0.6)', textDecoration:'none', fontFamily:'Space Mono,monospace' }}>
-                  Profile stored on Walrus
-                </a>
+                <span style={{ fontSize:11, color:'rgba(0,212,170,0.6)', fontFamily:'Space Mono,monospace', cursor:'default' }}>
+                  Profile stored on Walrus ✓
+                </span>
               </div>
             )}
 
