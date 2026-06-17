@@ -23,6 +23,7 @@ import AgentWallet from './pages/AgentWallet'
 import GenesisCollection from './pages/GenesisCollection'
 import CreateCollection from './pages/CreateCollection'
 import Swap         from './pages/Swap'
+import Scanner      from './pages/Scanner'
 import VerifyBlob    from './pages/VerifyBlob'
 import NotFound         from './pages/NotFound'
 import ZkLogin          from './pages/ZkLogin'
@@ -44,6 +45,7 @@ function AnimatedRoutes() {
           <Route path="/"            element={<ErrorBoundary><Home /></ErrorBoundary>} />
           <Route path="/marketplace" element={<ErrorBoundary><Marketplace /></ErrorBoundary>} />
           <Route path="/swap"        element={<ErrorBoundary><Swap /></ErrorBoundary>} />
+          <Route path="/scanner"     element={<ErrorBoundary><Scanner /></ErrorBoundary>} />
           <Route path="/mint"        element={<ErrorBoundary><Mint /></ErrorBoundary>} />
           <Route path="/mint/batch"  element={<ErrorBoundary><BatchMint /></ErrorBoundary>} />
           <Route path="/mint/ai"     element={<ErrorBoundary><AIGenerator /></ErrorBoundary>} />
