@@ -1024,3 +1024,50 @@
 .statValue { font-size:15px;font-weight:700;color:#fff; }
 
 .signalDot { width:6px;height:6px;border-radius:50%;background:#00d4aa;display:inline-block;box-shadow:0 0 6px #00d4aa; }
+
+
+/* === Desktop Mascot Fix === */
+@media (min-width: 1024px) {
+  .heroMascot {
+    position: absolute;
+    right: 5%;
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+
+  .heroMascot img {
+    width: 420px;
+    opacity: 0.95;
+    filter: drop-shadow(0 20px 60px rgba(0,0,0,0.6));
+  }
+
+  .heroMascot::after {
+    content: "";
+    position: absolute;
+    bottom: -40px;
+    width: 100%;
+    height: 300px;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 10%,
+      #020617 80%
+    );
+  }
+}
+
+/* Glow */
+.heroGlow {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 400px;
+  background: radial-gradient(
+    circle at center,
+    rgba(20, 184, 166, 0.25),
+    transparent 70%
+  );
+  filter: blur(80px);
+  z-index: 1;
+}
