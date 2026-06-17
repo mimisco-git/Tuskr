@@ -223,7 +223,7 @@
   z-index: 2;
   width: 100%;
   overflow: hidden;
-  margin-top: -72px;
+  margin-top: 12px;
   /* Fade mascot bottom into the glass section */
   -webkit-mask-image: linear-gradient(to bottom, black 40%, rgba(0,0,0,0.6) 68%, rgba(0,0,0,0.15) 88%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 40%, rgba(0,0,0,0.6) 68%, rgba(0,0,0,0.15) 88%, transparent 100%);
@@ -263,9 +263,9 @@
   width: 100%;
   max-width: 1400px;
   /* clamp prevents runaway sizes on ultrawide / very tall screens */
-  height: clamp(380px, 70svh, 800px);
+  height: clamp(420px, 72svh, 860px);
   object-fit: cover;
-  object-position: center 8%;
+  object-position: center top;
   margin: 0 auto;
 }
 
@@ -285,7 +285,7 @@
     width: 100%;
     margin-left: 0;
     overflow: hidden;
-    margin-top: -10px;
+    margin-top: 8px;
   }
 
   .mascot {
@@ -293,7 +293,7 @@
     width: 100%;
     max-width: 100%;
     object-fit: cover;
-    object-position: center 5%;
+    object-position: center top;
     transform: none;
     display: block;
     margin: 0 auto;
