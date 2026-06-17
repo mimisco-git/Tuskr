@@ -316,6 +316,18 @@ export default function Home() {
   }, [])
 
   // Cursor glow: update CSS variables on mouse move over hero
+  // Stats grid responsive columns with proper cleanup
+  useEffect(() => {
+    const applyGrid = () => {
+      const el = document.querySelector('[data-stats-grid]') as HTMLElement | null
+      if (!el) return
+      el.style.gridTemplateColumns = window.innerWidth >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
+    }
+    applyGrid()
+    window.addEventListener('resize', applyGrid)
+    return () => window.removeEventListener('resize', applyGrid)
+  }, [])
+
   const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(1) + '%'
@@ -455,12 +467,12 @@ export default function Home() {
             {/* MOBILE: Premium horizontal swipe carousel */}
             <div className={s.statCarouselWrap} ref={carouselRef} onScroll={handleCarouselScroll}>
               {[
-                { icon: '🔮', value: liveStats.minted || '0',                                   label: 'NFTs Minted'         },
-                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',     label: 'On Walrus'           },
-                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                        label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
-                { icon: '🛍️', value: String(liveStats.listed || '0'),                           label: 'Active Listings'     },
-                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—', label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook', sparkline: priceHistory  },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><path d='M7 1.5L12 4.5V9.5L7 12.5L2 9.5V4.5L7 1.5Z' stroke='#00D4AA' strokeWidth='1.2' strokeLinejoin='round'/><circle cx='7' cy='7' r='1.5' fill='#00D4AA'/></svg>`}}/>), value: liveStats.minted || '0',                                   label: 'NFTs Minted'         },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><path d='M1.5 5.5C3 3.5 4.5 3.5 6 5.5C7.5 7.5 9 7.5 10.5 5.5C12 3.5 13 3.5 13 5.5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round'/><path d='M1.5 9C3 7 4.5 7 6 9C7.5 11 9 11 10.5 9C12 7 13 7 13 9' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round' opacity='0.55'/></svg>`}}/>), value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',     label: 'On Walrus'           },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><path d='M2 4h10M2 7h7M2 10h5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round'/><circle cx='11' cy='10' r='2' stroke='#00D4AA' strokeWidth='1.2'/></svg>`}}/>), value: floorSui ? `${floorSui} SUI` : '—',                        label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><rect x='1.5' y='1.5' width='4.5' height='4.5' rx='1' stroke='#00D4AA' strokeWidth='1.2'/><rect x='8' y='1.5' width='4.5' height='4.5' rx='1' stroke='#00D4AA' strokeWidth='1.2'/><rect x='1.5' y='8' width='4.5' height='4.5' rx='1' stroke='#00D4AA' strokeWidth='1.2'/><rect x='8' y='8' width='4.5' height='4.5' rx='1' fill='#00D4AA' opacity='0.35' stroke='#00D4AA' strokeWidth='1.2'/></svg>`}}/>), value: String(liveStats.listed || '0'),                           label: 'Active Listings'     },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><rect x='1.5' y='7' width='2.5' height='5.5' rx='1' fill='#00D4AA' opacity='0.5'/><rect x='5.5' y='4' width='2.5' height='8.5' rx='1' fill='#00D4AA' opacity='0.75'/><rect x='9.5' y='1.5' width='2.5' height='11' rx='1' fill='#00D4AA'/></svg>`}}/>), value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—', label: 'Total Volume'        },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><path d='M9.5 2.5C11.5 3.5 13 5.5 13 7.5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round'/><path d='M4.5 11.5C2.5 10.5 1 8.5 1 6.5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round' opacity='0.6'/><path d='M7 1.5L9.5 2.5L8.5 5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round' strokeLinejoin='round'/><path d='M7 12.5L4.5 11.5L5.5 9' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round' strokeLinejoin='round' opacity='0.6'/></svg>`}}/>), value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                label: 'SUI/USDC DeepBook', sparkline: priceHistory  },
               ].map((stat) => (
                 <div key={stat.label} className={s.statCarouselCard}>
                   <span className={s.statCarouselIcon}>{stat.icon}</span>
@@ -509,6 +521,7 @@ export default function Home() {
             {/* DESKTOP: 6-col grid */}
             <div
               className={s.statsGrid}
+              data-stats-grid=""
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3,1fr)',
@@ -522,22 +535,18 @@ export default function Home() {
               }}
               ref={el => {
                 if (!el) return
-                const applyGrid = () => {
-                  const w = window.innerWidth
-                  if (w >= 640) el.style.gridTemplateColumns = 'repeat(6,1fr)'
-                  else el.style.gridTemplateColumns = 'repeat(3,1fr)'
-                }
-                applyGrid()
-                window.addEventListener('resize', applyGrid)
+                // Apply once on mount (cleanup handled by the resize useEffect below)
+                const w = window.innerWidth
+                el.style.gridTemplateColumns = w >= 640 ? 'repeat(6,1fr)' : 'repeat(3,1fr)'
               }}
             >
               {[
-                { icon: '🔮', value: liveStats.minted || '0',                                      label: 'NFTs Minted'         },
-                { icon: '🧊', value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',        label: 'Stored on Walrus'    },
-                { icon: '🏷️', value: floorSui ? `${floorSui} SUI` : '—',                           label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
-                { icon: '🛍️', value: String(liveStats.listed || '0'),                              label: 'Active Listings'     },
-                { icon: '📈', value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—',    label: 'Total Volume'        },
-                { icon: '💹', value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook', sparkline: priceHistory },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><path d='M7 1.5L12 4.5V9.5L7 12.5L2 9.5V4.5L7 1.5Z' stroke='#00D4AA' strokeWidth='1.2' strokeLinejoin='round'/><circle cx='7' cy='7' r='1.5' fill='#00D4AA'/></svg>`}}/>), value: liveStats.minted || '0',                                      label: 'NFTs Minted'         },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><path d='M1.5 5.5C3 3.5 4.5 3.5 6 5.5C7.5 7.5 9 7.5 10.5 5.5C12 3.5 13 3.5 13 5.5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round'/><path d='M1.5 9C3 7 4.5 7 6 9C7.5 11 9 11 10.5 9C12 7 13 7 13 9' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round' opacity='0.55'/></svg>`}}/>), value: liveStats.walrusMB ? `${liveStats.walrusMB} MB` : '—',        label: 'Stored on Walrus'    },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><path d='M2 4h10M2 7h7M2 10h5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round'/><circle cx='11' cy='10' r='2' stroke='#00D4AA' strokeWidth='1.2'/></svg>`}}/>), value: floorSui ? `${floorSui} SUI` : '—',                           label: floorSui && floorUsd ? `Floor · ${floorUsd}` : 'Floor Price' },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><rect x='1.5' y='1.5' width='4.5' height='4.5' rx='1' stroke='#00D4AA' strokeWidth='1.2'/><rect x='8' y='1.5' width='4.5' height='4.5' rx='1' stroke='#00D4AA' strokeWidth='1.2'/><rect x='1.5' y='8' width='4.5' height='4.5' rx='1' stroke='#00D4AA' strokeWidth='1.2'/><rect x='8' y='8' width='4.5' height='4.5' rx='1' fill='#00D4AA' opacity='0.35' stroke='#00D4AA' strokeWidth='1.2'/></svg>`}}/>), value: String(liveStats.listed || '0'),                              label: 'Active Listings'     },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><rect x='1.5' y='7' width='2.5' height='5.5' rx='1' fill='#00D4AA' opacity='0.5'/><rect x='5.5' y='4' width='2.5' height='8.5' rx='1' fill='#00D4AA' opacity='0.75'/><rect x='9.5' y='1.5' width='2.5' height='11' rx='1' fill='#00D4AA'/></svg>`}}/>), value: totalVolumeSui ? `${totalVolumeSui.toFixed(1)} SUI` : '—',    label: 'Total Volume'        },
+                { icon: (<span style={{display:'flex',alignItems:'center',justifyContent:'center'}} dangerouslySetInnerHTML={{__html:`<svg width='14' height='14' viewBox='0 0 14 14' fill='none'><path d='M9.5 2.5C11.5 3.5 13 5.5 13 7.5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round'/><path d='M4.5 11.5C2.5 10.5 1 8.5 1 6.5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round' opacity='0.6'/><path d='M7 1.5L9.5 2.5L8.5 5' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round' strokeLinejoin='round'/><path d='M7 12.5L4.5 11.5L5.5 9' stroke='#00D4AA' strokeWidth='1.3' strokeLinecap='round' strokeLinejoin='round' opacity='0.6'/></svg>`}}/>), value: suiPrice ? `$${suiPrice.toFixed(3)}` : '—',                   label: 'SUI/USDC · DeepBook', sparkline: priceHistory },
               ].map((stat, i) => (
                 <div key={stat.label} className={s.statCell} style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -575,7 +584,7 @@ export default function Home() {
           {/* Mascot — in flow on mobile, absolute on desktop via CSS */}
           <div className={s.mascotWrap}>
             <img
-              src="/mascot.png"
+              src="/mascot-hold.png"
               alt="Tuskr mascot"
               className={s.mascot}
               draggable={false}
@@ -809,26 +818,26 @@ export default function Home() {
 
       {/* ── PREMIUM MOBILE BOTTOM NAV DOCK ── */}
       <nav className={s.mobileNav} aria-label="Mobile navigation">
-        <a href="/"           className={s.mobileNavItem}>
+        <Link to="/"           className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>⌂</span>
           Home
-        </a>
-        <a href="/marketplace" className={s.mobileNavItem}>
+        </Link>
+        <Link to="/marketplace" className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>◈</span>
           Market
-        </a>
-        <a href="/mint"        className={s.mobileNavItem}>
+        </Link>
+        <Link to="/mint"        className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>✦</span>
           Mint
-        </a>
-        <a href="/mint/ai"     className={s.mobileNavItem}>
+        </Link>
+        <Link to="/mint/ai"     className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>✧</span>
           AI
-        </a>
-        <a href="/profile"     className={s.mobileNavItem}>
+        </Link>
+        <Link to="/profile"     className={s.mobileNavItem}>
           <span className={s.mobileNavIcon}>◉</span>
           Profile
-        </a>
+        </Link>
       </nav>
 
     </main>
