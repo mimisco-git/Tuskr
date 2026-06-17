@@ -260,12 +260,12 @@
 
 .mascot {
   display: block;
-  width: 100%;
-  max-width: 900px;              /* constrain width so character isn't tiny */
-  height: clamp(380px, 65svh, 780px);
-  object-fit: contain;           /* show full character without cropping */
-  object-position: center bottom; /* feet at bottom, head rises up into hero */
+  /* Wide enough to look substantial — 70vw on desktop, caps at 920px */
+  width: clamp(480px, 68vw, 920px);
+  height: auto;                  /* natural aspect ratio — no squishing */
   margin: 0 auto;
+  /* Subtle float */
+  animation: mascotFloat 5s ease-in-out infinite;
 }
 
 /* ═══════════════════════════════════════════════
@@ -291,8 +291,8 @@
     height: auto;
     width: 100%;
     max-width: 100%;
-    object-fit: contain;
-    object-position: center bottom;
+    width: 90%;
+    height: auto;
     transform: none;
     display: block;
     margin: 0 auto;
