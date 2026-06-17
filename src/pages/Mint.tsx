@@ -495,8 +495,11 @@ export default function Mint() {
                       animation:'spin 0.75s linear infinite',
                     }}/>
                   ) : (
-                    <div style={{ width:34, height:34, borderRadius:9, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16 }}>
-                      {icon}
+                    <div style={{ width:34, height:34, borderRadius:9, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                      {icon === 'W' && <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 12c1.5-2 3-2 4.5 0s3 2 4.5 0 3-2 4.5 0" stroke="rgba(245,245,247,0.4)" strokeWidth="1.5" strokeLinecap="round"/><path d="M2 8c1.5-2 3-2 4.5 0s3 2 4.5 0 3-2 4.5 0" stroke="rgba(245,245,247,0.25)" strokeWidth="1.5" strokeLinecap="round"/></svg>}
+                      {icon === 'L' && <svg width="16" height="18" viewBox="0 0 16 18" fill="none"><rect x="1" y="8" width="14" height="9" rx="2" stroke="rgba(245,245,247,0.4)" strokeWidth="1.5"/><path d="M4 8V5.5a4 4 0 018 0V8" stroke="rgba(245,245,247,0.4)" strokeWidth="1.5"/><circle cx="8" cy="13" r="1.5" fill="rgba(245,245,247,0.4)"/></svg>}
+                      {icon === 'M' && <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3" stroke="rgba(245,245,247,0.4)" strokeWidth="1.5"/><path d="M6 9h6M9 6v6" stroke="rgba(245,245,247,0.4)" strokeWidth="1.5" strokeLinecap="round"/></svg>}
+                      {icon === 'T' && <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M10 5l5 4-5 4" stroke="rgba(245,245,247,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                     </div>
                   )}
                 </div>
@@ -532,22 +535,22 @@ export default function Mint() {
           }
 
           const steps = [
-            <StepRow key="walrus" status={walrusStatus()} icon="🌊" color="#00d4aa"
+            <StepRow key="walrus" status={walrusStatus()} icon="W" color="#00d4aa"
               action="Store media on Walrus"
               detail={`Blob ID: ${blobId?.slice(0,20)}... · Permanent storage · Cannot be deleted`}
               liveLabel="Uploading"
             />,
-            ...(hasSeal ? [<StepRow key="seal" status={sealStatus()} icon="🔐" color="#a855f7"
+            ...(hasSeal ? [<StepRow key="seal" status={sealStatus()} icon="L" color="#a855f7"
               action="Encrypt description with Seal"
               detail="Private content stored on Walrus · Only you can decrypt"
               liveLabel="Encrypting"
             />] : []),
-            <StepRow key="mint" status={mintStatus()} icon="⚡" color="#3b82f6"
+            <StepRow key="mint" status={mintStatus()} icon="M" color="#3b82f6"
               action="Mint TuskrNFT on Sui Move"
               detail={`Contract: tuskr_nft::mint · Royalty: ${royalty}% · Network: Testnet`}
               liveLabel={mintStatus() === 'waiting' ? 'Sign in Wallet' : 'Minting'}
             />,
-            <StepRow key="transfer" status={transferStatus()} icon="🏦" color="#f59e0b"
+            <StepRow key="transfer" status={transferStatus()} icon="T" color="#f59e0b"
               action="Transfer NFT to your wallet"
               detail={`Owner: ${account?.address?.slice(0,14)}...${account?.address?.slice(-6)}`}
               liveLabel="Transferring"
