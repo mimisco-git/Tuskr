@@ -41,8 +41,13 @@ function normalizeUrl(raw) {
 
 function fetchImage(url) {
   return new Promise((resolve, reject) => {
-    const lib = url.startsWith('https://') ? https : http
-    const req = lib.get(url, {
+    // Walrus aggregator supports ?mime= to set correct Content-Type — use it
+    let fetchUrl = url
+    if (url.includes('walrus') && url.includes('/v1/blobs/') && !url.includes('?mime=')) {
+      fetchUrl = url + '?mime=image/png'
+    }
+    const lib = fetchUrl.startsWith('https://') ? https : http
+    const req = lib.get(fetchUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer':    'https://www.tradeport.xyz/',
@@ -104,16 +109,7 @@ export default async function handler(req, res) {
       }
 
       if (result.status === 200) {
-        // Detect real content type from magic bytes — Walrus sometimes sends wrong type
-        let ct = result.contentType || ''
-        const buf = result.body
-        if (buf && buf.length >= 4) {
-          if (buf[0]===0x89 && buf[1]===0x50 && buf[2]===0x4E && buf[3]===0x47) ct = 'image/png'
-          else if (buf[0]===0xFF && buf[1]===0xD8) ct = 'image/jpeg'
-          else if (buf[0]===0x47 && buf[1]===0x49 && buf[2]===0x46) ct = 'image/gif'
-          else if (buf[0]===0x52 && buf[1]===0x49 && buf[2]===0x46 && buf[3]===0x46) ct = 'image/webp'
-          else if (!ct.startsWith('image/')) ct = 'image/jpeg'
-        }
+        const ct = result.contentType || 'image/png'
         res.setHeader('Content-Type',        ct)
         res.setHeader('Content-Disposition', 'inline')
         res.setHeader('Cache-Control',       'public, max-age=86400, stale-while-revalidate=3600')
