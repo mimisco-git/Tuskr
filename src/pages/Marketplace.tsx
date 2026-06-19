@@ -20,6 +20,15 @@ function fmt(n: number | null, d = 2) {
   return n.toLocaleString('en-US', { maximumFractionDigits: d })
 }
 
+// Normalize a Sui object ID to consistent 66-char hex (0x + 64 hex chars)
+// so nftMap keys and lookups always match regardless of padding differences.
+function normId(v: any): string {
+  if (!v) return ''
+  const raw = typeof v === 'object' ? (v.id ?? v.ID ?? '') : String(v)
+  if (!raw) return ''
+  return '0x' + String(raw).replace(/^0x/i, '').toLowerCase().padStart(64, '0')
+}
+
 function walrusUrl(blobId: string, network: string) {
   const agg = network === 'mainnet'
     ? 'https://aggregator.walrus.space'
@@ -112,76 +121,53 @@ export default function Marketplace() {
   const loadTuskrNfts = useCallback(async () => {
     setLoadingTuskr(true)
     try {
-      // Use server-side API — avoids browser RPC issues that caused blank Tuskr tab
-      const net = network.name
-      const res  = await fetch(`/api/tuskr-nfts?type=minted&network=${net}`)
-      const data = await res.json()
-      const mintedList: { objectId: string; name: string; blobId: string }[] = data.nfts ?? []
+      const net    = network.name
+      const OLD_PK = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
+
+      // Step 1: get event list — server API first, browser queryEvents as fallback
+      let mintedList: { objectId: string; name: string; blobId: string }[] = []
+
+      try {
+        const res  = await fetch(`/api/tuskr-nfts?type=minted&network=${net}`)
+        const data = await res.json()
+        mintedList = (data.nfts ?? []).filter((n: any) => n.objectId)
+      } catch { /* server API failed — try browser fallback below */ }
+
+      // Fallback: query events directly from the browser
+      if (!mintedList.length) {
+        const pkgs    = [PACKAGE_ID, OLD_PK]
+        const results = await Promise.all(pkgs.map(pkg =>
+          client.queryEvents({
+            query: { MoveEventType: `${pkg}::tuskr_nft::MintedEvent` },
+            limit: 200,
+          }).catch(() => ({ data: [] as any[] }))
+        ))
+        mintedList = results
+          .flatMap(r => r.data)
+          .map((e: any) => ({
+            objectId: e.parsedJson?.nft_id || '',
+            name:     e.parsedJson?.name    || 'Tuskr NFT',
+            blobId:   e.parsedJson?.blob_id || '',
+          }))
+          .filter((n: any) => n.objectId)
+      }
 
       if (!mintedList.length) { setTuskrNfts([]); return }
 
-      const allIds = mintedList.map(n => n.objectId).filter(Boolean)
+      // Step 2: build display from event data directly
+      // blobId from the MintedEvent is reliable — build Walrus URL straight away.
+      // We deliberately skip multiGetObjects here: listed/wrapped NFTs disappear
+      // from direct object lookup and caused the blank tab.
+      const nfts = mintedList
+        .filter((n: any) => n.objectId)
+        .map((n: any) => ({
+          objectId: n.objectId,
+          name:     n.name  || 'Tuskr NFT',
+          blobId:   n.blobId,
+          mediaUrl: n.blobId ? walrusUrl(n.blobId, net) : '',
+        }))
 
-      if (!allIds.length) { setTuskrNfts([]); return }
-
-      // Fetch all NFT objects with content + display
-      const objs = await client.multiGetObjects({
-        ids: allIds,
-        options: { showContent: true, showDisplay: true },
-      }).catch(() => [])
-
-      const parsed = (objs as any[])
-        .filter(o => o.data)
-        .map(o => {
-          // content.fields is MoveStruct — can be direct map OR { fields: {...}, type: "..." }
-          const content = o.data.content ?? {}
-          const raw = content.fields ?? {}
-          // Handle both MoveStruct variants
-          const f = (raw.fields && typeof raw.fields === 'object' && !Array.isArray(raw.fields))
-            ? raw.fields
-            : raw
-
-          const d      = o.data.display?.data ?? {}
-
-          // blob_id is a plain String — reliable
-          const blobId = (f.blob_id ?? d.blob_id ?? '').toString()
-
-          // media_url is Url type: could be string, { url: "..." }, or { fields: { url: "..." }, type: "..." }
-          const rawUrl = f.media_url ?? f.mediaUrl ?? ''
-          let urlStr = ''
-          if (typeof rawUrl === 'string') {
-            urlStr = rawUrl
-          } else if (rawUrl?.url) {
-            urlStr = rawUrl.url
-          } else if (rawUrl?.fields?.url) {
-            urlStr = rawUrl.fields.url
-          } else if (typeof rawUrl === 'object' && rawUrl !== null) {
-            // Last resort: grab first string value
-            urlStr = Object.values(rawUrl).find(v => typeof v === 'string' && v.startsWith('http')) as string || ''
-          }
-
-          // If media_url contains a Walrus URL but blob_id is empty, extract blob_id from URL
-          let effectiveBlobId = blobId
-          if (!effectiveBlobId && urlStr.includes('walrus') && urlStr.includes('/blobs/')) {
-            effectiveBlobId = urlStr.split('/blobs/').pop()?.split('?')[0] || ''
-          }
-
-          // Build final mediaUrl with priority order
-          const mediaUrl = effectiveBlobId
-            ? walrusUrl(effectiveBlobId, network.name)   // Always prefer Walrus blob
-            : (d.image_url || urlStr || '')               // Fallback to Display or raw URL
-
-
-          return {
-            objectId: o.data.objectId,
-            name:     f.name || d.name || 'Tuskr NFT',
-            blobId:   effectiveBlobId,
-            mediaUrl,
-          }
-        })
-
-      // Show all NFTs — NFTImage handles expired blobs with gradient fallback
-      setTuskrNfts(parsed)
+      setTuskrNfts(nfts)
     } catch (err) {
       console.error('loadTuskrNfts:', err)
       setTuskrNfts([])
@@ -239,12 +225,14 @@ export default function Marketplace() {
           const urlStr = typeof rawUrl === 'string' ? rawUrl
                        : rawUrl?.url ?? rawUrl?.fields?.url ?? ''
           const img    = blobId ? walrusUrl(blobId, network.name) : (d.image_url || urlStr || '')
-          if (img) nftMap[o.data.objectId] = img
+          // Normalize the key so it always matches the lookup below
+          if (img) nftMap[normId(o.data.objectId)] = img
         })
 
         const withImages = parsed.map((l: any) => ({
           ...l,
-          mediaUrl: nftMap[l.nftId] || '',
+          // normId() ensures the key format always matches how it was stored above
+          mediaUrl: nftMap[normId(l.nftId)] || '',
         }))
         setListings(withImages)
       } else {
