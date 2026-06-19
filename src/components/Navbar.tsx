@@ -401,6 +401,33 @@ export default function Navbar() {
                   </div>
                   </div>
                 </div>
+
+                {/* Quick actions — same as desktop account dropdown */}
+                <div className={s.acctDivider} style={{ margin: '12px 0 6px' }} />
+                <Link
+                  to="/profile"
+                  className={s.acctAction}
+                  onClick={() => setMobile(false)}
+                >
+                  My Profile
+                </Link>
+                <Link
+                  to="/mint"
+                  className={s.acctAction}
+                  onClick={() => setMobile(false)}
+                >
+                  Mint NFT
+                </Link>
+                <div className={s.acctDivider} style={{ margin: '6px 0 6px' }} />
+                {wallet && (
+                  <button
+                    className={`${s.acctAction} ${s.acctActionRed}`}
+                    style={{ width: '100%', textAlign: 'left' }}
+                    onClick={() => { disconnect(); setMobile(false) }}
+                  >
+                    Disconnect Wallet
+                  </button>
+                )}
               </div>
             ) : (
               <div className={s.idCard}>
