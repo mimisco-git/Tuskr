@@ -340,20 +340,8 @@
    DESKTOP  ≥ 1024px
 ═══════════════════════════════════════════════ */
 @media (min-width: 1024px) {
-  /* Apply the same overflow trick as mobile but for desktop scale.
-     heroInner is max 900px. 160% × 900px ≈ 1440px = full viewport. */
-  .mascotWrap {
-    width: 160%;
-    margin-left: -30%;
-    overflow: visible;
-    margin-top: -20px;
-  }
-
   .mascot {
-    height: auto;         /* natural aspect ratio — no squishing */
-    max-width: none;      /* no 1400px cap */
-    object-fit: unset;    /* show full image, no cropping */
-    object-position: unset;
+    height: clamp(480px, 72svh, 820px);
   }
 }
 
