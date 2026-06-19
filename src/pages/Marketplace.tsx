@@ -112,26 +112,15 @@ export default function Marketplace() {
   const loadTuskrNfts = useCallback(async () => {
     setLoadingTuskr(true)
     try {
-      // Query both current and previous package IDs to show all minted NFTs
-      const OLD_PKG = '0x7661bfc5434c8f210d1832ad5654c4ac9cb394440e99aacdec8a54bdaa382d4d'
-      const pkgs = PACKAGE_ID === OLD_PKG ? [PACKAGE_ID] : [PACKAGE_ID, OLD_PKG]
+      // Use server-side API — avoids browser RPC issues that caused blank Tuskr tab
+      const net = network.name
+      const res  = await fetch(`/api/tuskr-nfts?type=minted&network=${net}`)
+      const data = await res.json()
+      const mintedList: { objectId: string; name: string; blobId: string }[] = data.nfts ?? []
 
-      const allEventResults = await Promise.all(
-        pkgs.map(pkg =>
-          client.queryEvents({
-            query: { MoveEventType: `${pkg}::tuskr_nft::MintedEvent` },
-            limit: 50,
-          }).catch(() => ({ data: [] }))
-        )
-      )
-      const events = { data: allEventResults.flatMap(r => r.data) }
+      if (!mintedList.length) { setTuskrNfts([]); return }
 
-      if (!events.data.length) { setTuskrNfts([]); return }
-
-      // Collect all NFT IDs from events (including those without blob_id)
-      const allIds = (events.data as any[])
-        .map((e: any) => e.parsedJson?.nft_id || e.parsedJson?.id)
-        .filter(Boolean)
+      const allIds = mintedList.map(n => n.objectId).filter(Boolean)
 
       if (!allIds.length) { setTuskrNfts([]); return }
 
